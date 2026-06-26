@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+.aios/
+.pre-cr/
+dist/
+build/
+*.egg-info/
+outputs/**/*.md
+outputs/**/*.json
+outputs/**/*.jsonl
+outputs/**/*.yaml
+outputs/**/*.yml
+!outputs/**/.gitkeep
+AIOS-backfill/

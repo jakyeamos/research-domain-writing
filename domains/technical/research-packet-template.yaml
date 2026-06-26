@@ -1,0 +1,12 @@
+inherits: ../_template/research-packet-template.yaml
+
+extensions:
+  feature:
+    product: { type: string, required: true }
+    problem: { type: text, required: true }
+    users: { type: list }
+    architecture: { type: text }
+    constraints: { type: list }
+    risks: { type: list }
+    metrics: { type: list }
+    roadmap_status: { type: enum, values: [shipped, beta, planned, unknown] }

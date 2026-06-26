@@ -1,0 +1,57 @@
+# Output serialization — final artifacts saved under outputs/
+
+version: 1
+
+default_format: markdown
+
+formats:
+  markdown:
+    extension: .md
+    template: |
+      ---
+      output_id: {{output_id}}
+      domain: {{domain}}
+      entity: {{entity_name}}
+      output_type: {{output_type}}
+      confidence_level: {{confidence_level}}
+      generated_at: {{generated_at}}
+      research_packet_ids: {{research_packet_ids}}
+      concepts_used: {{concepts_used}}
+      needs_review: {{needs_review}}
+      warnings: {{warnings}}
+      ---
+
+      {{final_copy}}
+
+  json:
+    extension: .json
+    schema:
+      output_id: string
+      domain: string
+      entity_name: string
+      topic: string
+      output_type: string
+      final_copy: string
+      draft_copy: string
+      research_packet_ids_used: array
+      concepts_used: array
+      confidence_level: string
+      generated_at: ISO8601
+      warnings: array
+      needs_review: boolean
+      qa_pass: boolean
+      qa_issues: array
+
+  yaml:
+    extension: .yaml
+    same_fields_as: json
+
+paths:
+  drafts: outputs/drafts
+  final: outputs/final
+  qa: outputs/qa
+  research: outputs/research
+
+batch_log:
+  path: outputs/batch-log.jsonl
+  fields: [task_id, domain, status, confidence_level, needs_review, missing_info]

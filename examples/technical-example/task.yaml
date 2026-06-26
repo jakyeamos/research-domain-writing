@@ -1,0 +1,8 @@
+task_id: technical-example-feature-explainer
+request: "Explain the idempotency key feature for API consumers."
+domain: technical
+entity_type: feature
+entity_name: Idempotency keys
+output_type: feature_explainer
+audience: backend engineers
+research_depth: standard

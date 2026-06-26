@@ -1,0 +1,73 @@
+id: basketball-player-jalen-brunson-2024-25
+domain: basketball
+entity_type: player
+entity_name: Jalen Brunson
+topic: stat interpretation — offensive load vs efficiency
+time_period: 2024-25 regular season
+context: Primary on-ball guard for NYK; high usage star in structured offense.
+
+key_facts:
+  - id: fact-001
+    text: "68 regular-season games played (availability stable vs prior injury-shortened years)."
+  - id: fact-002
+    text: "28.4% usage rate — primary offensive initiator."
+  - id: fact-003
+    text: "58.1% true shooting on that usage volume."
+  - id: fact-004
+    text: "Assist rate remains positive but not elite; offense runs through his PNR and isolation reads."
+
+relevant_metrics:
+  - name: USG%
+    value: "28.4"
+    sample: "2024-25 RS, 68 GP"
+  - name: TS%
+    value: "58.1"
+    sample: "2024-25 RS"
+  - name: AST%
+    value: "moderate — exact value unknown in packet refresh"
+    sample: unknown
+
+domain_terms:
+  - usage rate
+  - true shooting
+  - on-ball creation
+  - pick-and-roll
+
+concepts_that_apply:
+  - usage-illusion
+  - rim-pressure
+
+source_notes:
+  - source: "Placeholder — replace with official NBA/tracking export when researching live"
+    accessed: "2026-05-22"
+    note: "Illustrative sample packet for tooling demo; verify before publication"
+    fact_ids: [fact-002, fact-003]
+
+interpretation_notes:
+  - "Model-friendly profile: efficient scoring on high usage without needing elite assist rates."
+  - "Skepticism case: defensive matchup hunting in playoffs not covered here."
+
+open_questions:
+  - "Playoff efficiency delta vs regular season?"
+  - "On/off with secondary creators unavailable?"
+
+uncertainties:
+  - "Defensive impact not characterized in this packet."
+  - "Exact AST% and turnover rate not loaded."
+
+confidence_level: medium
+last_updated: "2026-05-22T12:00:00Z"
+used_in_outputs:
+  - basketball-example-brunson-stat-interpretation
+
+extensions:
+  player:
+    team: NYK
+    season: "2024-25"
+    role: primary on-ball guard
+    archetype: high-usage scoring PG
+    usage:
+      usg_pct: 28.4
+      on_ball_pct: unknown
+    age: unknown
+    minutes_stability: stable

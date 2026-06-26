@@ -1,0 +1,13 @@
+output_id: basketball-example-brunson-stat-interpretation
+pass: true
+confidence_score: 0.82
+needs_human_review: false
+issues:
+  - id: qa-001
+    severity: minor
+    category: audience
+    description: "Could define TS% in one clause for wider audience — optional"
+    suggested_fix: "Add parenthetical (FG+FT efficiency) without new numbers"
+blocking_issue_count: 0
+revised_draft_path: null
+notes: "All numeric claims trace to knowledge/basketball/jalen-brunson-2024-25.yaml"

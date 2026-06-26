@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "testCommand": "uv run pytest -q",
+  "coveragePaths": [
+    "build/pre-cr-python.lcov"
+  ],
+  "coverageFormat": "lcov",
+  "coverageAdapters": [
+    {
+      "name": "python-lcov",
+      "command": "uv run python scripts/run-pre-cr-python-tests.py",
+      "coveragePath": "build/pre-cr-python.lcov",
+      "coverageFormat": "lcov"
+    }
+  ],
+  "threshold": 80,
+  "surfaces": {
+    "covered": [
+      "scripts/validate-packet.py"
+    ],
+    "ignored": [
+      ".gitignore",
+      ".pre-cr.json",
+      "CHANGELOG.md",
+      "README.md",
+      "RELEASE.md",
+      "SKILL.md",
+      "config/**",
+      "docs/**",
+      "domains/**",
+      "examples/**",
+      "install/**",
+      "knowledge/**",
+      "outputs/**",
+      "prompts/**",
+      "pyproject.toml",
+      "scripts/new-domain.sh",
+      "scripts/run-pre-cr-python-tests.py",
+      "tests/**",
+      "uv.lock"
+    ],
+    "unsupported": []
+  },
+  "checks": {
+    "coverage": true,
+    "security": true,
+    "checklist": true
+  }
+}
