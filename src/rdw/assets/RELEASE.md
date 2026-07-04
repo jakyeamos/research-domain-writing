@@ -67,6 +67,14 @@ Use `pre-cr run --json --workspace .` only for changed-file readiness during PR 
 9. Commit release changes, merge to `main`, tag `v0.1.0`, push `main` and the tag.
 10. Publish to PyPI.
 
+For an interactive PyPI token and publish flow, run:
+
+```bash
+scripts/publish-pypi-wizard.sh
+```
+
+The wizard opens the PyPI token page, captures the token with hidden input, rebuilds/verifies artifacts, runs a dry-run check, and only publishes after a final confirmation. It does not write the PyPI token to disk.
+
 ## Release Framing
 
 RDW is an agent-first research-grounded writing harness. It creates structured, auditable writing runs; your agent performs research and drafting through explicit prompts.

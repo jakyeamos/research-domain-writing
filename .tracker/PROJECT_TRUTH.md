@@ -4,7 +4,7 @@ projectName: Research Domain Writing
 summary: Installable RDW 0.1 release candidate with an agent-first CLI harness, prompts, domain packs, packet/batch validation, packaged assets, examples, skill distribution, and release governance.
 healthScore: 90
 statusLabel: release_candidate
-nextStep: Publish v0.1.0 to PyPI after final main-branch release gates and tag push.
+nextStep: Run scripts/publish-pypi-wizard.sh with a PyPI account token to complete the v0.1.0 PyPI upload.
 blockers:
   - Slash-command behavior should still receive a manual post-install smoke in each target agent before broader announcement.
   - Packet merge/conflict resolution for concurrent updates is a post-0.1 enhancement.
@@ -52,6 +52,7 @@ The repo now has a real `rdw` Python CLI that acts as an agent harness: it valid
 - `examples/` with end-to-end sample tasks.
 - `rdw doctor`, `rdw validate-packet`, `rdw validate-batch`, `rdw new-domain`, `rdw task plan`, `rdw batch plan`, and `rdw install`.
 - Compatibility wrappers in `scripts/` and `install/install.sh`.
+- `scripts/publish-pypi-wizard.sh` for guided PyPI token capture, artifact rebuild, dry-run check, and confirmed publish.
 - `docs/LIMITATIONS.md` and `docs/FUTURE-AIOS-INTEGRATION.md` documenting v1 boundaries.
 - `RELEASE.md` and `CHANGELOG.md` for release governance.
 
@@ -66,7 +67,7 @@ The repo now has a real `rdw` Python CLI that acts as an agent harness: it valid
 
 ## Next Step
 
-Complete the public v0.1 release flow: final release gates on `main`, build, tag `v0.1.0`, push `main` and the tag, publish to PyPI, then run an installed `rdw doctor` smoke.
+Complete the public v0.1 release flow by running `scripts/publish-pypi-wizard.sh`, publishing to PyPI with a valid account token, then running an installed `rdw doctor` smoke from PyPI.
 
 ## Quality Ladder Notes
 
