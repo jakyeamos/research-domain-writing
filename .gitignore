@@ -15,3 +15,5 @@ outputs/**/*.yaml
 outputs/**/*.yml
 !outputs/**/.gitkeep
 AIOS-backfill/
+
+.quality-runner/
