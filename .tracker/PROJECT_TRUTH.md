@@ -1,13 +1,14 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: Installable RDW 0.1 release candidate with an agent-first CLI harness, prompts, domain packs, packet/batch validation, packaged assets, examples, skill distribution, and release governance.
-healthScore: 90
+summary: Installable RDW 0.1 release candidate with an agent-first CLI harness, prompts, domain packs, packet/batch validation, packaged assets, examples, skill distribution, release governance, and DOI-ready software-methods metadata.
+healthScore: 92
 statusLabel: release_candidate
 nextStep: Run scripts/publish-pypi-wizard.sh with a PyPI account token to complete the v0.1.0 PyPI upload.
 blockers:
   - Slash-command behavior should still receive a manual post-install smoke in each target agent before broader announcement.
   - Packet merge/conflict resolution for concurrent updates is a post-0.1 enhancement.
+  - DOI minting is blocked until CITATION.cff and .zenodo.json use the real author ORCID instead of the placeholder.
 lastUpdated: 2026-07-04
 tags: [aios, writing, research, skill, python, cli, pypi]
 areas: [engineering, writing]
@@ -40,6 +41,10 @@ agentExpectationsVersion: 1
 Research Domain Writing is a standalone, installable, file-based pipeline for turning research into grounded domain copy, QA output, and a human style pass. It separates research, domain copywriting, domain QA, and humanizer/blader responsibilities so style transformation does not invent domain knowledge.
 
 The repo now has a real `rdw` Python CLI that acts as an agent harness: it validates packets and batches, creates deterministic task/batch planning folders, emits prompt bundles, installs agent skills/templates, and packages the curated assets for wheel installs. The CLI intentionally does not call LLM APIs, browse, research, or draft autonomously in v0.1.
+
+The repo now has DOI-ready software-methods metadata and release docs:
+`CITATION.cff`, `.zenodo.json`, `RESEARCH_READY.md`, and
+`docs/release-notes/v0.1.0.md`.
 
 ## What Exists
 
@@ -85,6 +90,11 @@ Checks run on 2026-07-04:
 
 Additional check on 2026-07-04: `uv run ruff check .`, `uv run basedpyright`,
 and `uv run pytest` passed after the README install documentation update.
+
+Additional DOI-readiness check on 2026-07-04: `uv run rdw doctor`,
+`uv run rdw validate-batch examples/batch-tasks.yaml`, `uv run pytest`,
+`uv run ruff check src tests`, and `uv run basedpyright src tests` passed after
+adding the citation and software-methods artifact docs.
 
 ## Agent Notes
 
