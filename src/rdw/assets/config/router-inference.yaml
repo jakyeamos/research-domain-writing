@@ -1,0 +1,77 @@
+# Routing inference — agent fills task contract from natural language.
+# Explicit key=value from user always wins over these defaults.
+
+version: 1
+
+defaults:
+  audience: general readers with basic domain literacy
+  research_depth: standard
+  output_type: summary
+
+audience_inference:
+  - match: [leaderboard, ranking, fantasy, stats, analytics, PER, BPM, usage, lis]
+    audience: fantasy and analytics users who know basic stats
+  - match: [album, track, review, pitchfork, genre]
+    audience: general music readers
+  - match: [api, sdk, developer, engineer, architecture, changelog]
+    audience: backend engineers and technical implementers
+  - match: [executive, roadmap, stakeholder]
+    audience: product and engineering leads
+
+output_type_inference:
+  - match: [leaderboard, ranking, rankings, top 10, top 20, ladder, board]
+    output_type: ranking_explanation
+    entity_type: ranking
+  - match: [improve copy, ui copy, tooltip, legend, column header, empty state, methodology]
+    output_type: ranking_explanation
+    note: Often sitewide + row copy; may split into multiple tasks in batch
+  - match: [stat interpretation, why the stat, what does .* measure]
+    output_type: stat_interpretation
+  - match: [player summary, player blurb, scouting]
+    output_type: player_summary
+    entity_type: player
+  - match: [compare, vs, versus, better than]
+    output_type: comparison_blurb
+  - match: [album review, album blurb]
+    output_type: album_review_blurb
+    entity_type: album
+  - match: [feature, release note, how it works]
+    output_type: feature_explainer
+    entity_type: feature
+
+entity_inference:
+  # Extract product/surface name when user names it
+  - pattern: "(?:my |the )?([A-Z][A-Za-z0-9]+) leaderboard"
+    entity_name_template: "{1} leaderboard"
+    domain: basketball
+  - pattern: "leaderboard"
+    entity_name: leaderboard
+    domain: basketball
+    when_no_stat_name: true
+
+domain_inference:
+  basketball:
+    keywords: [nba, basketball, player, team, stat, stats, fantasy, leaderboard, lis, per, bpm, usage, rim, pick-and-roll, archetype]
+    default_entity_type: player
+  music:
+    keywords: [album, artist, song, track, genre, production, review]
+  technical:
+    keywords: [api, feature, product, deploy, architecture, sdk, latency]
+
+depth_inference:
+  deep: [controversial, lawsuit, medical, diagnosis, invest, fiduciary, definitive ranking, best ever]
+  light: [short blurb, one-liner, tweet, quick note, low stakes]
+  standard: []  # default when not deep or light
+
+# Worked example for router calibration (not loaded as facts)
+examples:
+  - user: "improve the copy on my LIS leaderboard"
+    inferred:
+      domain: basketball
+      entity_type: ranking
+      entity_name: LIS leaderboard
+      output_type: ranking_explanation
+      audience: fantasy and analytics users who know basic stats
+      research_depth: standard
+      topic: UI copy for ranked list — headers, blurbs, methodology
+      inference_confidence: medium-high

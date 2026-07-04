@@ -1,0 +1,9 @@
+task_id: basketball-example-demo-guard-stat-interpretation
+request: "Explain why true shooting on high usage is the key read on Demo Guard in the 2026 synthetic sample — and when a stat model might still be skeptical."
+domain: basketball
+entity_type: player
+entity_name: Demo Guard
+output_type: stat_interpretation
+audience: analytics-literate fans
+research_depth: standard
+packet_id: basketball-player-demo-guard-2026

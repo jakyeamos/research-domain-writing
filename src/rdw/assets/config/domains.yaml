@@ -1,0 +1,60 @@
+# Domain registry — add new domains here without changing core prompts.
+# Each domain maps to a domain pack under domains/<id>/
+
+version: 1
+
+default_domain: general
+fallback_when_unknown: general
+
+domains:
+  general:
+    pack_path: domains/_template
+    knowledge_path: knowledge/general
+    description: Fallback for tasks without a specialized pack
+    enabled: true
+
+  basketball:
+    pack_path: domains/basketball
+    knowledge_path: knowledge/basketball
+    description: Player/team analytics, stat interpretation, scouting copy
+    enabled: true
+    entity_types: [player, team, season, matchup, stat_line, ranking]
+
+  music:
+    pack_path: domains/music
+    knowledge_path: knowledge/music
+    description: Album/artist criticism, genre context, reception writing
+    enabled: true
+    entity_types: [artist, album, song, genre, era, label]
+
+  technical:
+    pack_path: domains/technical
+    knowledge_path: knowledge/technical
+    description: Product, feature, architecture, and developer-facing copy
+    enabled: true
+    entity_types: [product, feature, system, api, release, repo]
+
+  legal:
+    pack_path: domains/_template
+    knowledge_path: knowledge/legal
+    description: Policy/legal — use template until dedicated pack exists
+    enabled: false
+
+  finance:
+    pack_path: domains/_template
+    knowledge_path: knowledge/finance
+    description: Finance — use template until dedicated pack exists
+    enabled: false
+
+router_rules:
+  inference_config: config/router-inference.yaml
+  # Keywords are hints only; router prompt makes final call
+  keyword_hints:
+    basketball: [nba, player, PER, BPM, usage, archetype, pick-and-roll, rim pressure, leaderboard, LIS, fantasy, ranking]
+    music: [album, track, mix, production, genre, chorus, verse, mastering]
+    technical: [api, deploy, architecture, latency, sdk, feature flag, roadmap]
+
+research_depth_defaults:
+  light: { max_open_questions: 3, require_sources: false }
+  standard: { max_open_questions: 8, require_sources: true }
+  deep: { max_open_questions: 15, require_sources: true, human_review_default: true }

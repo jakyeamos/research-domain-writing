@@ -1,0 +1,27 @@
+batch_id: demo-batch-001
+defaults:
+  research_depth: standard
+  output_format: markdown
+
+tasks:
+  - task_id: batch-demo-guard-summary
+    request: "Two-sentence player summary for Demo Guard synthetic sample"
+    domain: basketball
+    entity_name: Demo Guard
+    output_type: player_summary
+    research_depth: light
+    packet_id: basketball-player-demo-guard-2026
+
+  - task_id: batch-album-blurb
+    request: "Album blurb for demo album"
+    domain: music
+    entity_name: "Example Album (Demo)"
+    output_type: album_review_blurb
+    research_depth: 4
+
+  - task_id: batch-idempotency
+    request: "Feature explainer idempotency keys"
+    domain: technical
+    entity_name: Idempotency keys
+    output_type: feature_explainer
+    research_depth: 2

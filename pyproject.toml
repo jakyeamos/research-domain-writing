@@ -2,10 +2,46 @@
 name = "research-domain-writing"
 version = "0.1.0"
 description = "Research-grounded domain writing pipeline prompts, domain packs, packet validation, and agent skill distribution."
+readme = "README.md"
 requires-python = ">=3.12"
+license = "MIT"
+authors = [
+    { name = "Jakye Amos" },
+]
+keywords = ["agent", "writing", "research", "prompt-engineering", "cli"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Text Processing",
+]
 dependencies = [
     "pyyaml>=6.0.2",
 ]
+
+[project.urls]
+Homepage = "https://github.com/jakyeamos/research-domain-writing"
+Repository = "https://github.com/jakyeamos/research-domain-writing"
+Issues = "https://github.com/jakyeamos/research-domain-writing/issues"
+
+[project.scripts]
+rdw = "rdw.cli:main"
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+rdw = ["assets/**/*"]
+
+[tool.setuptools.exclude-package-data]
+rdw = ["assets/**/__pycache__/*", "assets/**/*.pyc"]
 
 [dependency-groups]
 dev = [
@@ -27,7 +63,7 @@ ignore = ["E501"]
 
 [tool.basedpyright]
 pythonVersion = "3.12"
-include = ["scripts", "tests"]
+include = ["src", "scripts", "tests"]
 typeCheckingMode = "standard"
 reportMissingImports = "warning"
 reportMissingModuleSource = "none"

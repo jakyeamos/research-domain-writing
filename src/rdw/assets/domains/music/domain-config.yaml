@@ -1,0 +1,61 @@
+domain_id: music
+display_name: Music Criticism
+version: 1
+
+entity_types:
+  - artist
+  - album
+  - song
+  - genre
+  - era
+  - label
+
+required_context_fields:
+  - entity_name
+  - entity_type
+  - time_period
+
+optional_context_fields:
+  - genre
+  - influences
+  - production_credits
+  - reception_context
+  - comparable_works
+
+forbidden_generic_phrases:
+  - "sonic landscape"
+  - "a tour de force"
+  - "genre-bending" # without naming how
+  - "masterpiece" # without criteria
+
+common_misuse_patterns:
+  - reviewing an album without credits or listening notes
+  - genre labels without musical evidence
+  - conflating chart success with artistic claims
+
+research_packet:
+  storage_path: knowledge/music
+
+extensions_schema:
+  album: [artist, release_year, label, genre, tracklist_highlights, production_notes]
+  artist: [discography_scope, era, influences, vocal_instrumental_role]
+
+writing_output_types:
+  - album_review_blurb
+  - artist_profile
+  - song_note
+  - genre_context
+  - influence_map
+  - reception_summary
+
+concept_bank:
+  path: concepts/
+
+jargon_bank:
+  path: jargon/
+
+qa:
+  checklist: qa-checklist.md
+
+writing:
+  templates: writing-templates.md

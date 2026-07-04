@@ -1,0 +1,67 @@
+# Copy this folder to domains/<your-domain>/ and customize.
+
+domain_id: _template
+display_name: Template Domain
+version: 1
+
+entity_types:
+  - entity
+  - topic
+  - event
+
+required_context_fields:
+  - entity_name
+  - topic
+  - time_period
+
+optional_context_fields:
+  - audience
+  - comparison_targets
+  - constraints
+
+preferred_terminology: []
+forbidden_generic_phrases:
+  - "game-changer"
+  - "revolutionary"
+  - "best-in-class"
+  - "leverage synergies"
+  - "it's worth noting"
+
+common_misuse_patterns:
+  - using jargon without defining the evidentiary basis
+  - stating opinion as fact
+  - inventing metrics or citations
+
+source_preferences:
+  config_ref: config/research-sources.yaml#general
+
+confidence_rules:
+  high: primary sources + stable context
+  medium: secondary sources with gaps noted
+  low: thin context — require uncertainty language
+
+research_packet:
+  template: research-packet-template.yaml
+  storage_path: knowledge/general
+
+concept_bank:
+  path: concepts/
+  template: concept-template.md
+
+jargon_bank:
+  path: jargon/
+  template: jargon-template.md
+
+qa:
+  checklist: qa-checklist.md
+
+writing:
+  templates: writing-templates.md
+
+output_types:
+  - summary
+  - analysis
+  - comparison
+  - explainer
+
+extensions: {}

@@ -1,0 +1,28 @@
+# Extends domains/_template/research-packet-template.yaml
+
+inherits: ../_template/research-packet-template.yaml
+
+extensions:
+  player:
+    team: { type: string, unknown_value: unknown }
+    season: { type: string, required: true }
+    role: { type: string, description: "primary ballhandler, spacer, rim runner, etc." }
+    archetype: { type: string, required: false }
+    usage: { type: object, fields: [usg_pct, on_ball_pct], required: false }
+    age: { type: number, required: false }
+    physical_profile: { type: text, required: false }
+    minutes_stability: { type: enum, values: [stable, volatile, unknown] }
+
+  team:
+    conference: { type: string }
+    pace_environment: { type: string }
+    defensive_scheme: { type: string }
+    roster_construction: { type: text }
+
+stat_interpretation_block:
+  metric_name: string
+  value: string
+  sample: string
+  what_it_captures: text
+  what_it_misses: text
+  role_sensitivity: text

@@ -1,0 +1,62 @@
+domain_id: technical
+display_name: Technical / Product Writing
+version: 1
+
+entity_types:
+  - product
+  - feature
+  - system
+  - api
+  - release
+  - repo
+
+required_context_fields:
+  - entity_name
+  - entity_type
+  - audience
+
+optional_context_fields:
+  - stack
+  - constraints
+  - users
+  - risks
+  - success_metrics
+  - competitors
+
+forbidden_generic_phrases:
+  - "seamless"
+  - "cutting-edge"
+  - "robust" # without failure mode context
+  - "leverage" # as buzzword
+
+common_misuse_patterns:
+  - claiming latency without measurement
+  - describing unshipped features as current
+  - architecture adjectives without components named
+
+research_packet:
+  storage_path: knowledge/technical
+
+extensions_schema:
+  feature: [product, problem, users, architecture, constraints, risks, metrics]
+  product: [personas, integrations, sla, roadmap_status]
+
+writing_output_types:
+  - feature_explainer
+  - release_note
+  - architecture_summary
+  - risk_memo
+  - comparison_matrix
+  - onboarding_doc
+
+concept_bank:
+  path: concepts/
+
+jargon_bank:
+  path: jargon/
+
+qa:
+  checklist: qa-checklist.md
+
+writing:
+  templates: writing-templates.md

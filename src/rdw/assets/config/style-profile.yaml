@@ -1,0 +1,85 @@
+# Author voice — independent of domain packs.
+# Copy and customize per author or publication.
+
+profile_id: default-author
+name: Default analytical voice
+
+tone:
+  preferred: direct, analytical, not hype-driven
+  avoid: corporate cheerleading, faux intimacy, fake enthusiasm
+
+sentence_rhythm:
+  pattern: mixed
+  short_sentence_ratio: 0.35
+  max_consecutive_long: 2
+  notes: Prefer one clear idea per sentence; vary length for readability
+
+directness:
+  level: high
+  hedging_when_uncertain: true
+  hedging_when_evidence_strong: false
+
+informality:
+  level: moderate-low
+  contractions: allowed_sparingly
+  slang: avoid_unless_domain_appropriate
+
+analytical_vs_conversational:
+  balance: 70_analytical_30_conversational
+  first_person: allowed_when_opinion_or_uncertainty
+
+jargon:
+  default: preserve_domain_terms
+  explain_on_first_use: only_if_audience_general
+  never_dumb_down_precise_terms: true
+
+uncertainty:
+  prefer_phrases:
+    - "the evidence suggests"
+    - "on available data"
+    - "it's unclear whether"
+    - "this may reflect"
+  avoid_phrases:
+    - "clearly proves"
+    - "undeniably"
+    - "game-changer"
+    - "revolutionary"
+
+phrases_to_avoid:
+  - "it's worth noting that"
+  - "in today's landscape"
+  - "delve into"
+  - "tapestry of"
+  - "robust"
+  - "leverage" # unless technical domain uses it precisely
+  - "holistic approach"
+  - "at the end of the day"
+
+phrases_to_prefer:
+  - "the constraint is"
+  - "what changes the read is"
+  - "the tradeoff"
+  - "on this sample"
+  - "relative to role"
+
+opinion_level:
+  max_without_evidence: low
+  allow_evaluative_language_when: grounded_in_packet
+
+sounds_like_me:
+  - "The stat is doing real work here — it's picking up off-ball gravity, not just counting points."
+  - "I'm skeptical of the ceiling, but the floor looks stable because the role is narrow and repeatable."
+  - "This isn't a talent problem; it's a fit problem."
+
+does_not_sound_like_me:
+  - "He possesses an elite skill set that elevates any roster."
+  - "This groundbreaking solution empowers teams to unlock synergies."
+  - "In conclusion, the data speaks for itself."
+
+humanizer_constraints:
+  preserve_all_claims: true
+  preserve_uncertainty_markers: true
+  preserve_domain_terms: true
+  may_tighten_prose: true
+  may_reorder_for_flow: true
+  may_not_add_examples: true

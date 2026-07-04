@@ -1,0 +1,101 @@
+# Generic research packet — all domains extend via `extensions` block.
+
+schema_version: 1
+
+fields:
+  id:
+    type: string
+    required: true
+    description: Stable slug, e.g. basketball-player-demo-guard-2026
+
+  domain:
+    type: string
+    required: true
+
+  entity_type:
+    type: string
+    required: true
+
+  entity_name:
+    type: string
+    required: true
+
+  topic:
+    type: string
+    required: false
+
+  time_period:
+    type: string
+    required: false
+    unknown_value: unknown
+
+  context:
+    type: text
+    required: false
+    description: Role, setting, audience, stakes
+
+  key_facts:
+    type: list
+    required: true
+    description: Atomic, source-backed facts only
+
+  relevant_metrics:
+    type: list
+    required: false
+    description: Named metrics with values and sample scope
+
+  domain_terms:
+    type: list
+    required: false
+    description: Terms used correctly in this packet
+
+  concepts_that_apply:
+    type: list
+    required: false
+    description: Slugs referencing concept bank files
+
+  source_notes:
+    type: list
+    required: true
+    item_schema:
+      source: string
+      accessed: date
+      note: string
+      fact_ids: list
+
+  interpretation_notes:
+    type: list
+    required: false
+    description: Analyst judgments — not facts
+
+  open_questions:
+    type: list
+    required: false
+
+  uncertainties:
+    type: list
+    required: false
+
+  confidence_level:
+    type: enum
+    values: [high, medium, low]
+    required: true
+
+  last_updated:
+    type: datetime
+    required: true
+
+  used_in_outputs:
+    type: list
+    required: false
+    description: output_id references
+
+extensions:
+  type: object
+  required: false
+  description: Domain-specific fields — see domain packs
+
+rules:
+  - Do not invent values; use unknown for missing fields
+  - Facts must trace to source_notes or be marked interpretation
+  - Update existing packet id instead of duplicating when refreshing research

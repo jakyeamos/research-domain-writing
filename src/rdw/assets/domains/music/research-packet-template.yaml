@@ -1,0 +1,15 @@
+inherits: ../_template/research-packet-template.yaml
+
+extensions:
+  album:
+    artist: { type: string, required: true }
+    release_year: { type: number }
+    label: { type: string, unknown_value: unknown }
+    genre: { type: list }
+    production_notes: { type: text }
+    reception: { type: object, fields: [contemporaneous, retrospective] }
+
+  artist:
+    era: { type: string }
+    influences: { type: list }
+    discography_scope: { type: string }

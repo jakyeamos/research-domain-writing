@@ -1,0 +1,56 @@
+# Source preferences by domain — guides researcher, not automated fetching.
+# v1 is manual research; agents read these guidelines when gathering context.
+
+version: 1
+
+global_rules:
+  separate_facts_from_interpretation: true
+  cite_source_in_notes: true
+  never_invent_statistics: true
+  mark_unknown_fields: unknown
+  prefer_primary_when_available: true
+
+domains:
+  basketball:
+    preferred:
+      - official box scores / NBA stats pages
+      - tracking data provider docs (when available)
+      - reputable analytics writers with methodology notes
+    avoid:
+      - unsourced Twitter rankings as sole evidence
+      - single-game hot takes for career claims
+    confidence_rules:
+      high: multi-season sample + role context documented
+      medium: single season with stable role
+      low: preseason / G-League / injury-shortened samples
+
+  music:
+    preferred:
+      - liner notes, credits, interviews (primary)
+      - established criticism with cited references
+      - chart/certification data from official sources
+    avoid:
+      - fan wiki speculation for factual claims
+    confidence_rules:
+      high: listened + credits verified + contemporaneous reception documented
+      medium: strong secondary sources, limited primary
+      low: hearsay or unreleased material rumors
+
+  technical:
+    preferred:
+      - official docs, RFCs, changelogs
+      - repo README / ADRs / design docs
+      - measured benchmarks with methodology
+    avoid:
+      - marketing pages as sole technical truth
+    confidence_rules:
+      high: reproduced behavior or doc-backed API contract
+      medium: architecture described in internal docs
+      low: roadmap rumors or unshipped features
+
+  general:
+    preferred:
+      - primary sources
+      - peer-reviewed or editorially reviewed material
+    avoid:
+      - generic SEO articles without citations
