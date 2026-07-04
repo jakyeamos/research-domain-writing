@@ -6,12 +6,14 @@ The `rdw` CLI in v0.1 is not an LLM runner. It does not browse, call model APIs,
 
 ## Install
 
-From PyPI after release:
+From PyPI:
 
 ```bash
 pip install research-domain-writing
 rdw doctor
 ```
+
+Package page: [research-domain-writing on PyPI](https://pypi.org/project/research-domain-writing/).
 
 From a source checkout:
 
