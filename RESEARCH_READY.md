@@ -37,5 +37,6 @@ timestamps, and domain-specific extension data before being cited.
 
 ## DOI Gate
 
-Before minting a DOI, replace the placeholder ORCID in `CITATION.cff` and
-`.zenodo.json` with the real author ORCID.
+Author metadata records ORCID `https://orcid.org/0009-0006-0905-9633`.
+Before minting a DOI, confirm the release tag and archived artifact boundary
+match the release notes.
