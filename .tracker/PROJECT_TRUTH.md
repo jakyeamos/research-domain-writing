@@ -89,3 +89,7 @@ and `uv run pytest` passed after the README install documentation update.
 ## Agent Notes
 
 Do not collapse research and humanizer responsibilities. If a draft needs new facts, route back to research rather than allowing the humanizer/blader step to invent content. AIOS may add thin adapters, but RDW pipeline prompts, domain packs, and batch runner work belong in this repo.
+
+## QR Remediation Planning
+
+- 2026-07-04: Added GSD Phase 1 for QR remediation from qr-fleet-continue-20260704-research-domain-writing; 1 plan(s) created from research-domain-writing.md. Execution has not started.
