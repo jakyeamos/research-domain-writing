@@ -1,28 +1,28 @@
-id: basketball-player-jalen-brunson-2024-25
+id: basketball-player-demo-guard-2026
 domain: basketball
 entity_type: player
-entity_name: Jalen Brunson
+entity_name: Demo Guard
 topic: stat interpretation — offensive load vs efficiency
-time_period: 2024-25 regular season
-context: Primary on-ball guard for NYK; high usage star in structured offense.
+time_period: 2026 demo regular season
+context: Fictional sample guard for RDW packaging demos. Do not treat these values as claims about a real player.
 
 key_facts:
   - id: fact-001
-    text: "68 regular-season games played (availability stable vs prior injury-shortened years)."
+    text: "62 demo regular-season games played (availability stable inside the synthetic sample)."
   - id: fact-002
-    text: "28.4% usage rate — primary offensive initiator."
+    text: "27.8% usage rate — primary offensive initiator in the demo sample."
   - id: fact-003
-    text: "58.1% true shooting on that usage volume."
+    text: "59.2% true shooting on that usage volume."
   - id: fact-004
-    text: "Assist rate remains positive but not elite; offense runs through his PNR and isolation reads."
+    text: "Assist rate remains positive but not elite; offense runs through pick-and-roll and isolation reads."
 
 relevant_metrics:
   - name: USG%
-    value: "28.4"
-    sample: "2024-25 RS, 68 GP"
+    value: "27.8"
+    sample: "2026 demo RS, 62 GP"
   - name: TS%
-    value: "58.1"
-    sample: "2024-25 RS"
+    value: "59.2"
+    sample: "2026 demo RS"
   - name: AST%
     value: "moderate — exact value unknown in packet refresh"
     sample: unknown
@@ -38,10 +38,10 @@ concepts_that_apply:
   - rim-pressure
 
 source_notes:
-  - source: "Placeholder — replace with official NBA/tracking export when researching live"
-    accessed: "2026-05-22"
-    note: "Illustrative sample packet for tooling demo; verify before publication"
-    fact_ids: [fact-002, fact-003]
+  - source: "Synthetic RDW demo data"
+    accessed: "2026-06-26"
+    note: "Fictional packet used only to demonstrate schema, source linkage, and claim boundaries."
+    fact_ids: [fact-001, fact-002, fact-003, fact-004]
 
 interpretation_notes:
   - "Model-friendly profile: efficient scoring on high usage without needing elite assist rates."
@@ -58,16 +58,16 @@ uncertainties:
 confidence_level: medium
 last_updated: "2026-05-22T12:00:00Z"
 used_in_outputs:
-  - basketball-example-brunson-stat-interpretation
+  - basketball-example-demo-guard-stat-interpretation
 
 extensions:
   player:
-    team: NYK
-    season: "2024-25"
+    team: DEM
+    season: "2026 demo"
     role: primary on-ball guard
     archetype: high-usage scoring PG
     usage:
-      usg_pct: 28.4
+      usg_pct: 27.8
       on_ball_pct: unknown
     age: unknown
     minutes_stability: stable

@@ -1,0 +1,13 @@
+output_id: technical-example-feature-explainer
+pass: true
+confidence_score: 0.86
+needs_human_review: false
+issues:
+  - id: qa-001
+    severity: minor
+    category: specificity
+    description: "The draft appropriately leaves retention and conflict behavior as implementation-specific."
+    suggested_fix: null
+blocking_issue_count: 0
+revised_draft_path: null
+notes: "All claims trace to examples/technical-example/research-packet.yaml."

@@ -1,0 +1,47 @@
+id: music-album-example-album-demo
+domain: music
+entity_type: album
+entity_name: Example Album (Demo)
+topic: short review blurb
+time_period: synthetic release cycle
+context: Fictional album packet used to demonstrate thin-evidence music writing.
+
+key_facts:
+  - id: fact-001
+    text: "The demo album is described as a concise electronic pop release with sparse percussion."
+  - id: fact-002
+    text: "The packet has no verified reception, sales, chart, or artist-background evidence."
+  - id: fact-003
+    text: "Allowed claims should stay close to texture, arrangement, and listening impression."
+
+source_notes:
+  - source: "Synthetic RDW demo data"
+    accessed: "2026-06-26"
+    note: "Fictional source note for demonstrating source linkage and thin-evidence caveats."
+    fact_ids: [fact-001, fact-002, fact-003]
+
+domain_terms:
+  - sparse percussion
+  - electronic pop
+  - texture
+  - arrangement
+
+open_questions:
+  - "No verified artist biography."
+  - "No reception history."
+  - "No production credits."
+
+uncertainties:
+  - "Thin evidence; do not infer influence, intent, popularity, or cultural placement."
+
+confidence_level: low
+last_updated: "2026-06-26T12:00:00Z"
+used_in_outputs:
+  - music-example-album-blurb
+
+extensions:
+  album:
+    artist: Demo Artist
+    release_year: "2026 demo"
+    label: unknown
+    genre: electronic pop

@@ -1,0 +1,8 @@
+task_id: music-example-album-blurb
+request: "Short album blurb focusing on production choices, not chart hype."
+domain: music
+entity_type: album
+entity_name: "Example Album (Demo)"
+output_type: album_review_blurb
+audience: general music readers
+research_depth: light

@@ -16,7 +16,7 @@
   "threshold": 80,
   "surfaces": {
     "covered": [
-      "scripts/validate-packet.py"
+      "src/rdw/**"
     ],
     "ignored": [
       ".gitignore",

@@ -1,0 +1,73 @@
+id: basketball-player-demo-guard-2026
+domain: basketball
+entity_type: player
+entity_name: Demo Guard
+topic: stat interpretation — offensive load vs efficiency
+time_period: 2026 demo regular season
+context: Fictional sample guard for RDW packaging demos. Do not treat these values as claims about a real player.
+
+key_facts:
+  - id: fact-001
+    text: "62 demo regular-season games played (availability stable inside the synthetic sample)."
+  - id: fact-002
+    text: "27.8% usage rate — primary offensive initiator in the demo sample."
+  - id: fact-003
+    text: "59.2% true shooting on that usage volume."
+  - id: fact-004
+    text: "Assist rate remains positive but not elite; offense runs through pick-and-roll and isolation reads."
+
+relevant_metrics:
+  - name: USG%
+    value: "27.8"
+    sample: "2026 demo RS, 62 GP"
+  - name: TS%
+    value: "59.2"
+    sample: "2026 demo RS"
+  - name: AST%
+    value: "moderate — exact value unknown in packet refresh"
+    sample: unknown
+
+domain_terms:
+  - usage rate
+  - true shooting
+  - on-ball creation
+  - pick-and-roll
+
+concepts_that_apply:
+  - usage-illusion
+  - rim-pressure
+
+source_notes:
+  - source: "Synthetic RDW demo data"
+    accessed: "2026-06-26"
+    note: "Fictional packet used only to demonstrate schema, source linkage, and claim boundaries."
+    fact_ids: [fact-001, fact-002, fact-003, fact-004]
+
+interpretation_notes:
+  - "Model-friendly profile: efficient scoring on high usage without needing elite assist rates."
+  - "Skepticism case: defensive matchup hunting in playoffs not covered here."
+
+open_questions:
+  - "Playoff efficiency delta vs regular season?"
+  - "On/off with secondary creators unavailable?"
+
+uncertainties:
+  - "Defensive impact not characterized in this packet."
+  - "Exact AST% and turnover rate not loaded."
+
+confidence_level: medium
+last_updated: "2026-05-22T12:00:00Z"
+used_in_outputs:
+  - basketball-example-demo-guard-stat-interpretation
+
+extensions:
+  player:
+    team: DEM
+    season: "2026 demo"
+    role: primary on-ball guard
+    archetype: high-usage scoring PG
+    usage:
+      usg_pct: 27.8
+      on_ball_pct: unknown
+    age: unknown
+    minutes_stability: stable

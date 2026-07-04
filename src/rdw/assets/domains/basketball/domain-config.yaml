@@ -1,0 +1,93 @@
+domain_id: basketball
+display_name: Basketball Analytics
+version: 1
+example_only: true  # Illustrates system; core tool is domain-agnostic
+
+entity_types:
+  - player
+  - team
+  - season
+  - matchup
+  - stat_line
+  - ranking
+
+required_context_fields:
+  - entity_name
+  - entity_type
+  - time_period
+  - role_or_usage_context
+
+optional_context_fields:
+  - team
+  - age
+  - physical_profile
+  - archetype
+  - comparison_player
+  - injury_context
+  - playoff_vs_regular
+
+preferred_terminology:
+  - usage rate
+  - on-ball / off-ball
+  - rim pressure
+  - spacing gravity
+  - defensive matchup difficulty
+  - sample size
+  - role
+
+forbidden_generic_phrases:
+  - "elite without context"
+  - "generational" # unless evidence tier supports
+  - "can do it all"
+  - "blank canvas"
+  - "high basketball IQ" # without observable behaviors
+
+common_misuse_patterns:
+  - ranking players by a single rate stat without role/team context
+  - treating playoff samples as equal to multi-year regular season
+  - conflating box score scoring with offensive impact
+  - projecting injury-prone players without minutes stability caveat
+
+source_preferences:
+  config_ref: config/research-sources.yaml#basketball
+
+confidence_rules:
+  high: 2+ seasons, stable role, tracking + box score align
+  medium: one full season or role change mid-year noted
+  low: pre-season, G-League only, or <15 game sample
+
+research_packet:
+  template: research-packet-template.yaml
+  storage_path: knowledge/basketball
+
+extensions_schema:
+  player: [team, season, role, archetype, usage, age, physical_profile, minutes_stability]
+  team: [conference, roster_construction, pace_environment, defensive_scheme]
+
+writing_output_types:
+  - ranking_explanation
+  - player_summary
+  - stat_interpretation
+  - why_stat_likes_player
+  - why_stat_skeptical
+  - role_context
+  - strengths
+  - weaknesses
+  - ranking_explanation
+  - comparison_blurb
+  - sleeper_case
+  - overrated_warning
+  - future_projection
+  - team_fit_notes
+
+concept_bank:
+  path: concepts/
+
+jargon_bank:
+  path: jargon/
+
+qa:
+  checklist: qa-checklist.md
+
+writing:
+  templates: writing-templates.md
