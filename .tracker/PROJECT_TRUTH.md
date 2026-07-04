@@ -67,7 +67,7 @@ The repo now has a real `rdw` Python CLI that acts as an agent harness: it valid
 
 ## Next Step
 
-Complete the public v0.1 release flow by running `scripts/publish-pypi-wizard.sh`, publishing to PyPI with a valid account token, then running an installed `rdw doctor` smoke from PyPI.
+Complete the public v0.1 release flow by running `scripts/publish-pypi-wizard.sh`, publishing to PyPI with a valid account token, then running an installed `rdw doctor` smoke from PyPI. The README now points readers at the PyPI package page while keeping source-checkout installation documented separately.
 
 ## Quality Ladder Notes
 
@@ -82,6 +82,9 @@ Checks run on 2026-07-04:
 | Build | Pass | `uv build` built sdist and wheel. |
 | Wheel smoke | Pass | Built wheel installed in a temp venv; installed `rdw doctor`, `rdw task plan`, `rdw batch plan`, and packaged-asset `rdw install --target all` passed. |
 | Dead code | Unknown | No Vulture or equivalent dead-code command is configured. |
+
+Additional check on 2026-07-04: `uv run ruff check .`, `uv run basedpyright`,
+and `uv run pytest` passed after the README install documentation update.
 
 ## Agent Notes
 
