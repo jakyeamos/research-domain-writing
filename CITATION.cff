@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use Research Domain Writing or its examples, please cite it using the metadata in this file."
+title: "Research Domain Writing"
+version: "0.1.0"
+date-released: "2026-07-04"
+type: software
+authors:
+  - family-names: Amos
+    given-names: Jakye
+    affiliation: "Case Western Reserve University"
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+repository-code: "https://github.com/jakyeamos/research-domain-writing"
+url: "https://github.com/jakyeamos/research-domain-writing"
+license: MIT
+keywords:
+  - research writing
+  - agent workflows
+  - grounded writing
+  - prompt bundles
+  - reproducible writing
+abstract: "An agent-first harness for research-grounded writing that validates structured research packets, plans repeatable writing runs, emits exact prompt bundles, and keeps outputs auditable without acting as an LLM runner."

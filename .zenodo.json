@@ -1,0 +1,27 @@
+{
+  "title": "Research Domain Writing",
+  "upload_type": "software",
+  "description": "Software-plus-report artifact for an agent-first research-grounded writing harness. The archived release includes source code, domain packs, packet validators, prompt-bundle planning, curated examples, limitations docs, and release metadata. Generated writing runs and user-provided source packets remain local unless explicitly attached to a release.",
+  "creators": [
+    {
+      "name": "Amos, Jakye",
+      "affiliation": "Case Western Reserve University",
+      "orcid": "0000-0000-0000-0000"
+    }
+  ],
+  "license": "MIT",
+  "keywords": [
+    "research writing",
+    "agent workflows",
+    "grounded writing",
+    "reproducible writing"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/jakyeamos/research-domain-writing",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
+  ],
+  "notes": "Replace the placeholder ORCID before minting the DOI."
+}

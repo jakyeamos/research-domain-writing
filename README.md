@@ -124,6 +124,13 @@ Packets live in `knowledge/<domain>/*.yaml` and must include source notes, confi
 
 See [docs/LIMITATIONS.md](docs/LIMITATIONS.md) for v0.1 boundaries.
 
+## DOI-Ready Research Release
+
+RDW is prepared as an independent software-methods artifact. See
+[RESEARCH_READY.md](RESEARCH_READY.md) and
+[docs/release-notes/v0.1.0.md](docs/release-notes/v0.1.0.md) for the citable
+artifact boundary, validation path, data-availability policy, and claim limits.
+
 ## Validation
 
 `rdw validate-packet` checks:
