@@ -1,59 +1,63 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: Standalone research-grounded domain writing pipeline with prompts, domain packs, packet validation, examples, skill distribution, and release governance is extracted from AIOS.
-healthScore: 74
-statusLabel: needs_attention
-nextStep: Build the dedicated batch CLI runner, then add stronger packet merge/conflict handling and schema validation.
+summary: Installable RDW 0.1 release candidate with an agent-first CLI harness, prompts, domain packs, packet/batch validation, packaged assets, examples, skill distribution, and release governance.
+healthScore: 90
+statusLabel: release_candidate
+nextStep: Publish v0.1.0 to PyPI after final main-branch release gates and tag push.
 blockers:
-  - Batch execution is still prompt-driven rather than a dedicated CLI runner.
-  - Packet merge/conflict resolution for concurrent updates is not implemented.
-lastUpdated: 2026-06-27
-tags: [aios, writing, research, skill, python]
+  - Slash-command behavior should still receive a manual post-install smoke in each target agent before broader announcement.
+  - Packet merge/conflict resolution for concurrent updates is a post-0.1 enhancement.
+lastUpdated: 2026-07-04
+tags: [aios, writing, research, skill, python, cli, pypi]
 areas: [engineering, writing]
 goals: []
 repoType: tool
 sourceOfTruth: mixed
 primaryLanguage: Python
 activeBranch: main
-lastCommitDate: 2026-06-27
+lastCommitDate: 2026-07-04
 quality:
   lint: pass
   types: pass
   tests: pass
   deadCode: unknown
-  structure: warning
+  structure: pass
 canonicalCommands:
   install: uv sync
   dev: unknown
-  lint: uv run ruff check scripts tests
-  typecheck: uv run basedpyright scripts tests
+  lint: uv run ruff check .
+  format: uv run ruff format --check .
+  typecheck: uv run basedpyright src tests scripts
   test: uv run pytest -q
+  build: uv build
   deadcode: unknown
 agentExpectationsVersion: 1
 ---
 
 ## Current State
 
-Research Domain Writing is a standalone, file-based pipeline for turning research into grounded domain copy, QA output, and a human style pass. It separates research, domain copywriting, domain QA, and humanizer/blader responsibilities so style transformation does not invent domain knowledge.
+Research Domain Writing is a standalone, installable, file-based pipeline for turning research into grounded domain copy, QA output, and a human style pass. It separates research, domain copywriting, domain QA, and humanizer/blader responsibilities so style transformation does not invent domain knowledge.
 
-The repo has prompts, starter domain packs, knowledge packet patterns, examples, a Codex/Claude/Cursor skill distribution surface, packet validation, release governance, and a substantial README. The main v1 limitation remains mechanical: batch execution is prompt-driven rather than handled by a dedicated CLI runner.
+The repo now has a real `rdw` Python CLI that acts as an agent harness: it validates packets and batches, creates deterministic task/batch planning folders, emits prompt bundles, installs agent skills/templates, and packages the curated assets for wheel installs. The CLI intentionally does not call LLM APIs, browse, research, or draft autonomously in v0.1.
 
 ## What Exists
 
 - `README.md` explaining the full pipeline, slash-command usage, batch workflow, domain packs, and limitations.
 - `SKILL.md` as the agent skill entrypoint.
+- `src/rdw/` as the installable Python package and CLI surface.
 - `prompts/` for router, planner, researcher, packet builder, copywriter, QA, humanizer, orchestrator, and batch runner flows.
 - `domains/` and `config/` for domain-specific writing and source rules.
 - `knowledge/` examples and reusable packet patterns.
 - `examples/` with end-to-end sample tasks.
-- `scripts/validate-packet.py` for packet validation.
+- `rdw doctor`, `rdw validate-packet`, `rdw validate-batch`, `rdw new-domain`, `rdw task plan`, `rdw batch plan`, and `rdw install`.
+- Compatibility wrappers in `scripts/` and `install/install.sh`.
 - `docs/LIMITATIONS.md` and `docs/FUTURE-AIOS-INTEGRATION.md` documenting v1 boundaries.
 - `RELEASE.md` and `CHANGELOG.md` for release governance.
 
 ## What Does Not Exist Yet
 
-- No dedicated batch CLI runner.
+- No autonomous batch execution runner; `rdw batch plan` validates and expands planned task bundles only.
 - No robust packet merge/conflict resolution for concurrent updates.
 - No stronger JSON-schema validation beyond the current packet validator.
 - No mature legal, finance, or medicine domain packs.
@@ -62,19 +66,20 @@ The repo has prompts, starter domain packs, knowledge packet patterns, examples,
 
 ## Next Step
 
-Implement the dedicated batch CLI runner that orchestrates existing prompts, `examples/batch-tasks.yaml`, and `outputs/batch-log.jsonl` without changing the core research/copy/QA/humanizer separation.
+Complete the public v0.1 release flow: final release gates on `main`, build, tag `v0.1.0`, push `main` and the tag, publish to PyPI, then run an installed `rdw doctor` smoke.
 
 ## Quality Ladder Notes
 
-Checks run on 2026-06-27:
+Checks run on 2026-07-04:
 
 | Step | Status | Evidence |
 | --- | --- | --- |
-| Lint | Pass | `uv run ruff check scripts tests` passed. |
-| Format | Pass | `uv run ruff format --check scripts tests` reported 3 files already formatted. |
-| Type check | Pass | `uv run basedpyright scripts tests` passed with 0 errors and 0 warnings. |
-| Tests | Pass | `uv run pytest -q` passed with 10 tests. |
-| Structure | Warning | `pre-cr run --json --workspace .` exited 1 because no changed files were present, while the emitted health payload reported `ready: true` and coverage loaded at 89 percent. |
+| Lint | Pass | `uv run ruff check .` passed. |
+| Format | Pass | `uv run ruff format --check .` passed. |
+| Type check | Pass | `uv run basedpyright src tests scripts` passed with 0 errors and 0 warnings. |
+| Tests | Pass | `uv run pytest -q` passed with 12 tests. |
+| Build | Pass | `uv build` built sdist and wheel. |
+| Wheel smoke | Pass | Built wheel installed in a temp venv; installed `rdw doctor`, `rdw task plan`, `rdw batch plan`, and packaged-asset `rdw install --target all` passed. |
 | Dead code | Unknown | No Vulture or equivalent dead-code command is configured. |
 
 ## Agent Notes
