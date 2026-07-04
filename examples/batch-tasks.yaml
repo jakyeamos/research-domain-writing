@@ -4,13 +4,13 @@ defaults:
   output_format: markdown
 
 tasks:
-  - task_id: batch-brunson-summary
-    request: "Two-sentence player summary for Brunson 2024-25"
+  - task_id: batch-demo-guard-summary
+    request: "Two-sentence player summary for Demo Guard synthetic sample"
     domain: basketball
-    entity_name: Jalen Brunson
+    entity_name: Demo Guard
     output_type: player_summary
     research_depth: light
-    packet_id: basketball-player-jalen-brunson-2024-25
+    packet_id: basketball-player-demo-guard-2026
 
   - task_id: batch-album-blurb
     request: "Album blurb for demo album"

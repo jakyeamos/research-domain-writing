@@ -6,7 +6,7 @@ description: |
   finance, medicine, academic, etc.). Separates research, domain drafting, QA, and
   final humanizer/blader style pass. Do NOT use humanizer alone for domain knowledge.
   Slash commands: /rdw (single task), /rdw-batch (YAML batch).
-version: 1.0.0
+version: 0.1.0
 ---
 
 # Research Domain Writing
@@ -27,9 +27,11 @@ version: 1.0.0
 
 Run planner + researcher prompts. **Use your tools** (web, files, APIs) to gather facts; save YAML under `knowledge/<domain>/`. The skill does not include a built-in crawler — that is by design.
 
-## v1 limitation
+## v0.1 limitation
 
-- **Batch is prompt-driven** — no dedicated CLI runner yet (`prompts/batch-runner.md` + agent). A CLI for batch runs is the main planned upgrade.
+- `rdw task plan` and `rdw batch plan` validate inputs and emit deterministic prompt bundles.
+- The CLI does not call an LLM, browse, research, draft, or complete batch tasks by itself.
+- The agent executes the emitted prompts and updates run artifacts.
 
 Details: `docs/LIMITATIONS.md`
 
@@ -52,7 +54,7 @@ Batch: `prompts/batch-runner.md`
 
 ## Slash commands
 
-After `./install/install.sh`:
+After `rdw install --target all` or source checkout `./install/install.sh`:
 
 | Tool | Command |
 |------|---------|
@@ -79,7 +81,7 @@ Load `config/style-profile.yaml` for voice.
 ## Add a domain
 
 ```bash
-./scripts/new-domain.sh my-domain "My Domain"
+rdw new-domain my-domain "My Domain"
 ```
 
 Edit `domains/my-domain/`, register in `config/domains.yaml`, store packets in `knowledge/my-domain/`.

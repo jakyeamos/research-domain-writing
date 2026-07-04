@@ -14,4 +14,4 @@ Invoke when the user runs `/rdw` or asks for grounded domain copy.
 1. Read `SKILL.md` + `prompts/pipeline-orchestrator.md` under root.
 2. Agent performs research; save `knowledge/<domain>/*.yaml`.
 3. Copywriter → QA → humanizer; no new facts in humanizer.
-4. See `README.md` for batch: `prompts/batch-runner.md`.
+4. For batch, use `rdw batch plan` to create task bundles, then follow `prompts/batch-runner.md`.

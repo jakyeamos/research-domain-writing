@@ -1,4 +1,4 @@
-output_id: basketball-example-brunson-stat-interpretation
+output_id: basketball-example-demo-guard-stat-interpretation
 pass: true
 confidence_score: 0.82
 needs_human_review: false
@@ -10,4 +10,4 @@ issues:
     suggested_fix: "Add parenthetical (FG+FT efficiency) without new numbers"
 blocking_issue_count: 0
 revised_draft_path: null
-notes: "All numeric claims trace to knowledge/basketball/jalen-brunson-2024-25.yaml"
+notes: "All numeric claims trace to knowledge/basketball/demo-guard-2026-demo.yaml"

@@ -1,16 +1,20 @@
 ---
 output_id: technical-example-feature-explainer
 domain: technical
+entity_name: Idempotency keys
+output_type: feature_explainer
 confidence_level: medium
 needs_review: false
+research_packet_ids_used:
+  - technical-feature-idempotency-keys-demo
 ---
 
 # Idempotency keys
 
 **Problem:** Clients retry on timeouts; without idempotency, retries can double-charge or duplicate side effects.
 
-**Behavior:** Clients send `Idempotency-Key` on mutating requests. The server stores the first result keyed by (account, key) for 24 hours and returns the same response on repeats.
+**Behavior:** Clients send an idempotency key on mutating requests. The server stores the first result associated with that key and can return a consistent response on repeats instead of running the operation again.
 
-**Failure modes:** Keys expire after 24h — a retry after expiry may execute twice. Keys are not a distributed lock across different endpoints.
+**Failure modes:** The exact retention window, scope, and mismatched-payload behavior depend on the implementation. A retry outside the documented guarantee may still execute again.
 
-**Constraint:** Safe only when the operation is actually idempotent at the business layer; document which endpoints honor keys.
+**Constraint:** Document which endpoints honor keys, how long keys are retained, and whether conflicts return the original response or an error.

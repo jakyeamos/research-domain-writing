@@ -40,9 +40,9 @@ Save as YAML mirroring `domains/_template/research-packet-template.yaml` + domai
 ## Source notes item
 
 ```yaml
-- source: "NBA.com stats — Brunson 2024-25"
-  accessed: "2026-05-22"
-  note: "TS% 58.1 on 28.4 USG%, 68 games"
+- source: "Official source or user-provided dataset"
+  accessed: "2026-06-26"
+  note: "TS% 59.2 on 27.8 USG%, 62-game synthetic sample"
   fact_ids: [fact-003, fact-004]
 ```
 

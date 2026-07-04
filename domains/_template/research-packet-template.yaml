@@ -6,7 +6,7 @@ fields:
   id:
     type: string
     required: true
-    description: Stable slug, e.g. basketball-player-jalen-brunson-2024-25
+    description: Stable slug, e.g. basketball-player-demo-guard-2026
 
   domain:
     type: string

@@ -1,39 +1,47 @@
 # Scope: limitations vs design
 
-## Research (by design — not a gap)
+## Research
 
-**The skill does not perform research itself. The agent does**, following `prompts/research-planner.md` and `prompts/researcher.md`.
+RDW does not perform research by itself. The agent does the research by following `prompts/research-planner.md` and `prompts/researcher.md`.
 
 That means:
 
-- The agent may use whatever tools it already has (browser, APIs, pasted stats, local files, notebooks).
-- The skill’s job is to **structure, save, and reuse** what was gathered — YAML packets, `source_notes`, uncertainty, concept bank updates.
-- There is **no built-in fetch layer** inside this repo (no crawlers, no domain API adapters shipped here). That is intentional: research stays in the agent layer; grounding stays in files.
+- The agent may use whatever tools it already has: browser, APIs, pasted stats, local files, notebooks, or user-provided material.
+- RDW structures, validates, saves, and reuses what was gathered.
+- There is no built-in crawler, live stats connector, publication database client, or model API runner in v0.1.
 
-`config/research-sources.yaml` tells the agent what kinds of sources to prefer, not what to call automatically.
+`config/research-sources.yaml` tells the agent what kinds of sources to prefer. It is not an automatic fetch configuration.
 
-**If research feels weak**, fix the agent step (better sources, deeper planner tier), not by bolting web crawl into the skill package.
+## CLI
 
----
+The `rdw` CLI is a deterministic planning and validation harness:
 
-## Batch (v1 limitation — CLI has merit)
+- `rdw validate-packet` validates research packets.
+- `rdw validate-batch` validates batch YAML.
+- `rdw task plan` writes a task contract, prompt bundle, and initial status file.
+- `rdw batch plan` expands a batch into per-task planned folders and logs.
+- `rdw install` installs slash command and skill templates.
 
-**Batch is prompt-driven (no dedicated CLI runner yet).**
+The CLI does not call an LLM, browse the web, conduct autonomous research, or write final copy in v0.1.
 
-- Multi-task runs follow `prompts/batch-runner.md` inside an agent session.
-- `examples/batch-tasks.yaml` is the task list format; there is no `rdw batch` (or similar) that runs the pipeline end-to-end with stable exit codes and logging.
-- `outputs/batch-log.jsonl` is append-only — agents write lines after each task.
+## Batch
 
-**Why a CLI would help:** repeatable runs, tier flags, resume failed tasks, review queues — without re-explaining the pipeline in chat each time. The prompts stay the source of truth; the CLI would orchestrate them.
+`rdw batch plan` is not an autonomous batch writer. It validates and expands tasks so an agent can execute them consistently.
 
----
+Each planned task starts at status `planned`. The agent or a future adapter is responsible for moving tasks through research, draft, QA, final, and review states.
 
-## Workarounds (until batch CLI exists)
+## Workarounds
 
-| Need | v1 approach |
-|------|-------------|
-| Live stats / docs | Agent researches per researcher prompt; save to `knowledge/<domain>/` |
-| Repeatable batch | Agent loops `batch-runner.md`; or wrap stages in your own shell script |
-| Validate packets | `scripts/validate-packet.py` (optional PyYAML) |
+| Need | v0.1 approach |
+| --- | --- |
+| Live stats or docs | Agent researches and saves packets under `knowledge/<domain>/` |
+| Repeatable single task | `rdw task plan ... --out <run-dir>` |
+| Repeatable batch setup | `rdw batch plan <batch.yaml> --out <run-dir>` |
+| Agent slash command | `rdw install --target all` |
 
-See README **What still needs improvement** for the roadmap (batch CLI first).
+## Future upgrades
+
+- Optional adapters for specific research sources.
+- Resume and status update commands for planned runs.
+- Direct integration with agent runtimes that can execute prompt bundles.
+- Richer packet schema migrations.

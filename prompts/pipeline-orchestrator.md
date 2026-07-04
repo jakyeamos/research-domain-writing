@@ -5,7 +5,7 @@ Run the full research-domain-writing pipeline for one task.
 ## Research & batch
 
 - **Research:** agent executes `researcher.md` (may use any tools); skill saves structured packets (`docs/LIMITATIONS.md`).
-- **Batch (v1):** many tasks → `prompts/batch-runner.md` in agent; no dedicated CLI yet.
+- **Batch (v0.1):** `rdw batch plan <batch.yaml>` creates task bundles; agent follows `prompts/batch-runner.md` to execute them.
 
 ## Load order
 

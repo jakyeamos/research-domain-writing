@@ -1,6 +1,6 @@
 ---
 name: rdw-batch
-description: Batch research-domain-writing tasks from a YAML task list (prompt-driven orchestration)
+description: Batch research-domain-writing tasks from a YAML task list (planned by rdw; executed by agent)
 argument-hint: [path/to/batch-tasks.yaml] | tier=1|2|3|4
 allowed-tools:
   - Read
@@ -14,7 +14,7 @@ allowed-tools:
 ---
 
 <objective>
-Run multiple research-domain-writing tasks from a batch file. Reuse existing packets; log low-confidence outputs; separate `needs_review`.
+Plan and then execute multiple research-domain-writing tasks from a batch file. `rdw batch plan` validates and expands prompt bundles; the agent performs research, drafting, QA, and final output.
 </objective>
 
 <paths>
@@ -30,13 +30,12 @@ Run multiple research-domain-writing tasks from a batch file. Reuse existing pac
 <context>
 $ARGUMENTS
 
-Defaults:
-- Batch file: `__RDW_ROOT__/examples/batch-tasks.yaml` if no path given
-- Append each task result to `__RDW_ROOT__/outputs/batch-log.jsonl`
+Default batch file: `__RDW_ROOT__/examples/batch-tasks.yaml` if no path is given.
 </context>
 
 <process>
-1. Read batch file YAML.
-2. Follow `prompts/batch-runner.md` for each task (full pipeline per task).
-3. After batch, write summary counts: completed, needs_review, failed.
+1. Run `rdw batch plan <batch-file>` when the CLI is available; otherwise read the batch YAML directly.
+2. Read `prompts/batch-runner.md`.
+3. Execute each planned task through the full RDW pipeline.
+4. Update task status/log artifacts and summarize completed vs needs_review.
 </process>

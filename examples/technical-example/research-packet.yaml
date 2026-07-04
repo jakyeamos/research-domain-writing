@@ -1,0 +1,48 @@
+id: technical-feature-idempotency-keys-demo
+domain: technical
+entity_type: feature
+entity_name: Idempotency keys
+topic: feature explainer
+time_period: durable API pattern
+context: Generic technical packet for explaining idempotent API retries.
+
+key_facts:
+  - id: fact-001
+    text: "An idempotency key lets a client retry a request without creating duplicate side effects."
+  - id: fact-002
+    text: "The server stores the first result associated with the key and returns a consistent response for repeated requests."
+  - id: fact-003
+    text: "The pattern is most useful for create, charge, submit, or enqueue operations where duplicate execution is expensive."
+  - id: fact-004
+    text: "Keys need clear scope, retention, and conflict behavior."
+
+source_notes:
+  - source: "RDW generic technical domain packet"
+    accessed: "2026-06-26"
+    note: "Generic engineering pattern summary for demo writing; verify service-specific behavior before publishing product docs."
+    fact_ids: [fact-001, fact-002, fact-003, fact-004]
+
+domain_terms:
+  - idempotency
+  - retry
+  - side effect
+  - request key
+  - conflict
+
+open_questions:
+  - "Service-specific retention window."
+  - "Whether mismatched retry payloads return conflict or original response."
+
+uncertainties:
+  - "Exact API behavior depends on the implementation."
+
+confidence_level: medium
+last_updated: "2026-06-26T12:00:00Z"
+used_in_outputs:
+  - technical-example-feature-explainer
+
+extensions:
+  feature:
+    product_area: API reliability
+    audience: backend engineers
+    maturity: established pattern

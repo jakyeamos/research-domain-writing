@@ -2,13 +2,15 @@
 
 Process many writing tasks with reuse and tiered research.
 
-## v1 constraint
+## v0.1 constraint
 
-**Batch is prompt-driven (no dedicated CLI runner yet).** Execute each task by running the full pipeline in this agent session. Append results to `outputs/batch-log.jsonl` manually; there is no `rdw batch` executable.
+`rdw batch plan <batch.yaml>` validates the batch, expands deterministic per-task prompt bundles, and writes initial `planned` statuses. It does not execute research, drafting, QA, humanizer, or model calls.
+
+Execute each planned task by running the full pipeline in this agent session. Update task status and append log lines as work moves beyond `planned`.
 
 ## Inputs
 
-- Batch file: `examples/batch-tasks.yaml` or user-provided YAML/JSON list
+- Batch file: `examples/batch-tasks.yaml` or user-provided YAML list
 
 ```yaml
 batch_id: string
@@ -41,15 +43,15 @@ tasks:
 3. Researcher (if needed)
 4. Knowledge packet builder
 5. Copywriter → QA → (loop rev1 if blockers) → Humanizer
-6. Save final + append `outputs/batch-log.jsonl`
+6. Save final + append/update batch log
 
 ## Batch outputs
 
 ```
-outputs/batch/{batch_id}/
+<run-dir>/
   summary.yaml        # counts: completed, needs_review, failed
-  needs-review/       # low confidence or QA fail
-  completed/
+  batch-log.jsonl     # append-only status events
+  tasks/<task_id>/    # task contract, prompt bundle, status
 ```
 
 ## Logging

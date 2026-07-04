@@ -1,25 +1,25 @@
 ---
-output_id: basketball-example-brunson-stat-interpretation
+output_id: basketball-example-demo-guard-stat-interpretation
 domain: basketball
-entity_name: Jalen Brunson
+entity_name: Demo Guard
 output_type: stat_interpretation
 confidence_level: medium
-generated_at: "2026-05-22T12:30:00Z"
+generated_at: "2026-06-26T12:30:00Z"
 research_packet_ids_used:
-  - basketball-player-jalen-brunson-2024-25
+  - basketball-player-demo-guard-2026
 concepts_used:
   - usage-illusion
 needs_review: false
 warnings:
-  - "Sample packet uses placeholder sources — verify stats before publish"
+  - "Synthetic demo packet — do not publish as real player analysis"
 ---
 
-# Stat read: Brunson 2024-25 — usage with efficiency
+# Stat read: Demo Guard 2026 — usage with efficiency
 
-Brunson played **68 regular-season games** as New York's primary on-ball guard — a stable availability season that matters before we talk impact. The usage is real: **28.4%**. The stat that makes it matter is **58.1% true shooting** on that volume.
+Demo Guard played **62 synthetic regular-season games** as the demo team's primary on-ball guard — a stable availability sample that matters before we talk impact. The usage is heavy: **27.8%**. The stat that makes it matter is **59.2% true shooting** on that volume.
 
 Usage rate tells you who touches the offense. True shooting tells you what those touches cost. Average efficiency at this usage would be a usage-illusion profile — heavy load, debatable value. This read is the other way: efficient scoring at scale.
 
 TS% doesn't close the book. Assist/turnover detail isn't fully in the packet (AST% is unknown), and there's no defensive characterization here. Models that lean on playmaking defense or playoff matchup hunting can stay skeptical on dimensions this sample doesn't cover — that's a scope limit, not a knock on the efficiency story.
 
-For 2024-25: primary initiator who doesn't waste possessions. Push skepticism toward what's missing from the packet, not the core efficiency-on-usage signal.
+For the demo sample: primary initiator who doesn't waste possessions. Push skepticism toward what's missing from the packet, not the core efficiency-on-usage signal.
