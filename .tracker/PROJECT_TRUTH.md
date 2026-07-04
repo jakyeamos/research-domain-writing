@@ -8,7 +8,6 @@ nextStep: Run scripts/publish-pypi-wizard.sh with a PyPI account token to comple
 blockers:
   - Slash-command behavior should still receive a manual post-install smoke in each target agent before broader announcement.
   - Packet merge/conflict resolution for concurrent updates is a post-0.1 enhancement.
-  - DOI minting is blocked until CITATION.cff and .zenodo.json use the real author ORCID instead of the placeholder.
 lastUpdated: 2026-07-04
 tags: [aios, writing, research, skill, python, cli, pypi]
 areas: [engineering, writing]
