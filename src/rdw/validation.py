@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-from rdw.config import known_domains, output_formats
+from rdw.config import enabled_domains, known_domains, output_formats
 from rdw.yaml_io import YamlMapping, YamlValue, load_yaml_mapping
 
 REQUIRED_PACKET_FIELDS = {
@@ -41,7 +41,7 @@ class ValidationResult:
 
 
 def validate_packet_file(
-    path: Path, *, strict: bool = False, root: Path | None = None
+    path: Path, *, strict: bool = False, root: Path | None = None, allow_disabled: bool = False
 ) -> ValidationResult:
     if not path.exists():
         return ValidationResult(errors=[f"not found: {path}"], warnings=[])
@@ -49,11 +49,15 @@ def validate_packet_file(
         data = load_yaml_mapping(path)
     except ValueError as exc:
         return ValidationResult(errors=[f"invalid: {exc}"], warnings=[])
-    return validate_packet(data, strict=strict, root=root)
+    return validate_packet(data, strict=strict, root=root, allow_disabled=allow_disabled)
 
 
 def validate_packet(
-    data: YamlMapping, *, strict: bool = False, root: Path | None = None
+    data: YamlMapping,
+    *,
+    strict: bool = False,
+    root: Path | None = None,
+    allow_disabled: bool = False,
 ) -> ValidationResult:
     errors: list[str] = []
     warnings: list[str] = []
@@ -62,8 +66,15 @@ def validate_packet(
             errors.append(f"missing or empty required field: {field}")
 
     domain = _string_value(data.get("domain"))
-    if domain and domain not in known_domains(root):
-        errors.append(f"domain is not registered: {domain}")
+    if domain:
+        if domain not in known_domains(root):
+            errors.append(f"domain is not registered: {domain}")
+        elif domain not in enabled_domains(root):
+            message = f"domain is registered but disabled: {domain}"
+            if not strict:
+                warnings.append(message)
+            elif not allow_disabled:
+                errors.append(message)
 
     confidence = _string_value(data.get("confidence_level"))
     if confidence not in CONFIDENCE_VALUES:

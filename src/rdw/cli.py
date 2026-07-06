@@ -34,6 +34,7 @@ def _build_parser() -> argparse.ArgumentParser:
     validate_packet.add_argument("path", type=Path)
     validate_packet.add_argument("--strict", action="store_true")
     validate_packet.add_argument("--root", type=Path, default=Path.cwd())
+    validate_packet.add_argument("--allow-disabled-domain", action="store_true")
     validate_packet.set_defaults(func=_validate_packet)
 
     validate_batch = subcommands.add_parser("validate-batch", help="Validate a batch task file")
@@ -100,7 +101,12 @@ def _doctor(_args: argparse.Namespace) -> int:
 
 
 def _validate_packet(args: argparse.Namespace) -> int:
-    result = validate_packet_file(args.path, strict=bool(args.strict), root=args.root)
+    result = validate_packet_file(
+        args.path,
+        strict=bool(args.strict),
+        root=args.root,
+        allow_disabled=bool(args.allow_disabled_domain),
+    )
     return _print_validation(result.errors, result.warnings, f"OK: {args.path}")
 
 

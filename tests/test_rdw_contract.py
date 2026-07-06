@@ -185,6 +185,47 @@ def test_config_domain_and_format_accessors() -> None:
     assert config.default_output_format(ROOT) == "markdown"
 
 
+def _disabled_domain_packet(tmp_path: Path) -> Path:
+    packet = tmp_path / "legal.yaml"
+    packet.write_text(
+        "\n".join(
+            [
+                "id: legal-demo",
+                "domain: legal",
+                "entity_type: policy",
+                "entity_name: Demo Policy",
+                "key_facts:",
+                "  - id: fact-1",
+                "    text: a fact",
+                "source_notes:",
+                "  - source: Synthetic RDW demo data",
+                "    accessed: '2026-06-26'",
+                "    note: demo",
+                "    fact_ids: [fact-1]",
+                "confidence_level: low",
+                "last_updated: '2026-06-26T12:00:00Z'",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    return packet
+
+
+def test_disabled_domain_warns_then_errors(tmp_path: Path) -> None:
+    packet = _disabled_domain_packet(tmp_path)
+
+    lenient = validate_packet_file(packet, root=ROOT)
+    assert lenient.ok
+    assert any("registered but disabled: legal" in w for w in lenient.warnings)
+
+    strict = validate_packet_file(packet, strict=True, root=ROOT)
+    assert not strict.ok
+    assert any("registered but disabled: legal" in e for e in strict.errors)
+
+    allowed = validate_packet_file(packet, strict=True, root=ROOT, allow_disabled=True)
+    assert allowed.ok
+
+
 def test_compat_validate_packet_script() -> None:
     result = subprocess.run(
         [
