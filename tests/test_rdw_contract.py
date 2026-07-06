@@ -171,6 +171,20 @@ def test_cli_install_templates_with_temp_home(tmp_path: Path) -> None:
     assert (home / ".agents" / "skills" / "research-domain-writing").is_symlink()
 
 
+def test_config_domain_and_format_accessors() -> None:
+    from rdw import config
+
+    known = config.known_domains(ROOT)
+    enabled = config.enabled_domains(ROOT)
+    assert {"general", "basketball", "music", "technical", "legal", "finance"} <= known
+    assert "legal" in known and "legal" not in enabled
+    assert "finance" in known and "finance" not in enabled
+    assert "basketball" in enabled
+
+    assert {"markdown", "json", "yaml"} <= config.output_formats(ROOT)
+    assert config.default_output_format(ROOT) == "markdown"
+
+
 def test_compat_validate_packet_script() -> None:
     result = subprocess.run(
         [

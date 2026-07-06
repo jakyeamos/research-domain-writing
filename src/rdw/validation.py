@@ -4,8 +4,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-from rdw.resources import asset_path
-from rdw.yaml_io import YamlMapping, YamlValue, load_yaml, load_yaml_mapping, normalize_yaml
+from rdw.config import known_domains, output_formats
+from rdw.yaml_io import YamlMapping, YamlValue, load_yaml_mapping
 
 REQUIRED_PACKET_FIELDS = {
     "id",
@@ -62,7 +62,7 @@ def validate_packet(
             errors.append(f"missing or empty required field: {field}")
 
     domain = _string_value(data.get("domain"))
-    if domain and domain not in _enabled_or_known_domains(root):
+    if domain and domain not in known_domains(root):
         errors.append(f"domain is not registered: {domain}")
 
     confidence = _string_value(data.get("confidence_level"))
@@ -122,7 +122,7 @@ def validate_batch(data: YamlMapping, *, root: Path | None = None) -> Validation
         return ValidationResult(errors=errors, warnings=warnings)
 
     seen_ids: set[str] = set()
-    output_formats = _output_formats(root)
+    known_formats = output_formats(root)
     for index, task in enumerate(tasks, start=1):
         if not isinstance(task, dict):
             errors.append(f"tasks[{index}] must be a mapping")
@@ -144,12 +144,12 @@ def validate_batch(data: YamlMapping, *, root: Path | None = None) -> Validation
         if packet_id and not _packet_exists(packet_id, domain, root):
             errors.append(f"tasks[{index}] packet_id not found: {packet_id}")
         output_format = _string_value(task.get("output_format"))
-        if output_format and output_format not in output_formats:
+        if output_format and output_format not in known_formats:
             errors.append(f"tasks[{index}] unsupported output_format: {output_format}")
     defaults = data.get("defaults")
     if isinstance(defaults, dict):
         default_format = _string_value(defaults.get("output_format"))
-        if default_format and default_format not in output_formats:
+        if default_format and default_format not in known_formats:
             errors.append(f"defaults unsupported output_format: {default_format}")
         default_depth = defaults.get("research_depth")
         if default_depth is not None and normalize_depth(str(default_depth)) is None:
@@ -173,46 +173,6 @@ def _string_value(value: YamlValue | None) -> str:
 
 def _list_value(value: YamlValue | None) -> list[YamlValue]:
     return value if isinstance(value, list) else []
-
-
-def _config_root(root: Path | None) -> Path | None:
-    if root and (root / "config" / "domains.yaml").exists():
-        return root
-    return None
-
-
-def _load_config(name: str, root: Path | None) -> YamlMapping:
-    local_root = _config_root(root)
-    if local_root:
-        return load_yaml_mapping(local_root / "config" / name)
-    asset = asset_path("config", name)
-    temp_path = Path(str(asset)) if isinstance(asset, Path) else None
-    if temp_path and temp_path.exists():
-        raw = load_yaml(temp_path)
-    else:
-        import yaml
-
-        loaded: object = yaml.safe_load(asset.read_text(encoding="utf-8"))
-        raw = normalize_yaml(loaded)
-    if not isinstance(raw, dict):
-        return {}
-    return raw
-
-
-def _enabled_or_known_domains(root: Path | None) -> set[str]:
-    config = _load_config("domains.yaml", root)
-    domains = config.get("domains")
-    if not isinstance(domains, dict):
-        return {"general"}
-    return {str(key) for key in domains}
-
-
-def _output_formats(root: Path | None) -> set[str]:
-    config = _load_config("output-formats.yaml", root)
-    formats = config.get("formats")
-    if not isinstance(formats, dict):
-        return {"markdown"}
-    return {str(key) for key in formats}
 
 
 def _fact_ids(key_facts: list[YamlValue]) -> set[str]:
