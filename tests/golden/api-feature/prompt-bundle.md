@@ -13,6 +13,7 @@ entity_type: feature
 entity_name: backend engineers
 topic: 'feature_explainer: explain the API feature for backend engineers'
 output_type: feature_explainer
+output_format: markdown
 audience: backend engineers and technical implementers
 research_needed: true
 research_depth: standard
@@ -43,7 +44,7 @@ warnings: []
 1. Read `SKILL.md` and the prompts listed below.
 2. Confirm or adjust the task contract if the user objects.
 3. Run research, knowledge packet, draft, QA, and humanizer in order.
-4. Save artifacts under the output paths from `config/output-formats.yaml`.
+4. Save artifacts in the `output_format` from the contract above, using the output paths in `config/output-formats.yaml`.
 
 ## Router Prompt
 

@@ -6,12 +6,14 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from typing import cast
 
 import pytest
 
 from rdw.cli import main
 from rdw.planner import TaskRequest, infer_contract, plan_batch, plan_task
 from rdw.validation import validate_batch_file, validate_packet_file
+from rdw.yaml_io import YamlValue
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -127,6 +129,23 @@ def test_router_infers_music_and_technical() -> None:
     assert idempotency["domain"] == "technical"
     assert idempotency["entity_name"] == "Idempotency keys"
     assert idempotency["output_type"] == "feature_explainer"
+
+
+def test_infer_contract_includes_output_format() -> None:
+    default = infer_contract(TaskRequest(request="explain idempotency keys"), root=ROOT)
+    assert default["output_format"] == "markdown"
+
+    explicit = infer_contract(
+        TaskRequest(request="explain idempotency keys", output_format="json"), root=ROOT
+    )
+    assert explicit["output_format"] == "json"
+
+    unknown = infer_contract(
+        TaskRequest(request="explain idempotency keys", output_format="pdf"), root=ROOT
+    )
+    assert unknown["output_format"] == "pdf"
+    warnings = cast("list[YamlValue]", unknown["warnings"])
+    assert any("unknown output_format: pdf" in str(w) for w in warnings)
 
 
 def test_task_plan_writes_deterministic_bundle(tmp_path: Path) -> None:

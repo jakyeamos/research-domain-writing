@@ -59,6 +59,7 @@ def _build_parser() -> argparse.ArgumentParser:
     task_plan.add_argument("--depth")
     task_plan.add_argument("--packet-id")
     task_plan.add_argument("--task-id")
+    task_plan.add_argument("--output-format")
     task_plan.add_argument("--out", type=Path, default=None)
     task_plan.add_argument("--root", type=Path, default=Path.cwd())
     task_plan.set_defaults(func=_task_plan)
@@ -132,6 +133,7 @@ def _task_plan(args: argparse.Namespace) -> int:
         depth=args.depth,
         packet_id=args.packet_id,
         task_id=args.task_id,
+        output_format=args.output_format,
     )
     output_dir = args.out or (Path.cwd() / "outputs" / "runs" / "task-plan")
     planned = plan_task(task_request, output_dir, root=args.root)

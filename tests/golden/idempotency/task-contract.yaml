@@ -6,6 +6,7 @@ entity_type: feature
 entity_name: Idempotency keys
 topic: 'feature_explainer: explain idempotency keys'
 output_type: feature_explainer
+output_format: markdown
 audience: general readers with basic domain literacy
 research_needed: true
 research_depth: standard

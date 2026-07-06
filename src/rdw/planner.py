@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
+from rdw.config import default_output_format, output_formats
 from rdw.resources import read_asset_text
 from rdw.validation import normalize_depth, validate_batch_file
 from rdw.yaml_io import YamlMapping, YamlValue, dump_yaml, load_yaml_mapping
@@ -21,6 +22,7 @@ class TaskRequest:
     depth: str | None = None
     packet_id: str | None = None
     task_id: str | None = None
+    output_format: str | None = None
 
 
 @dataclass(frozen=True)
@@ -79,6 +81,7 @@ def plan_batch(batch_path: Path, output_dir: Path, *, root: Path | None = None) 
                 depth=normalize_depth(str(depth_value)) or str(depth_value),
                 packet_id=_optional_string(item.get("packet_id")),
                 task_id=task_id,
+                output_format=output_format,
             ),
             output_dir / "tasks" / task_id,
             root=root,
@@ -128,6 +131,10 @@ def infer_contract(task: TaskRequest, *, root: Path | None = None) -> YamlMappin
     task_id = task.task_id or _slugify(f"{domain}-{entity_name}-{output_type}")
     audience = task.audience or _infer_audience(lower)
     packet_id = task.packet_id or _default_packet_id(domain, entity_type, entity_name)
+    output_format = task.output_format or default_output_format(root)
+    warnings: list[YamlValue] = []
+    if output_format not in output_formats(root):
+        warnings.append(f"unknown output_format: {output_format}")
     return {
         "task_id": task_id,
         "task": request,
@@ -137,6 +144,7 @@ def infer_contract(task: TaskRequest, *, root: Path | None = None) -> YamlMappin
         "entity_name": entity_name,
         "topic": _topic(request, output_type),
         "output_type": task.output_type or output_type,
+        "output_format": output_format,
         "audience": audience,
         "research_needed": True,
         "research_depth": depth,
@@ -152,7 +160,7 @@ def infer_contract(task: TaskRequest, *, root: Path | None = None) -> YamlMappin
         "qa_checklist_path": f"domains/{domain}/qa-checklist.md",
         "writing_template": f"domains/{domain}/writing-templates.md",
         "style_profile_path": "config/style-profile.yaml",
-        "warnings": [],
+        "warnings": warnings,
     }
 
 
@@ -171,7 +179,8 @@ def render_prompt_bundle(contract: YamlMapping) -> str:
         "1. Read `SKILL.md` and the prompts listed below.\n"
         "2. Confirm or adjust the task contract if the user objects.\n"
         "3. Run research, knowledge packet, draft, QA, and humanizer in order.\n"
-        "4. Save artifacts under the output paths from `config/output-formats.yaml`.\n\n"
+        "4. Save artifacts in the `output_format` from the contract above, "
+        "using the output paths in `config/output-formats.yaml`.\n\n"
         "## Router Prompt\n\n"
         f"{router}\n\n"
         "## Pipeline Orchestrator\n\n"

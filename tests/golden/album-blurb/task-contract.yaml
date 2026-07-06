@@ -6,6 +6,7 @@ entity_type: album
 entity_name: requested subject
 topic: 'album_review_blurb: short album blurb about production'
 output_type: album_review_blurb
+output_format: markdown
 audience: general music readers
 research_needed: true
 research_depth: standard
