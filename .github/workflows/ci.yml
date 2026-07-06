@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Sync
+        run: uv sync
+      - name: Lint
+        run: uv run ruff check .
+      - name: Format check
+        run: uv run ruff format --check .
+      - name: Type check
+        run: uv run basedpyright src tests scripts
+      - name: Test
+        run: uv run pytest -q
+      - name: Build
+        run: uv build
+      - name: Wheel smoke test
+        run: |
+          python -m venv /tmp/rdw-wheel-smoke
+          /tmp/rdw-wheel-smoke/bin/pip install dist/*.whl
+          /tmp/rdw-wheel-smoke/bin/rdw doctor
