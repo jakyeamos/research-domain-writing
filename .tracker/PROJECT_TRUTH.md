@@ -86,6 +86,8 @@ Checks run on 2026-07-04:
 Additional check on 2026-07-04: `uv run ruff check .`, `uv run basedpyright`,
 and `uv run pytest` passed after the README install documentation update.
 
+2026-07-05: Added golden snapshot tests and GitHub Actions CI (lint/format/types/tests/build/wheel-smoke).
+
 ## Agent Notes
 
 Do not collapse research and humanizer responsibilities. If a draft needs new facts, route back to research rather than allowing the humanizer/blader step to invent content. AIOS may add thin adapters, but RDW pipeline prompts, domain packs, and batch runner work belong in this repo.
