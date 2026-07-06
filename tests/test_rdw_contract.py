@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -18,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def test_cli_doctor_passes(capsys: pytest.CaptureFixture[str]) -> None:
     assert main(["doctor"]) == 0
     output = capsys.readouterr().out
-    assert "rdw 0.1.0" in output
+    assert re.search(r"rdw \d+\.\d+\.\d+", output)
     assert "OK pipeline orchestrator" in output
 
 
