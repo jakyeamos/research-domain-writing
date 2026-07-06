@@ -15,8 +15,8 @@ goals: []
 repoType: tool
 sourceOfTruth: mixed
 primaryLanguage: Python
-activeBranch: main
-lastCommitDate: 2026-07-04
+activeBranch: feat/v0.2-hardening
+lastCommitDate: 2026-07-05
 quality:
   lint: pass
   types: pass
@@ -87,6 +87,8 @@ Additional check on 2026-07-04: `uv run ruff check .`, `uv run basedpyright`,
 and `uv run pytest` passed after the README install documentation update.
 
 2026-07-05: Added golden snapshot tests and GitHub Actions CI (lint/format/types/tests/build/wheel-smoke).
+
+2026-07-05 (feat/v0.2-hardening, Task 4): Extracted config-loading helpers from `src/rdw/validation.py` into a new shared module `src/rdw/config.py` (pure refactor, no behavior change). `config.py` exposes `config_root`, `load_config`, `known_domains`, `enabled_domains`, `output_formats`, `default_output_format`. Deleted the now-duplicated private helpers from `validation.py` (`_config_root`, `_load_config`, `_enabled_or_known_domains`, `_output_formats`) and their now-unused imports (`asset_path`, `load_yaml`, `normalize_yaml`). Renamed a local variable in `validate_batch` from `output_formats` to `known_formats` to avoid shadowing the imported `output_formats` function. `uv run ruff check .`, `uv run ruff format --check .`, and `uv run basedpyright src tests scripts` all pass clean; `uv run pytest -q` passed 17 tests (up from 12, includes new `test_config_domain_and_format_accessors`). Commit: `deb2e0c`.
 
 ## Agent Notes
 
