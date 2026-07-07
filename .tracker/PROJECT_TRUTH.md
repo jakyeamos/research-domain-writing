@@ -51,6 +51,9 @@ The repo now has a real `rdw` Python CLI that acts as an agent harness: it valid
 - `knowledge/` examples and reusable packet patterns.
 - `examples/` with end-to-end sample tasks.
 - `rdw doctor`, `rdw validate-packet`, `rdw validate-batch`, `rdw new-domain`, `rdw task plan`, `rdw batch plan`, and `rdw install`.
+- Lifecycle commands: `rdw status`, `rdw task mark`, `rdw batch status`, `rdw batch resume`.
+- Schema export: `rdw schema packet|batch|task-contract --format jsonschema`.
+- Optional adapter stubs: `rdw adapter list`, `rdw adapter run <name> <run-dir>`.
 - Task and batch planning now carry `output_format` through inferred contracts, CLI overrides, warnings for unknown formats, and golden prompt bundles.
 - Compatibility wrappers in `scripts/` and `install/install.sh`.
 - `scripts/publish-pypi-wizard.sh` for guided PyPI token capture, artifact rebuild, dry-run check, and confirmed publish.
@@ -61,8 +64,8 @@ The repo now has a real `rdw` Python CLI that acts as an agent harness: it valid
 
 - No autonomous batch execution runner; `rdw batch plan` validates and expands planned task bundles only.
 - No robust packet merge/conflict resolution for concurrent updates.
-- No stronger JSON-schema validation beyond the current packet validator.
 - No mature legal, finance, or medicine domain packs.
+- Adapter extras are stubs; RDW does not call model APIs by default.
 - No diff-based regression tests on QA rules.
 - No dead-code scanner is configured.
 
@@ -93,6 +96,10 @@ and `uv run pytest` passed after the README install documentation update.
 
 2026-07-06 (feat/v0.2-hardening): Added explicit `output_format` propagation to `rdw task plan` and inferred task contracts. Contracts now default from `config/output-formats.yaml`, preserve CLI/batch overrides, and warn on unknown formats. Golden task contracts and prompt bundles were updated to include `output_format: markdown`; regression coverage now includes default, explicit, and unknown output formats. `uv run ruff check .`, `uv run ruff format --check .`, `uv run basedpyright src tests scripts`, `uv run pytest -q` (19 tests), and `uv build` all passed. No dead-code scanner is configured. Commit: `1f34d99`.
 
+2026-07-07 (feat/v0.2-hardening, Wave 3): Lifecycle workflow (`rdw status`, `rdw task mark`, `rdw batch status/resume`), JSON Schema export (`rdw schema`), and provider-neutral adapter stubs (`rdw adapter`). Optional extras: `[openai]`, `[anthropic]`, `[local]`, `[adapters]`. `uv run ruff check .`, `uv run ruff format --check .`, `uv run basedpyright src tests scripts`, `uv run pytest -q` (36 tests), and `uv build` passed. No dead-code scanner is configured. Commit: `1b918e2`.
+
 ## Agent Notes
 
 Do not collapse research and humanizer responsibilities. If a draft needs new facts, route back to research rather than allowing the humanizer/blader step to invent content. AIOS may add thin adapters, but RDW pipeline prompts, domain packs, and batch runner work belong in this repo.
+
+Router logic now lives in `config/router-inference.yaml` + `src/rdw/router.py`; do not reintroduce hard-coded inference in `planner.py`.
