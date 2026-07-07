@@ -153,7 +153,13 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "pyyaml", specifier = ">=6.0.2" }]
+requires-dist = [
+    { name = "pyyaml", specifier = ">=6.0.2" },
+    { name = "research-domain-writing", extras = ["anthropic"], marker = "extra == 'adapters'" },
+    { name = "research-domain-writing", extras = ["local"], marker = "extra == 'adapters'" },
+    { name = "research-domain-writing", extras = ["openai"], marker = "extra == 'adapters'" },
+]
+provides-extras = ["openai", "anthropic", "local", "adapters"]
 
 [package.metadata.requires-dev]
 dev = [

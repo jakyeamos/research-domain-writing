@@ -8,6 +8,7 @@ from pathlib import Path
 
 from rdw.config import default_output_format, output_formats
 from rdw.resources import read_asset_text
+from rdw.router import route_request
 from rdw.validation import normalize_depth, validate_batch_file
 from rdw.yaml_io import YamlMapping, YamlValue, dump_yaml, load_yaml_mapping
 
@@ -30,14 +31,27 @@ class PlannedTask:
     task_id: str
     contract: YamlMapping
     prompt_bundle: str
+    output_dir: Path
 
 
-def plan_task(task: TaskRequest, output_dir: Path, *, root: Path | None = None) -> PlannedTask:
+def plan_task(
+    task: TaskRequest,
+    output_dir: Path,
+    *,
+    root: Path | None = None,
+    no_overwrite: bool = False,
+    run_id: str | None = None,
+) -> PlannedTask:
+    if run_id is not None:
+        output_dir = output_dir / _resolve_run_id(run_id)
     contract = infer_contract(task, root=root)
     task_id = str(contract["task_id"])
     prompt_bundle = render_prompt_bundle(contract)
+    contract_path = output_dir / "task-contract.yaml"
+    if no_overwrite and contract_path.exists():
+        raise ValueError(f"refusing to overwrite existing plan: {contract_path} (use --force)")
     output_dir.mkdir(parents=True, exist_ok=True)
-    (output_dir / "task-contract.yaml").write_text(dump_yaml(contract), encoding="utf-8")
+    contract_path.write_text(dump_yaml(contract), encoding="utf-8")
     (output_dir / "prompt-bundle.md").write_text(prompt_bundle, encoding="utf-8")
     status = {
         "task_id": task_id,
@@ -46,7 +60,12 @@ def plan_task(task: TaskRequest, output_dir: Path, *, root: Path | None = None) 
         "next_step": "Give prompt-bundle.md to an agent and run the RDW pipeline.",
     }
     (output_dir / "status.json").write_text(json.dumps(status, indent=2) + "\n", encoding="utf-8")
-    return PlannedTask(task_id=task_id, contract=contract, prompt_bundle=prompt_bundle)
+    return PlannedTask(
+        task_id=task_id,
+        contract=contract,
+        prompt_bundle=prompt_bundle,
+        output_dir=output_dir,
+    )
 
 
 def plan_batch(batch_path: Path, output_dir: Path, *, root: Path | None = None) -> None:
@@ -123,13 +142,14 @@ def plan_batch(batch_path: Path, output_dir: Path, *, root: Path | None = None) 
 
 def infer_contract(task: TaskRequest, *, root: Path | None = None) -> YamlMapping:
     request = task.request.strip()
-    lower = request.lower()
-    domain = task.domain or _infer_domain(lower)
-    output_type, entity_type = _infer_output(lower)
-    entity_name = task.entity or _infer_entity(request, entity_type)
-    depth = normalize_depth(task.depth or "") or _infer_depth(lower)
+    routed = route_request(request, root=root)
+    domain = task.domain or routed.domain
+    output_type = routed.output_type
+    entity_type = routed.entity_type
+    entity_name = task.entity or routed.entity_name
+    depth = normalize_depth(task.depth or "") or routed.depth
+    audience = task.audience or routed.audience
     task_id = task.task_id or _slugify(f"{domain}-{entity_name}-{output_type}")
-    audience = task.audience or _infer_audience(lower)
     packet_id = task.packet_id or _default_packet_id(domain, entity_type, entity_name)
     output_format = task.output_format or default_output_format(root)
     warnings: list[YamlValue] = []
@@ -188,66 +208,6 @@ def render_prompt_bundle(contract: YamlMapping) -> str:
     )
 
 
-def _infer_domain(lower: str) -> str:
-    if any(
-        token in lower for token in ("nba", "basketball", "leaderboard", "usage", "fantasy", "lis")
-    ):
-        return "basketball"
-    if any(token in lower for token in ("album", "artist", "song", "track", "genre", "production")):
-        return "music"
-    if any(
-        token in lower
-        for token in ("api", "feature", "architecture", "sdk", "latency", "release", "idempotency")
-    ):
-        return "technical"
-    return "general"
-
-
-def _infer_output(lower: str) -> tuple[str, str]:
-    if any(token in lower for token in ("leaderboard", "ranking", "rankings", "ladder")):
-        return "ranking_explanation", "ranking"
-    if "stat" in lower:
-        return "stat_interpretation", "player"
-    if any(token in lower for token in ("album", "blurb")):
-        return "album_review_blurb", "album"
-    if any(token in lower for token in ("feature", "how it works", "api", "idempotency")):
-        return "feature_explainer", "feature"
-    return "summary", "entity"
-
-
-def _infer_entity(request: str, entity_type: str) -> str:
-    lower = request.lower()
-    if "idempotency key" in lower:
-        return "Idempotency keys"
-    leaderboard = re.search(r"(?:my |the )?([A-Z][A-Za-z0-9]+) leaderboard", request)
-    if leaderboard:
-        return f"{leaderboard.group(1)} leaderboard"
-    if entity_type == "ranking":
-        return "leaderboard"
-    title = request.strip().split(" for ", maxsplit=1)
-    if len(title) == 2 and title[1].strip():
-        return title[1].strip().strip(".")
-    return "requested subject"
-
-
-def _infer_depth(lower: str) -> str:
-    if any(token in lower for token in ("controversial", "lawsuit", "medical", "definitive")):
-        return "deep"
-    if any(token in lower for token in ("short blurb", "one-liner", "quick note")):
-        return "light"
-    return "standard"
-
-
-def _infer_audience(lower: str) -> str:
-    if any(token in lower for token in ("leaderboard", "ranking", "fantasy", "analytics")):
-        return "fantasy and analytics users who know basic stats"
-    if any(token in lower for token in ("album", "track", "genre")):
-        return "general music readers"
-    if any(token in lower for token in ("api", "developer", "engineer", "architecture")):
-        return "backend engineers and technical implementers"
-    return "general readers with basic domain literacy"
-
-
 def _default_packet_id(domain: str, entity_type: str, entity_name: str) -> str:
     return _slugify(f"{domain}-{entity_type}-{entity_name}")
 
@@ -255,6 +215,12 @@ def _default_packet_id(domain: str, entity_type: str, entity_name: str) -> str:
 def _slugify(value: str) -> str:
     slug = re.sub(r"[^a-zA-Z0-9]+", "-", value.lower()).strip("-")
     return slug or "rdw-task"
+
+
+def _resolve_run_id(run_id: str) -> str:
+    if run_id == "auto":
+        return datetime.now(UTC).strftime("run-%Y%m%dT%H%M%SZ")
+    return _slugify(run_id)
 
 
 def _topic(request: str, output_type: str) -> str:

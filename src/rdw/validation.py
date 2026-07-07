@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -83,6 +84,10 @@ def validate_packet(
     key_facts = _list_value(data.get("key_facts"))
     if not key_facts:
         errors.append("key_facts must be a non-empty list")
+    elif strict:
+        for index, fact in enumerate(key_facts, start=1):
+            if not isinstance(fact, dict) or not _string_value(fact.get("id")):
+                errors.append(f"key_facts[{index}] must be a mapping with an id in strict mode")
 
     fact_ids = _fact_ids(key_facts)
     source_notes = _list_value(data.get("source_notes"))
@@ -94,6 +99,13 @@ def validate_packet(
     last_updated = _string_value(data.get("last_updated"))
     if last_updated and not _is_datetime_like(last_updated):
         errors.append("last_updated must be an ISO date or datetime string")
+    if (
+        strict
+        and last_updated
+        and _is_datetime_like(last_updated)
+        and not _is_tz_aware(last_updated)
+    ):
+        errors.append("last_updated must be timezone-aware in strict mode")
 
     entity_type = _string_value(data.get("entity_type"))
     extensions = data.get("extensions")
@@ -207,6 +219,15 @@ def _validate_source_notes(
         for field in ("source", "accessed", "note"):
             if _is_missing(note.get(field)):
                 errors.append(f"source_notes[{index}] missing {field}")
+        accessed = note.get("accessed")
+        if isinstance(accessed, str) and accessed and not _is_datetime_like(accessed):
+            errors.append(f"source_notes[{index}] accessed must be an ISO date")
+        if strict:
+            source_error = _source_format_error(
+                _string_value(note.get("source")), _string_value(note.get("source_type"))
+            )
+            if source_error:
+                errors.append(f"source_notes[{index}] {source_error}")
         linked_ids = _list_value(note.get("fact_ids"))
         if strict and fact_ids and not linked_ids:
             errors.append(f"source_notes[{index}] must link fact_ids in strict mode")
@@ -225,6 +246,34 @@ def _is_datetime_like(value: str) -> bool:
         except ValueError:
             continue
     return False
+
+
+def _is_tz_aware(value: str) -> bool:
+    for candidate in (value, value.replace("Z", "+00:00")):
+        try:
+            parsed = datetime.fromisoformat(candidate)
+        except ValueError:
+            continue
+        return parsed.tzinfo is not None
+    return False
+
+
+_DOI_RE = re.compile(r"^(doi:)?10\.\d{4,9}/\S+$", re.IGNORECASE)
+_URL_RE = re.compile(r"^https?://[^\s]+\.[^\s]+", re.IGNORECASE)
+
+
+def _source_format_error(source: str, source_type: str) -> str | None:
+    value = source.strip()
+    lower = value.lower()
+    if source_type == "url":
+        return None if _URL_RE.match(value) else "source must be a URL for source_type: url"
+    if source_type == "doi":
+        return None if _DOI_RE.match(value) else "source must be a DOI for source_type: doi"
+    if lower.startswith(("http://", "https://")) and not _URL_RE.match(value):
+        return f"malformed URL source: {source}"
+    if lower.startswith(("doi:", "10.")) and not _DOI_RE.match(value):
+        return f"malformed DOI source: {source}"
+    return None
 
 
 def _domain_requires_extension(domain: str, entity_type: str, root: Path | None) -> bool:

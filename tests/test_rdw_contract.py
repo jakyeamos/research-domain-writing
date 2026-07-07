@@ -245,6 +245,124 @@ def test_disabled_domain_warns_then_errors(tmp_path: Path) -> None:
     assert allowed.ok
 
 
+def test_router_reads_from_root_config(tmp_path: Path) -> None:
+    import shutil
+
+    from rdw.router import route_request
+
+    (tmp_path / "config").mkdir()
+    shutil.copy(ROOT / "config" / "domains.yaml", tmp_path / "config" / "domains.yaml")
+    router_yaml = (ROOT / "config" / "router-inference.yaml").read_text(encoding="utf-8")
+    router_yaml = router_yaml.replace(
+        "  technical:\n    keywords: [api, feature, product, deploy, architecture, sdk, latency, idempotency, release]",
+        "  technical:\n    keywords: [api, feature, product, deploy, architecture, sdk, latency, idempotency, release, widgetized]",
+    )
+    (tmp_path / "config" / "router-inference.yaml").write_text(router_yaml, encoding="utf-8")
+
+    routed = route_request("explain the widgetized thing", root=tmp_path)
+    assert routed.domain == "technical"
+
+
+def test_strict_requires_fact_ids_and_tz_and_valid_source(tmp_path: Path) -> None:
+    packet = tmp_path / "packet.yaml"
+    packet.write_text(
+        "\n".join(
+            [
+                "id: packet",
+                "domain: basketball",
+                "entity_type: player",
+                "entity_name: Player",
+                "key_facts:",
+                "  - plain string fact without id",
+                "source_notes:",
+                "  - source: 'http://'",
+                "    accessed: not-a-date",
+                "    note: sample",
+                "confidence_level: high",
+                "last_updated: '2026-06-26T12:00:00'",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    result = validate_packet_file(packet, strict=True, root=ROOT)
+
+    assert any("must be a mapping with an id" in e for e in result.errors)
+    assert any("accessed must be an ISO date" in e for e in result.errors)
+    assert any("timezone-aware" in e for e in result.errors)
+    assert any("malformed URL source" in e for e in result.errors)
+
+
+def test_shipped_packets_pass_strict() -> None:
+    packets = [
+        ROOT / "knowledge" / "basketball" / "demo-guard-2026-demo.yaml",
+        ROOT / "examples" / "music-example" / "research-packet.yaml",
+        ROOT / "examples" / "technical-example" / "research-packet.yaml",
+    ]
+    for packet in packets:
+        result = validate_packet_file(packet, strict=True, root=ROOT)
+        assert result.ok, f"{packet} failed strict: {result.errors}"
+
+
+def test_plan_task_no_overwrite_guards_existing(tmp_path: Path) -> None:
+    output = tmp_path / "task"
+    plan_task(TaskRequest(request="explain idempotency keys"), output, root=ROOT)
+
+    with pytest.raises(ValueError, match="refusing to overwrite"):
+        plan_task(
+            TaskRequest(request="explain idempotency keys"),
+            output,
+            root=ROOT,
+            no_overwrite=True,
+        )
+
+
+def test_plan_task_run_id_writes_subdir(tmp_path: Path) -> None:
+    output = tmp_path / "task"
+    planned = plan_task(
+        TaskRequest(request="explain idempotency keys"), output, root=ROOT, run_id="auto"
+    )
+    assert planned.output_dir.parent == output
+    assert planned.output_dir.name.startswith("run-")
+    assert (planned.output_dir / "task-contract.yaml").is_file()
+
+
+def test_install_dry_run_writes_nothing(tmp_path: Path) -> None:
+    from rdw.install import install
+
+    home = tmp_path / "home"
+    result = install(target="all", home=home, source_root=ROOT, dry_run=True)
+    assert result.written
+    assert not (home / ".claude" / "commands" / "rdw.md").exists()
+    assert not (home / ".claude").exists()
+
+
+def test_install_backup_preserves_existing_dir(tmp_path: Path) -> None:
+    from rdw.install import install
+
+    home = tmp_path / "home"
+    link = home / ".claude" / "skills" / "research-domain-writing"
+    link.mkdir(parents=True)
+    (link / "sentinel.txt").write_text("keep me", encoding="utf-8")
+
+    install(target="claude", home=home, source_root=ROOT, backup=True)
+
+    assert link.is_symlink()
+    backups = list(link.parent.glob("research-domain-writing.bak-*"))
+    assert backups and (backups[0] / "sentinel.txt").read_text(encoding="utf-8") == "keep me"
+
+
+def test_install_refuses_real_dir_without_flags(tmp_path: Path) -> None:
+    from rdw.install import install
+
+    home = tmp_path / "home"
+    link = home / ".claude" / "skills" / "research-domain-writing"
+    link.mkdir(parents=True)
+
+    with pytest.raises(ValueError, match="real directory in the way"):
+        install(target="claude", home=home, source_root=ROOT)
+
+
 def test_compat_validate_packet_script() -> None:
     result = subprocess.run(
         [

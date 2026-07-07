@@ -21,8 +21,11 @@ The `rdw` CLI is a deterministic planning and validation harness:
 - `rdw task plan` writes a task contract, prompt bundle, and initial status file.
 - `rdw batch plan` expands a batch into per-task planned folders and logs.
 - `rdw install` installs slash command and skill templates.
+- `rdw status`, `rdw task mark`, `rdw batch status`, and `rdw batch resume` track lifecycle state in run artifacts.
+- `rdw schema` exports JSON Schemas for packets, batches, and task contracts.
+- `rdw adapter` exposes optional provider-neutral runtime stubs (`local`, `openai`, `anthropic`).
 
-The CLI does not call an LLM, browse the web, conduct autonomous research, or write final copy in v0.1.
+The CLI does not call an LLM, browse the web, conduct autonomous research, or write final copy.
 
 ## Batch
 
@@ -37,11 +40,13 @@ Each planned task starts at status `planned`. The agent or a future adapter is r
 | Live stats or docs | Agent researches and saves packets under `knowledge/<domain>/` |
 | Repeatable single task | `rdw task plan ... --out <run-dir>` |
 | Repeatable batch setup | `rdw batch plan <batch.yaml> --out <run-dir>` |
+| Track task progress | `rdw task mark research-done <run-dir>` |
+| Resume a batch | `rdw batch resume <run-dir>` |
+| Editor/CI schema validation | `rdw schema packet --format jsonschema` |
 | Agent slash command | `rdw install --target all` |
 
 ## Future upgrades
 
-- Optional adapters for specific research sources.
-- Resume and status update commands for planned runs.
+- Real provider adapters that call external APIs (stubs exist today).
 - Direct integration with agent runtimes that can execute prompt bundles.
 - Richer packet schema migrations.

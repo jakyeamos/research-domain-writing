@@ -5,10 +5,18 @@ import sys
 from pathlib import Path
 
 from rdw import __version__
+from rdw.adapters import get_adapter, list_adapters
 from rdw.domain import create_domain
 from rdw.install import INSTALL_TARGETS, install
+from rdw.lifecycle import (
+    format_batch_resume,
+    mark_task_status,
+    show_batch_status,
+    show_task_status,
+)
 from rdw.planner import TaskRequest, plan_batch, plan_task
 from rdw.resources import asset_path
+from rdw.schema_export import export_schema
 from rdw.validation import validate_batch_file, validate_packet_file
 
 
@@ -29,6 +37,26 @@ def _build_parser() -> argparse.ArgumentParser:
 
     doctor = subcommands.add_parser("doctor", help="Check RDW installation health")
     doctor.set_defaults(func=_doctor)
+
+    status = subcommands.add_parser("status", help="Show status for a planned task run")
+    status.add_argument("run_dir", type=Path)
+    status.set_defaults(func=_status)
+
+    schema = subcommands.add_parser("schema", help="Export public JSON Schemas")
+    schema.add_argument("target", choices=["packet", "batch", "task-contract"])
+    schema.add_argument("--format", default="jsonschema", choices=["jsonschema"])
+    schema.add_argument("-o", "--output", type=Path)
+    schema.set_defaults(func=_schema)
+
+    adapter = subcommands.add_parser("adapter", help="Optional provider-neutral runtime adapters")
+    adapter_subcommands = adapter.add_subparsers(dest="adapter_command", required=True)
+    adapter_list = adapter_subcommands.add_parser("list", help="List available adapters")
+    adapter_list.set_defaults(func=_adapter_list)
+    adapter_run = adapter_subcommands.add_parser("run", help="Run an adapter against a task run")
+    adapter_run.add_argument("name")
+    adapter_run.add_argument("run_dir", type=Path)
+    adapter_run.add_argument("--dry-run", action="store_true")
+    adapter_run.set_defaults(func=_adapter_run)
 
     validate_packet = subcommands.add_parser("validate-packet", help="Validate a research packet")
     validate_packet.add_argument("path", type=Path)
@@ -62,7 +90,16 @@ def _build_parser() -> argparse.ArgumentParser:
     task_plan.add_argument("--output-format")
     task_plan.add_argument("--out", type=Path, default=None)
     task_plan.add_argument("--root", type=Path, default=Path.cwd())
+    task_plan.add_argument("--force", action="store_true")
+    task_plan.add_argument("--no-overwrite", action="store_true")
+    task_plan.add_argument("--run-id")
     task_plan.set_defaults(func=_task_plan)
+
+    task_mark = task_subcommands.add_parser("mark", help="Update task lifecycle status")
+    task_mark.add_argument("status")
+    task_mark.add_argument("run_dir", type=Path)
+    task_mark.add_argument("--reason")
+    task_mark.set_defaults(func=_task_mark)
 
     batch = subcommands.add_parser("batch", help="Batch planning commands")
     batch_subcommands = batch.add_subparsers(dest="batch_command", required=True)
@@ -72,11 +109,22 @@ def _build_parser() -> argparse.ArgumentParser:
     batch_plan.add_argument("--root", type=Path, default=Path.cwd())
     batch_plan.set_defaults(func=_batch_plan)
 
+    batch_status = batch_subcommands.add_parser("status", help="Show batch run status")
+    batch_status.add_argument("batch_dir", type=Path)
+    batch_status.set_defaults(func=_batch_status)
+
+    batch_resume = batch_subcommands.add_parser("resume", help="List next batch tasks to run")
+    batch_resume.add_argument("batch_dir", type=Path)
+    batch_resume.set_defaults(func=_batch_resume)
+
     install_parser = subcommands.add_parser("install", help="Install slash commands and skills")
     install_parser.add_argument("--target", choices=sorted(INSTALL_TARGETS), default="all")
     install_parser.add_argument("--project-root", type=Path)
     install_parser.add_argument("--source-root", type=Path)
     install_parser.add_argument("--home", type=Path, default=Path.home())
+    install_parser.add_argument("--dry-run", action="store_true")
+    install_parser.add_argument("--backup", action="store_true")
+    install_parser.add_argument("--force", action="store_true")
     install_parser.set_defaults(func=_install)
     return parser
 
@@ -99,6 +147,36 @@ def _doctor(_args: argparse.Namespace) -> int:
     writable = _writable(output_root)
     print(f"{'OK' if writable else 'WARN'} writable outputs: {output_root}")
     return 1 if failed else 0
+
+
+def _status(args: argparse.Namespace) -> int:
+    print(show_task_status(args.run_dir))
+    return 0
+
+
+def _schema(args: argparse.Namespace) -> int:
+    payload = export_schema(args.target, format=args.format)
+    if args.output:
+        args.output.write_text(payload, encoding="utf-8")
+        print(f"Wrote {args.output}")
+    else:
+        print(payload, end="")
+    return 0
+
+
+def _adapter_list(_args: argparse.Namespace) -> int:
+    for name in list_adapters():
+        print(name)
+    return 0
+
+
+def _adapter_run(args: argparse.Namespace) -> int:
+    adapter = get_adapter(args.name)
+    result = adapter.run(args.run_dir, dry_run=bool(args.dry_run))
+    print(result.message)
+    if result.artifact_path:
+        print(f"Wrote {result.artifact_path}")
+    return 0
 
 
 def _validate_packet(args: argparse.Namespace) -> int:
@@ -124,6 +202,8 @@ def _new_domain(args: argparse.Namespace) -> int:
 
 
 def _task_plan(args: argparse.Namespace) -> int:
+    if args.force and args.no_overwrite:
+        raise ValueError("--force and --no-overwrite are mutually exclusive")
     task_request = TaskRequest(
         request=args.request,
         domain=args.domain,
@@ -136,9 +216,23 @@ def _task_plan(args: argparse.Namespace) -> int:
         output_format=args.output_format,
     )
     output_dir = args.out or (Path.cwd() / "outputs" / "runs" / "task-plan")
-    planned = plan_task(task_request, output_dir, root=args.root)
+    planned = plan_task(
+        task_request,
+        output_dir,
+        root=args.root,
+        no_overwrite=bool(args.no_overwrite),
+        run_id=args.run_id,
+    )
     print(f"Planned {planned.task_id}")
-    print(f"Prompt bundle: {output_dir / 'prompt-bundle.md'}")
+    print(f"Prompt bundle: {planned.output_dir / 'prompt-bundle.md'}")
+    return 0
+
+
+def _task_mark(args: argparse.Namespace) -> int:
+    view = mark_task_status(args.run_dir, args.status, reason=args.reason)
+    print(f"Marked {view.task_id} -> {view.status}")
+    if view.reason:
+        print(f"reason: {view.reason}")
     return 0
 
 
@@ -150,16 +244,30 @@ def _batch_plan(args: argparse.Namespace) -> int:
     return 0
 
 
+def _batch_status(args: argparse.Namespace) -> int:
+    print(show_batch_status(args.batch_dir))
+    return 0
+
+
+def _batch_resume(args: argparse.Namespace) -> int:
+    print(format_batch_resume(args.batch_dir))
+    return 0
+
+
 def _install(args: argparse.Namespace) -> int:
     result = install(
         target=args.target,
         home=args.home,
         project_root=args.project_root,
         source_root=args.source_root,
+        dry_run=bool(args.dry_run),
+        backup=bool(args.backup),
+        force=bool(args.force),
     )
+    prefix = "[dry-run] would write" if args.dry_run else "Wrote"
     print(f"RDW_ROOT={result.root}")
     for path in result.written:
-        print(f"Wrote {path}")
+        print(f"{prefix} {path}")
     return 0
 
 
