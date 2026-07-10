@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.0 - 2026-07-09
+
+- Added lifecycle, schema-export, and adapter commands to the packaged CLI.
+- Added explicit output-format contracts and golden prompt coverage.
+
 ## 0.1.0 - 2026-06-26
 
 - Prepared RDW as a GitHub + PyPI product with an installable `rdw` CLI.

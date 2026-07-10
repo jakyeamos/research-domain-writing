@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0 - 2026-07-09
+
+- Added lifecycle commands for task and batch status, marking, and resume flows.
+- Added JSON Schema export for packet, batch, and task contracts.
+- Added provider-neutral adapter stubs and optional adapter extras.
+- Added explicit output-format contracts to task planning and prompt bundles.
+- Added golden contract coverage and CI quality and wheel-smoke workflows.
+
 ## 0.1.0 - 2026-06-26
 
 - Prepared RDW as a GitHub + PyPI product with an installable `rdw` CLI.

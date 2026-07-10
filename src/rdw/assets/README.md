@@ -2,7 +2,7 @@
 
 Research Domain Writing (RDW) is an agent-first harness for research-grounded writing. It validates structured research packets, plans repeatable writing runs, emits exact prompt bundles, and keeps outputs auditable.
 
-The `rdw` CLI in v0.1 is not an LLM runner. It does not browse, call model APIs, or draft autonomously. Your agent performs the research and writing by following the emitted prompts.
+The `rdw` CLI in v0.2 is not an LLM runner. It does not browse, call model APIs, or draft autonomously. Your agent performs the research and writing by following the emitted prompts.
 
 ## Install
 
@@ -120,7 +120,7 @@ RDW separates knowledge work from style work:
 
 Packets live in `knowledge/<domain>/*.yaml` and must include source notes, confidence, timestamps, and domain-specific extension data when required.
 
-See [docs/LIMITATIONS.md](docs/LIMITATIONS.md) for v0.1 boundaries.
+See [docs/LIMITATIONS.md](docs/LIMITATIONS.md) for current boundaries.
 
 ## Validation
 
