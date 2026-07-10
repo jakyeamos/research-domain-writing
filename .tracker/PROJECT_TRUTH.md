@@ -4,11 +4,11 @@ projectName: Research Domain Writing
 summary: Installable RDW release candidate with an agent-first CLI harness, prompts, domain packs, packet/batch validation, packaged assets, examples, skill distribution, release governance, and explicit task output-format contracts.
 healthScore: 90
 statusLabel: release_candidate
-nextStep: Run scripts/publish-pypi-wizard.sh with a PyPI account token to complete the v0.1.0 PyPI upload.
+nextStep: Merge the v0.2.0 release branch, tag v0.2.0, and run scripts/publish-pypi-wizard.sh with a PyPI account token.
 blockers:
   - Slash-command behavior should still receive a manual post-install smoke in each target agent before broader announcement.
   - Packet merge/conflict resolution for concurrent updates is a post-0.1 enhancement.
-lastUpdated: 2026-07-06
+lastUpdated: 2026-07-09
 tags: [aios, writing, research, skill, python, cli, pypi]
 areas: [engineering, writing]
 goals: []
@@ -16,7 +16,7 @@ repoType: tool
 sourceOfTruth: mixed
 primaryLanguage: Python
 activeBranch: feat/v0.2-hardening
-lastCommitDate: 2026-07-06
+lastCommitDate: 2026-07-09
 quality:
   lint: pass
   types: pass
@@ -71,21 +71,10 @@ The repo now has a real `rdw` Python CLI that acts as an agent harness: it valid
 
 ## Next Step
 
-Complete the public v0.1 release flow by running `scripts/publish-pypi-wizard.sh`, publishing to PyPI with a valid account token, then running an installed `rdw doctor` smoke from PyPI. The README now points readers at the PyPI package page while keeping source-checkout installation documented separately.
+Complete the public v0.2 release flow by merging the release branch, tagging `v0.2.0`, publishing to PyPI with a valid account token, then running an installed `rdw doctor` smoke from PyPI. The README and packaged assets now identify the v0.2 release.
 
 ## Quality Ladder Notes
 
-Checks run on 2026-07-04:
-
-| Step | Status | Evidence |
-| --- | --- | --- |
-| Lint | Pass | `uv run ruff check .` passed. |
-| Format | Pass | `uv run ruff format --check .` passed. |
-| Type check | Pass | `uv run basedpyright src tests scripts` passed with 0 errors and 0 warnings. |
-| Tests | Pass | `uv run pytest -q` passed with 12 tests. |
-| Build | Pass | `uv build` built sdist and wheel. |
-| Wheel smoke | Pass | Built wheel installed in a temp venv; installed `rdw doctor`, `rdw task plan`, `rdw batch plan`, and packaged-asset `rdw install --target all` passed. |
-| Dead code | Unknown | No Vulture or equivalent dead-code command is configured. |
 
 Additional check on 2026-07-04: `uv run ruff check .`, `uv run basedpyright`,
 and `uv run pytest` passed after the README install documentation update.
