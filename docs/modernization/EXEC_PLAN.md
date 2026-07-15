@@ -1,9 +1,9 @@
 # RDW Modernization Execution Plan
 
-- Status: M6 final review in progress
+- Status: M6 complete; bounded batch executor slice implemented
 - Baseline: `main` / `9860d38` / `v0.2.0`
 - Owner: one lead implementation agent; specialist review passes are bounded and read-heavy
-- Application-code implementation: M0–M5 complete; M6 remediation in progress
+- Application-code implementation: M0–M6 plus ticket #10 batch executor slice complete
 
 ## Chosen strategy
 
@@ -61,7 +61,13 @@ budget on re-establishing behavior instead of improving the real risks.
 | M3 | Safe lifecycle state and batch projections | M1, M2 | complete |
 | M4 | Atomic installer and fresh-consumer parity | M1, M2, M3 | complete |
 | M5 | Release/CI hardening and cleanup | M1–M4 | complete |
-| M6 | Adversarial review, cutover, and rollback-ready release | M5 | in progress |
+| M6 | Adversarial review, cutover, and rollback-ready release | M5 | complete; release pending |
+
+The first post-ADR-004 implementation slice is ticket #10. It adds a serial,
+filesystem-first fixture executor without adding providers, browsing, a
+database, parallel workers, packet auto-merge, or batch rollback. Its proof
+surface is `tests/test_batch_execution.py` plus the existing lifecycle,
+package, wheel, and full-suite checks.
 
 ## M0 — Establish the protected modernization baseline
 

@@ -7,6 +7,7 @@ from pathlib import Path
 
 from rdw import __version__
 from rdw.adapters import get_adapter, list_adapters
+from rdw.batch_execution import execute_batch, request_batch_cancel, request_batch_pause
 from rdw.domain import create_domain
 from rdw.execution import execute_fixture
 from rdw.install import INSTALL_TARGETS, install
@@ -136,7 +137,7 @@ def _build_parser() -> argparse.ArgumentParser:
     task_execute.add_argument("--json", dest="json_output", action="store_true")
     task_execute.set_defaults(func=_task_execute)
 
-    batch = subcommands.add_parser("batch", help="Batch planning commands")
+    batch = subcommands.add_parser("batch", help="Batch planning and execution commands")
     batch_subcommands = batch.add_subparsers(dest="batch_command", required=True)
     batch_plan = batch_subcommands.add_parser("plan", help="Plan a batch file")
     batch_plan.add_argument("path", type=Path)
@@ -154,6 +155,28 @@ def _build_parser() -> argparse.ArgumentParser:
     batch_resume.add_argument("batch_dir", type=Path)
     batch_resume.add_argument("--json", dest="json_output", action="store_true")
     batch_resume.set_defaults(func=_batch_resume)
+
+    batch_execute = batch_subcommands.add_parser(
+        "execute", help="Execute a serial filesystem-first fixture batch"
+    )
+    batch_execute.add_argument("batch_dir", type=Path)
+    batch_execute.add_argument("--fixture-map", required=True, type=Path)
+    batch_execute.add_argument("--root", type=Path, default=Path.cwd())
+    batch_execute.add_argument("--resume", action="store_true")
+    batch_execute.add_argument("--reclaim-lease", action="store_true")
+    batch_execute.add_argument("--dry-run", action="store_true")
+    batch_execute.add_argument("--json", dest="json_output", action="store_true")
+    batch_execute.set_defaults(func=_batch_execute)
+
+    batch_pause = batch_subcommands.add_parser("pause", help="Request cooperative batch pause")
+    batch_pause.add_argument("batch_dir", type=Path)
+    batch_pause.add_argument("--json", dest="json_output", action="store_true")
+    batch_pause.set_defaults(func=_batch_pause)
+
+    batch_cancel = batch_subcommands.add_parser("cancel", help="Request cooperative batch cancel")
+    batch_cancel.add_argument("batch_dir", type=Path)
+    batch_cancel.add_argument("--json", dest="json_output", action="store_true")
+    batch_cancel.set_defaults(func=_batch_cancel)
 
     install_parser = subcommands.add_parser("install", help="Install slash commands and skills")
     install_parser.add_argument("--target", choices=sorted(INSTALL_TARGETS), default="all")
@@ -353,6 +376,45 @@ def _batch_resume(args: argparse.Namespace) -> int:
         _emit_json({"tasks": batch_resume(args.batch_dir)})
     else:
         print(format_batch_resume(args.batch_dir))
+    return 0
+
+
+def _batch_execute(args: argparse.Namespace) -> int:
+    result = execute_batch(
+        args.batch_dir,
+        args.fixture_map,
+        root=args.root,
+        resume=bool(args.resume),
+        reclaim_lease=bool(args.reclaim_lease),
+        dry_run=bool(args.dry_run),
+    )
+    if args.json_output:
+        _emit_json({"ok": True, **result.as_dict()})
+    else:
+        print(f"Batch {result.batch_id}: {result.state}")
+        print(
+            f"completed={result.completed} needs_review={result.needs_review} "
+            f"failed={result.failed} cancelled={result.cancelled} "
+            f"attempts={result.total_attempts}"
+        )
+    return 0
+
+
+def _batch_pause(args: argparse.Namespace) -> int:
+    result = request_batch_pause(args.batch_dir)
+    if args.json_output:
+        _emit_json({"ok": True, **result.as_dict()})
+    else:
+        print(f"Batch {result.batch_id}: {result.state}")
+    return 0
+
+
+def _batch_cancel(args: argparse.Namespace) -> int:
+    result = request_batch_cancel(args.batch_dir)
+    if args.json_output:
+        _emit_json({"ok": True, **result.as_dict()})
+    else:
+        print(f"Batch {result.batch_id}: {result.state}")
     return 0
 
 

@@ -53,6 +53,7 @@ def execute_fixture(
     root: Path | None = None,
     resume: bool = False,
     dry_run: bool = False,
+    attempt_id: str | None = None,
 ) -> ExecutionResult:
     run_dir = run_dir.resolve()
     fixture_path = fixture_path.resolve()
@@ -61,7 +62,8 @@ def execute_fixture(
     current_status = load_task_status_view(run_dir).status
     _check_execution_status(current_status, resume=resume)
 
-    attempt_id = _new_attempt_id()
+    attempt_id = attempt_id or _new_attempt_id()
+    _validate_attempt_id(attempt_id)
     idempotency_key = _idempotency_key(contract)
     request = AdapterRequest(
         run_dir=run_dir,
@@ -349,3 +351,8 @@ def _idempotency_key(contract: YamlMapping) -> str:
 def _new_attempt_id() -> str:
     timestamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     return f"attempt-{timestamp}-{uuid.uuid4().hex[:8]}"
+
+
+def _validate_attempt_id(attempt_id: str) -> None:
+    if not attempt_id or attempt_id in {".", ".."} or "/" in attempt_id or "\\" in attempt_id:
+        raise ValueError("attempt_id must be a safe path component")

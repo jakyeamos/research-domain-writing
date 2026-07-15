@@ -52,11 +52,14 @@ message. Human output remains short; `--json` returns the complete diagnostic
 payload. Strict mode preserves the current grounding checks and adds no silent
 fallbacks.
 
-### Plan and resume a batch
+### Plan and execute a bounded batch
 
 Batch planning validates the input, resolves each task through the same single
 task use case, writes planned task folders, and records a batch event. Resume
-and status read projections from task state/events without mutating files.
+and status read projections from task state/events without mutating files. The
+first executor is serial and fixture-backed: it owns a one-writer lease,
+immutable attempt receipts, bounded retry/backoff, cooperative controls, and
+explicit unknown-attempt recovery without adding a provider SDK or database.
 
 ### Advance a task
 
@@ -89,7 +92,7 @@ rdw validate-packet ... [--json]
 rdw validate-batch ... [--json]
 rdw schema packet|batch|task-contract
 rdw task plan|mark|status
-rdw batch plan|status|resume
+rdw batch plan|execute|status|resume|pause|cancel
 rdw adapter list|run
 rdw install
 rdw new-domain

@@ -83,7 +83,39 @@ rdw batch plan examples/batch-tasks.yaml --out .rdw-runs/demo-batch
 
 This validates the batch file, expands each task into a deterministic task folder, and writes `summary.yaml` plus `batch-log.jsonl` with `planned` statuses.
 
-### 4. Inspect and advance a run
+For deterministic integration checks, a serial fixture-backed executor can run
+the planned tasks without a model, browser, provider SDK, or database. Create a
+fixture map covering every task:
+
+```yaml
+batch_id: demo-batch-001
+execution:
+  max_concurrency: 1
+  max_attempts: 2
+  retry_backoff_seconds: [5, 30]
+  failure_policy: continue
+fixtures:
+  batch-demo-guard-summary: examples/fixtures/basketball-vertical-slice.yaml
+```
+
+Then run the additive executor controls:
+
+```bash
+rdw batch execute .rdw-runs/demo-batch \
+  --fixture-map path/to/fixture-map.yaml --root .
+rdw batch pause .rdw-runs/demo-batch
+rdw batch cancel .rdw-runs/demo-batch
+rdw batch execute .rdw-runs/demo-batch \
+  --fixture-map path/to/fixture-map.yaml --root . --resume
+```
+
+The executor is intentionally serial and filesystem-first. Receipts remain
+immutable, retries keep the task idempotency key but receive new attempt
+directories, completed tasks survive partial failure or cancellation, and an
+unknown attempt requires explicit reconciliation. `rdw batch resume` remains a
+read-only next-task view.
+
+### 5. Inspect and advance a run
 
 Lifecycle state is explicit and ordered:
 
@@ -107,6 +139,9 @@ rdw new-domain finance "Finance Writing"
 rdw task plan --request "explain idempotency keys" --domain technical --out .rdw-runs/idempotency
 rdw batch plan examples/batch-tasks.yaml --out .rdw-runs/demo-batch
 rdw task execute .rdw-runs/demo-task --fixture examples/fixtures/basketball-vertical-slice.yaml --root .
+rdw batch execute .rdw-runs/demo-batch --fixture-map path/to/fixture-map.yaml --root .
+rdw batch pause .rdw-runs/demo-batch
+rdw batch cancel .rdw-runs/demo-batch
 rdw install --target claude
 rdw install --target cursor
 rdw install --target agents

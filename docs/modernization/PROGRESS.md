@@ -3,10 +3,10 @@
 - Updated: 2026-07-15
 - Baseline: `main` / `9860d38` / `v0.2.0`
 - Branch: `codex/rdw-gpt56-modernization`
-- Current phase: M6 complete; release-ready pending review/merge
-- Implementation phase: in progress
-- Application-code changes: M0–M6 complete; merge/tag/publish remain separate
-  release decisions
+- Current phase: M6 complete; bounded batch executor slice complete; release-ready pending review/merge
+- Implementation phase: batch executor ticket #10 complete
+- Application-code changes: M0–M6 plus the serial batch executor slice complete;
+  merge/tag/publish remain separate release decisions
 
 ## Completed
 
@@ -30,6 +30,11 @@
 - Built and exercised a fresh wheel through doctor, strict packet validation,
   packaged-resource batch validation/planning, task planning, schema export,
   lifecycle marking, and all-target installation.
+- Ticket #10: added the serial filesystem-first fixture batch executor with a
+  typed policy, one-writer lease, input-order dispatch, immutable receipt
+  attempts, bounded retry/backoff, event-ID replay projection, cooperative
+  pause/cancel, partial-success counts, and explicit unknown-attempt recovery.
+  Focused executor coverage is now 9 tests; the full suite is 61 tests.
 
 ## Current findings
 
@@ -44,12 +49,16 @@
 - Remaining product risk is operational rather than architectural: the final
   remote CI run and slash-command smoke in each target agent are still release
   boundary checks.
+- The executor remains intentionally fixture-backed. Provider adapters, live
+  research execution, parallel workers, cost accounting, hosted queues, and
+  packet auto-merge remain outside this slice.
 
 ## Next step
 
-The implementation and local adversarial checks are complete. A maintainer can
-now review this branch and decide whether to merge it. Tagging and publishing
-remain separate explicitly authorized release actions.
+The implementation and local adversarial checks for the bounded batch slice are
+complete. A maintainer can now review this branch and decide whether to merge
+it. Tagging and publishing remain separate explicitly authorized release
+actions.
 
 ## Blockers and boundaries
 

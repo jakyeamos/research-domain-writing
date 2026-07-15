@@ -37,6 +37,7 @@ class TaskStatusView:
     updated_at: str | None
     next_step: str | None
     reason: str | None
+    executor_state: str | None
 
     def as_dict(self) -> dict[str, object]:
         return {
@@ -47,6 +48,7 @@ class TaskStatusView:
             "updated_at": self.updated_at,
             "next_step": self.next_step,
             "reason": self.reason,
+            "executor_state": self.executor_state,
         }
 
 
@@ -59,7 +61,9 @@ class BatchStatusView:
     completed: int
     needs_review: int
     failed: int
+    cancelled: int
     tasks: list[YamlMapping]
+    executor: YamlMapping | None
 
     def as_dict(self) -> dict[str, object]:
         return {
@@ -70,7 +74,9 @@ class BatchStatusView:
             "completed": self.completed,
             "needs_review": self.needs_review,
             "failed": self.failed,
+            "cancelled": self.cancelled,
             "tasks": self.tasks,
+            "executor": self.executor,
         }
 
 
@@ -147,6 +153,7 @@ def load_task_status_view(run_dir: Path) -> TaskStatusView:
         updated_at=_optional_string(data.get("updated_at")),
         next_step=_optional_string(data.get("next_step")),
         reason=_optional_string(data.get("reason")),
+        executor_state=_executor_state(data.get("executor")),
     )
 
 
@@ -159,6 +166,7 @@ def show_batch_status(batch_dir: Path) -> str:
         f"completed: {view.completed}",
         f"needs_review: {view.needs_review}",
         f"failed: {view.failed}",
+        f"cancelled: {view.cancelled}",
         "",
         "tasks:",
     ]
@@ -166,7 +174,9 @@ def show_batch_status(batch_dir: Path) -> str:
         task_id = str(row.get("task_id", ""))
         status = str(row.get("status", "unknown"))
         domain = str(row.get("domain", ""))
-        lines.append(f"  - {task_id}: {status} ({domain})")
+        executor_state = row.get("executor_state")
+        state_suffix = f" / {executor_state}" if isinstance(executor_state, str) else ""
+        lines.append(f"  - {task_id}: {status}{state_suffix} ({domain})")
     return "\n".join(lines)
 
 
@@ -179,6 +189,7 @@ def load_batch_status_view(batch_dir: Path) -> BatchStatusView:
     tasks = summary.get("tasks")
     task_rows = [row for row in tasks if isinstance(row, dict)] if isinstance(tasks, list) else []
     _refresh_batch_counts(summary, task_rows, batch_dir, persist=False)
+    executor = summary.get("executor")
     return BatchStatusView(
         batch_dir=batch_dir,
         batch_id=str(summary.get("batch_id") or batch_dir.name),
@@ -187,7 +198,9 @@ def load_batch_status_view(batch_dir: Path) -> BatchStatusView:
         completed=_int_value(summary.get("completed"), 0),
         needs_review=_int_value(summary.get("needs_review"), 0),
         failed=_int_value(summary.get("failed"), 0),
+        cancelled=_int_value(summary.get("cancelled"), 0),
         tasks=task_rows,
+        executor=executor if isinstance(executor, dict) else None,
     )
 
 
@@ -196,13 +209,15 @@ def batch_resume(batch_dir: Path) -> list[YamlMapping]:
     pending: list[YamlMapping] = []
     for row in view.tasks:
         status = str(row.get("status") or "planned")
-        if status in TERMINAL_TASK_STATUSES:
+        executor_state = str(row.get("executor_state") or "")
+        if status in TERMINAL_TASK_STATUSES or executor_state in {"succeeded", "cancelled"}:
             continue
         task_id = str(row.get("task_id") or "")
         pending.append(
             {
                 "task_id": task_id,
                 "status": status,
+                "executor_state": executor_state or None,
                 "domain": row.get("domain"),
                 "prompt_bundle": row.get("prompt_bundle"),
                 "run_dir": str(batch_dir / "tasks" / task_id),
@@ -230,6 +245,11 @@ def _refresh_batch_counts(
     *,
     persist: bool,
 ) -> None:
+    if isinstance(summary.get("executor"), dict):
+        _refresh_executor_counts(summary, task_rows, batch_dir)
+        if persist:
+            atomic_write_text(batch_dir / "summary.yaml", dump_yaml(summary))
+        return
     completed = 0
     needs_review = 0
     failed = 0
@@ -256,6 +276,49 @@ def _refresh_batch_counts(
         summary["status"] = "in_progress"
     if persist:
         atomic_write_text(batch_dir / "summary.yaml", dump_yaml(summary))
+
+
+def _refresh_executor_counts(
+    summary: YamlMapping,
+    task_rows: list[YamlMapping],
+    batch_dir: Path,
+) -> None:
+    completed = 0
+    needs_review = 0
+    failed = 0
+    cancelled = 0
+    pending = 0
+    reconcile_required = 0
+    for row in task_rows:
+        task_id = str(row.get("task_id") or "")
+        task_dir = batch_dir / "tasks" / task_id
+        status = str(row.get("status") or "planned")
+        if task_dir.is_dir() and (task_dir / "status.json").exists():
+            status = load_task_status_view(task_dir).status
+            row["status"] = status
+        executor_state = row.get("executor_state")
+        if not isinstance(executor_state, str):
+            executor_state = "succeeded" if status == "final-done" else "queued"
+            row["executor_state"] = executor_state
+        if executor_state == "succeeded":
+            completed += 1
+        elif executor_state == "needs-review":
+            needs_review += 1
+        elif executor_state == "failed":
+            failed += 1
+        elif executor_state == "cancelled":
+            cancelled += 1
+        elif executor_state == "reconcile-required":
+            reconcile_required += 1
+        else:
+            pending += 1
+    summary["completed"] = completed
+    summary["needs_review"] = needs_review
+    summary["failed"] = failed
+    summary["cancelled"] = cancelled
+    summary["pending"] = pending
+    summary["reconcile_required"] = reconcile_required
+    summary["task_count"] = len(task_rows)
 
 
 def _sync_batch_task(batch_root: Path, task_id: str, status: str, *, reason: str | None) -> None:
@@ -345,6 +408,12 @@ def _now_iso() -> str:
 
 def _optional_string(value: YamlValue | None) -> str | None:
     return value if isinstance(value, str) and value else None
+
+
+def _executor_state(value: YamlValue | None) -> str | None:
+    if isinstance(value, dict):
+        return _optional_string(value.get("state"))
+    return None
 
 
 def _int_value(value: YamlValue | None, default: int) -> int:

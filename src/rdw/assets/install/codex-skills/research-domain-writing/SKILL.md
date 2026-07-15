@@ -14,4 +14,6 @@ Invoke when the user runs `/rdw` or asks for grounded domain copy.
 1. Read `SKILL.md` + `prompts/pipeline-orchestrator.md` under root.
 2. Agent performs research; save `knowledge/<domain>/*.yaml`.
 3. Copywriter → QA → humanizer; no new facts in humanizer.
-4. For batch, use `rdw batch plan` to create task bundles, then follow `prompts/batch-runner.md`.
+4. For batch, use `rdw batch plan` to create task bundles, then follow
+   `prompts/batch-runner.md`. The optional `rdw batch execute --fixture-map`
+   command is a deterministic integration seam, not a model or research runner.

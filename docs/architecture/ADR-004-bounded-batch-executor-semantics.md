@@ -417,23 +417,23 @@ filesystem artifacts are not assumed reversible.
 
 ## Event vocabulary and idempotency
 
-The first implementation uses these event types:
+The implementation uses compact `batch-state` and `task-state` event envelopes
+with the following semantic states. Keeping the envelope small preserves the
+legacy batch-log fields while making the executor reducer deterministic.
 
 | Event | Meaning |
 | --- | --- |
-| `batch-execution-started` | New execution acquired the lease. |
-| `batch-resumed` | Paused or recoverable execution resumed explicitly. |
-| `batch-pause-requested` / `batch-paused` | Pause intent and safe pause boundary. |
-| `batch-cancel-requested` / `batch-cancelled` | Cancellation intent and acknowledged terminal state. |
-| `task-leased` / `task-attempt-started` | Task and external attempt ownership. |
-| `task-attempt-succeeded` | Receipt, artifacts, QA gates, and lifecycle passed. |
-| `task-retry-scheduled` | Retryable failure received a future retry time. |
-| `task-needs-review` | Task stopped at an evidence or human gate. |
-| `task-failed` / `task-cancelled` | Terminal task outcome. |
-| `attempt-reconcile-required` | Unknown attempt outcome blocks automatic retry. |
-| `lease-reclaimed` | Operator explicitly reclaimed an expired lease. |
-| `batch-completed` / `batch-completed-with-failures` | Queue drained with clean or partial outcome. |
-| `batch-recovery-required` | Safe execution cannot continue without reconciliation. |
+| `batch-state: running` | New execution acquired the lease. |
+| `batch-state: paused` | Pause reached a safe boundary. |
+| `batch-state: cancel-requested` / `cancelled` | Cancellation intent and safe terminal state. |
+| `task-state: leased` / `running` | Task and external attempt ownership. |
+| `task-state: succeeded` | Receipt, artifacts, QA gates, and lifecycle passed. |
+| `task-state: retry-wait` | Retryable failure received a future retry time. |
+| `task-state: needs-review` | Task stopped at an evidence or human gate. |
+| `task-state: failed` / `cancelled` | Terminal task outcome. |
+| `task-state: reconcile-required` | Unknown attempt outcome blocks automatic retry. |
+| `batch-state: completed` / `completed-with-failures` | Queue drained with clean or partial outcome. |
+| `batch-state: recovery-required` | Safe execution cannot continue without reconciliation. |
 
 `event_id` is computed from batch ID, execution ID, command ID, task ID,
 attempt ID, and event type. A duplicate command or crash retry therefore maps
