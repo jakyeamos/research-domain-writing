@@ -1,28 +1,31 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: Installable RDW release candidate with an agent-first CLI harness, prompts, domain packs, packet/batch validation, packaged assets, examples, skill distribution, release governance, and explicit task output-format contracts.
-healthScore: 90
-statusLabel: release_candidate
-nextStep: Merge the v0.2.0 release branch, tag v0.2.0, and run scripts/publish-pypi-wizard.sh with a PyPI account token.
+summary: RDW v0.2.0 is a healthy installable agent-first CLI/package with green code checks, but modernization planning found stale lock, release, and source/package truth surfaces.
+healthScore: 82
+statusLabel: modernization_baseline
+nextStep: Review docs/modernization/TARGET.md and EXEC_PLAN.md, then begin the protected M0 modernization slice.
 blockers:
-  - Slash-command behavior should still receive a manual post-install smoke in each target agent before broader announcement.
-  - Packet merge/conflict resolution for concurrent updates is a post-0.1 enhancement.
-lastUpdated: 2026-07-09
+  - Current release surfaces are not publish-ready until uv.lock, packaged release metadata, and the PyPI wizard version are aligned.
+  - Slash-command behavior still needs a manual post-install smoke in each target agent before broader announcement.
+lastUpdated: 2026-07-15
 tags: [aios, writing, research, skill, python, cli, pypi]
 areas: [engineering, writing]
 goals: []
 repoType: tool
 sourceOfTruth: mixed
 primaryLanguage: Python
-activeBranch: feat/v0.2-hardening
+activeBranch: main
 lastCommitDate: 2026-07-09
 quality:
   lint: pass
   types: pass
   tests: pass
-  deadCode: unknown
-  structure: pass
+  deadCode: pass
+  structure: warning
+  lock: fail
+  package: warning
+  shell: pass
 canonicalCommands:
   install: uv sync
   dev: unknown
@@ -31,7 +34,9 @@ canonicalCommands:
   typecheck: uv run basedpyright src tests scripts
   test: uv run pytest -q
   build: uv build
-  deadcode: unknown
+  deadcode: vulture src scripts tests --min-confidence 70
+  lockcheck: uv lock --check
+  shellcheck: shellcheck scripts/*.sh
 agentExpectationsVersion: 1
 ---
 
@@ -39,7 +44,12 @@ agentExpectationsVersion: 1
 
 Research Domain Writing is a standalone, installable, file-based pipeline for turning research into grounded domain copy, QA output, and a human style pass. It separates research, domain copywriting, domain QA, and humanizer/blader responsibilities so style transformation does not invent domain knowledge.
 
-The repo now has a real `rdw` Python CLI that acts as an agent harness: it validates packets and batches, creates deterministic task/batch planning folders with explicit output-format contracts, emits prompt bundles, installs agent skills/templates, and packages the curated assets for wheel installs. The CLI intentionally does not call LLM APIs, browse, research, or draft autonomously in v0.1.
+The v0.2.0 repo has a real `rdw` Python CLI that validates packets and batches, creates deterministic task/batch planning folders with explicit output-format contracts, emits prompt bundles, installs agent skills/templates, exports schemas, records lifecycle state, and packages curated assets for wheel installs. The CLI intentionally does not call LLM APIs, browse, research, or draft autonomously.
+
+The 2026-07-15 modernization baseline is green for lint, formatting, types,
+tests, build, CLI smoke, shellcheck, scoped dead-code, and isolated wheel use.
+The baseline also confirms stale lock/package/release metadata and lifecycle/
+contract duplication risks; these are captured in `docs/modernization/`.
 
 ## What Exists
 
@@ -59,6 +69,8 @@ The repo now has a real `rdw` Python CLI that acts as an agent harness: it valid
 - `scripts/publish-pypi-wizard.sh` for guided PyPI token capture, artifact rebuild, dry-run check, and confirmed publish.
 - `docs/LIMITATIONS.md` and `docs/FUTURE-AIOS-INTEGRATION.md` documenting v1 boundaries.
 - `RELEASE.md` and `CHANGELOG.md` for release governance.
+- `docs/modernization/AUDIT.md`, `TARGET.md`, `EXEC_PLAN.md`, and `PROGRESS.md`
+  for the proposed in-place modernization.
 
 ## What Does Not Exist Yet
 
@@ -67,25 +79,30 @@ The repo now has a real `rdw` Python CLI that acts as an agent harness: it valid
 - No mature legal, finance, or medicine domain packs.
 - Adapter extras are stubs; RDW does not call model APIs by default.
 - No diff-based regression tests on QA rules.
-- No dead-code scanner is configured.
+- No dedicated dead-code CI gate is configured; the scoped Vulture baseline is clean.
+- No canonical source/package asset parity gate exists yet.
 
 ## Next Step
 
-Complete the public v0.2 release flow by merging the release branch, tagging `v0.2.0`, publishing to PyPI with a valid account token, then running an installed `rdw doctor` smoke from PyPI. The README and packaged assets now identify the v0.2 release.
+Review the modernization target and execution plan. If accepted, create the
+protected implementation branch/worktree and begin M0. Do not publish or retag
+until the lockfile, package assets, release docs, and publish wizard are aligned.
 
 ## Quality Ladder Notes
 
+2026-07-15: Baseline passed `uv run ruff check .`, `uv run ruff format --check .`,
+`uv run basedpyright src tests scripts`, `uv run pytest -q` (36), the pre-CR
+coverage wrapper, `shellcheck scripts/*.sh`, scoped Vulture, `uv build`, and
+source/isolated-wheel CLI smoke. `uv lock --check` failed because the editable
+package entry still says 0.1.0.
 
-Additional check on 2026-07-04: `uv run ruff check .`, `uv run basedpyright`,
-and `uv run pytest` passed after the README install documentation update.
+2026-07-15: Root/package content directories match, but packaged RELEASE.md,
+root SKILL.md, packaged CHANGELOG.md, publish wizard version, and uv.lock drift
+from the v0.2.0 source release. See `docs/modernization/AUDIT.md`.
 
-2026-07-05: Added golden snapshot tests and GitHub Actions CI (lint/format/types/tests/build/wheel-smoke).
-
-2026-07-05 (feat/v0.2-hardening, Task 4): Extracted config-loading helpers from `src/rdw/validation.py` into a new shared module `src/rdw/config.py` (pure refactor, no behavior change). `config.py` exposes `config_root`, `load_config`, `known_domains`, `enabled_domains`, `output_formats`, `default_output_format`. Deleted the now-duplicated private helpers from `validation.py` (`_config_root`, `_load_config`, `_enabled_or_known_domains`, `_output_formats`) and their now-unused imports (`asset_path`, `load_yaml`, `normalize_yaml`). Renamed a local variable in `validate_batch` from `output_formats` to `known_formats` to avoid shadowing the imported `output_formats` function. `uv run ruff check .`, `uv run ruff format --check .`, and `uv run basedpyright src tests scripts` all pass clean; `uv run pytest -q` passed 17 tests (up from 12, includes new `test_config_domain_and_format_accessors`). Commit: `deb2e0c`.
-
-2026-07-06 (feat/v0.2-hardening): Added explicit `output_format` propagation to `rdw task plan` and inferred task contracts. Contracts now default from `config/output-formats.yaml`, preserve CLI/batch overrides, and warn on unknown formats. Golden task contracts and prompt bundles were updated to include `output_format: markdown`; regression coverage now includes default, explicit, and unknown output formats. `uv run ruff check .`, `uv run ruff format --check .`, `uv run basedpyright src tests scripts`, `uv run pytest -q` (19 tests), and `uv build` all passed. No dead-code scanner is configured. Commit: `1f34d99`.
-
-2026-07-07 (feat/v0.2-hardening, Wave 3): Lifecycle workflow (`rdw status`, `rdw task mark`, `rdw batch status/resume`), JSON Schema export (`rdw schema`), and provider-neutral adapter stubs (`rdw adapter`). Optional extras: `[openai]`, `[anthropic]`, `[local]`, `[adapters]`. `uv run ruff check .`, `uv run ruff format --check .`, `uv run basedpyright src tests scripts`, `uv run pytest -q` (36 tests), and `uv build` passed. No dead-code scanner is configured. Commit: `1b918e2`.
+2026-07-15: Modernization strategy is deep refactor in place. Preserve the
+no-LLM core boundary, CLI names, packet semantics, and run-artifact paths;
+replace duplicated contracts, unsafe lifecycle writes, and manual asset mirrors.
 
 ## Agent Notes
 
