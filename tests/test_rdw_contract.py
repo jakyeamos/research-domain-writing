@@ -82,6 +82,12 @@ def test_batch_validator_accepts_example() -> None:
     assert result.ok
 
 
+def test_batch_validator_falls_back_to_packaged_packets(tmp_path: Path) -> None:
+    result = validate_batch_file(ROOT / "examples" / "batch-tasks.yaml", root=tmp_path)
+
+    assert result.ok
+
+
 def test_batch_validator_rejects_duplicate_and_bad_depth(tmp_path: Path) -> None:
     batch = tmp_path / "batch.yaml"
     batch.write_text(
@@ -422,6 +428,77 @@ def test_install_refuses_real_dir_without_flags(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="real directory in the way"):
         install(target="claude", home=home, source_root=ROOT)
+
+
+def test_package_asset_install_stages_and_marks_managed_root(tmp_path: Path) -> None:
+    from rdw.resources import MANAGED_MARKER, copy_package_assets
+
+    destination = tmp_path / "skill"
+    copy_package_assets(destination)
+    assert (destination / MANAGED_MARKER).is_file()
+    assert (destination / "SKILL.md").is_file()
+
+    (destination / "user-edit.txt").write_text("temporary", encoding="utf-8")
+    copy_package_assets(destination)
+
+    assert not (destination / "user-edit.txt").exists()
+    assert (destination / "SKILL.md").is_file()
+
+
+def test_package_asset_install_protects_unmanaged_root_and_supports_backup(
+    tmp_path: Path,
+) -> None:
+    from rdw.resources import copy_package_assets
+
+    destination = tmp_path / "skill"
+    destination.mkdir()
+    (destination / "sentinel.txt").write_text("keep me", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="unmanaged install root"):
+        copy_package_assets(destination)
+
+    copy_package_assets(destination, backup=True)
+    backups = list(tmp_path.glob("skill.bak-*"))
+    assert backups and (backups[0] / "sentinel.txt").read_text(encoding="utf-8") == "keep me"
+
+
+def test_package_asset_install_rolls_back_interrupted_swap(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import rdw.resources as resources
+
+    destination = tmp_path / "skill"
+    resources.copy_package_assets(destination)
+    original_skill = (destination / "SKILL.md").read_bytes()
+    real_replace = resources.os.replace
+
+    def fail_stage_swap(source: str | Path, target: str | Path) -> None:
+        if Path(source).name.startswith(".skill.stage-"):
+            raise OSError("simulated interrupted swap")
+        real_replace(source, target)
+
+    monkeypatch.setattr(resources.os, "replace", fail_stage_swap)
+    with pytest.raises(OSError, match="simulated interrupted swap"):
+        resources.copy_package_assets(destination)
+
+    assert (destination / "SKILL.md").read_bytes() == original_skill
+    assert not list(tmp_path.glob(".skill.stage-*"))
+
+
+def test_install_protects_existing_managed_command_file(tmp_path: Path) -> None:
+    from rdw.install import install
+
+    home = tmp_path / "home"
+    command = home / ".claude" / "commands" / "rdw.md"
+    command.parent.mkdir(parents=True)
+    command.write_text("user command", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="managed file in the way"):
+        install(target="claude", home=home, source_root=ROOT)
+
+    install(target="claude", home=home, source_root=ROOT, backup=True)
+    backups = list(command.parent.glob("rdw.md.bak-*"))
+    assert backups and backups[0].read_text(encoding="utf-8") == "user command"
 
 
 def test_compat_validate_packet_script() -> None:

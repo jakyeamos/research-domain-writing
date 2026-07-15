@@ -11,10 +11,14 @@ YamlMapping = dict[str, YamlValue]
 
 
 def load_yaml(path: Path) -> YamlValue:
+    return load_yaml_text(path.read_text(encoding="utf-8"), source=str(path))
+
+
+def load_yaml_text(text: str, *, source: str = "<text>") -> YamlValue:
     try:
-        data: object = yaml.safe_load(path.read_text(encoding="utf-8"))
+        data: object = yaml.safe_load(text)
     except yaml.YAMLError as exc:
-        raise ValueError(f"invalid YAML in {path}: {exc}") from exc
+        raise ValueError(f"invalid YAML in {source}: {exc}") from exc
     return normalize_yaml(data)
 
 
@@ -22,6 +26,13 @@ def load_yaml_mapping(path: Path) -> YamlMapping:
     data = load_yaml(path)
     if not isinstance(data, dict):
         raise ValueError("root must be a mapping")
+    return data
+
+
+def load_yaml_mapping_text(text: str, *, source: str = "<text>") -> YamlMapping:
+    data = load_yaml_text(text, source=source)
+    if not isinstance(data, dict):
+        raise ValueError(f"root must be a mapping: {source}")
     return data
 
 

@@ -3,10 +3,12 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from datetime import datetime
+from importlib.resources.abc import Traversable
 from pathlib import Path
 
 from rdw.config import enabled_domains, known_domains, output_formats
-from rdw.yaml_io import YamlMapping, YamlValue, load_yaml_mapping
+from rdw.resources import asset_path
+from rdw.yaml_io import YamlMapping, YamlValue, load_yaml_mapping, load_yaml_mapping_text
 
 REQUIRED_PACKET_FIELDS = {
     "id",
@@ -283,22 +285,28 @@ def _domain_requires_extension(domain: str, entity_type: str, root: Path | None)
     if not domain or not entity_type:
         return False
     config_path = _domain_config_path(domain, root)
-    if config_path is None:
-        return False
     try:
-        config = load_yaml_mapping(config_path)
-    except ValueError:
+        if isinstance(config_path, Path):
+            config = load_yaml_mapping(config_path)
+        elif config_path is not None:
+            config = load_yaml_mapping_text(
+                config_path.read_text(encoding="utf-8"), source=str(config_path)
+            )
+        else:
+            return False
+    except (OSError, ValueError):
         return False
     schema = config.get("extensions_schema")
     return isinstance(schema, dict) and entity_type in schema
 
 
-def _domain_config_path(domain: str, root: Path | None) -> Path | None:
+def _domain_config_path(domain: str, root: Path | None) -> Path | Traversable | None:
     if root:
         candidate = root / "domains" / domain / "domain-config.yaml"
         if candidate.exists():
             return candidate
-    return None
+    candidate = asset_path("domains", domain, "domain-config.yaml")
+    return candidate if candidate.is_file() else None
 
 
 def _packet_exists(packet_id: str, domain: str, root: Path | None) -> bool:
@@ -310,12 +318,25 @@ def _packet_exists(packet_id: str, domain: str, root: Path | None) -> bool:
         if candidate.exists():
             return True
         knowledge_dir = root / "knowledge" / search_domain
-        if not knowledge_dir.exists():
+        if knowledge_dir.exists():
+            for packet_path in knowledge_dir.glob("*.yaml"):
+                try:
+                    packet = load_yaml_mapping(packet_path)
+                except ValueError:
+                    continue
+                if packet.get("id") == packet_id:
+                    return True
+        packaged_dir = asset_path("knowledge", search_domain)
+        if not packaged_dir.is_dir():
             continue
-        for packet_path in knowledge_dir.glob("*.yaml"):
+        for packet_path in packaged_dir.iterdir():
+            if not packet_path.name.endswith(".yaml"):
+                continue
             try:
-                packet = load_yaml_mapping(packet_path)
-            except ValueError:
+                packet = load_yaml_mapping_text(
+                    packet_path.read_text(encoding="utf-8"), source=str(packet_path)
+                )
+            except (OSError, ValueError):
                 continue
             if packet.get("id") == packet_id:
                 return True
