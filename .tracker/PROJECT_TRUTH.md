@@ -1,10 +1,10 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: RDW v0.2.0 modernization now includes the serial filesystem-first fixture batch executor with focused module boundaries, and ADR-005 selects basketball analytics as the first mature domain-pack target; the core remains offline and auditable.
+summary: RDW v0.2.0 modernization now includes the serial filesystem-first fixture batch executor and an executable basketball acceptance contract with source-grounded fixtures; the core remains offline and auditable.
 healthScore: 97
-statusLabel: domain_pack_selected
-nextStep: Implement ADR-005's basketball acceptance contract and source-grounded fixtures; review/merge draft PR #9, tagging, and publishing remain separate authorized release actions.
+statusLabel: acceptance_gates_implemented
+nextStep: Run the full RDW writing pipeline and human review for the basketball acceptance fixtures; keep example_only true until graduation gates pass, with release actions separate.
 blockers:
   - A fresh Codex task was not opened for slash smoke; the installed Codex/agents surface was verified by symlink and skill-content inspection.
   - The modernization branch is not a release action; merge, tagging, and publishing remain explicitly deferred.
@@ -104,6 +104,14 @@ projections; it defines ranking packet metadata, source/freshness rules,
 positive and negative acceptance fixtures, and objective QA gates. The current
 synthetic basketball pack remains `example_only` until those gates pass.
 
+Ticket #11 now implements an explicit `mature` basketball packet validator,
+source-grounded ranking/player/team-fit acceptance packets, positive and
+negative fixture coverage, and a deterministic claim-ledger validator exposed
+through `rdw validate-claim-ledger`. The generic validator remains compatible
+with the existing basketball demo, music packet, and technical packet; the
+new acceptance corpus remains example-only and does not add browsing, provider
+SDKs, ranking calculation, or model calls.
+
 Wayfinder ticket #10 is now implemented across the focused batch executor
 modules in `src/rdw/batch_execution.py`, `batch_models.py`, `batch_support.py`,
 `batch_events.py`, `batch_projection.py`, and `batch_leases.py`.
@@ -124,7 +132,8 @@ packet merge.
 - `domains/` and `config/` for domain-specific writing and source rules.
 - `knowledge/` examples and reusable packet patterns.
 - `examples/` with end-to-end sample tasks.
-- `rdw doctor`, `rdw validate-packet`, `rdw validate-batch`, `rdw new-domain`, `rdw task plan`, `rdw batch plan`, `rdw batch execute`, `rdw batch pause`, `rdw batch cancel`, and `rdw install`.
+- `rdw doctor`, `rdw validate-packet`, `rdw validate-claim-ledger`, `rdw validate-batch`, `rdw new-domain`, `rdw task plan`, `rdw batch plan`, `rdw batch execute`, `rdw batch pause`, `rdw batch cancel`, and `rdw install`.
+- Opt-in `rdw validate-packet --mature` basketball acceptance gates for metric semantics, ranking metadata, source freshness, role/sample context, confidence, and synthetic provenance.
 - Lifecycle commands: `rdw status`, `rdw task mark`, `rdw batch status`, and read-only `rdw batch resume`.
 - Schema export: `rdw schema packet|batch|task-contract --format jsonschema`.
 - Optional adapter stubs: `rdw adapter list`, `rdw adapter run <name> <run-dir>`.
@@ -156,6 +165,9 @@ packet merge.
   `src/rdw/`.
 - `src/rdw/adapters/fixture.py` plus `examples/fixtures/` as the deterministic
   external-runtime seam and success, uncertain, and rejected fixtures.
+- `examples/acceptance/basketball/` as the source-grounded mature-pack corpus:
+  one ranking surface, two player contexts, one team-fit context, QA ledgers,
+  and negative provenance/semantic fixtures.
 - `scripts/sync-package-assets.py --check|--sync` as the canonical root/package
   asset parity check and synchronization tool.
 - `--json` output for validation, task/batch planning, status, resume, and
@@ -175,9 +187,9 @@ packet merge.
 - No live/provider-backed autonomous batch execution runner yet. The bounded
   serial fixture executor exists for deterministic integration proof; real
   research, drafting, QA, and humanizer work remain agent-led.
-- No production-ready mature domain pack yet; ADR-005 selects basketball
-  analytics, but the current packet corpus is still synthetic/demo data and
-  remains gated by the acceptance rubric.
+- No production-ready mature domain pack yet; the basketball acceptance
+  contract and source-grounded fixtures exist, but `example_only` remains true
+  until the full writing pipeline and human graduation review pass.
 - No packet merge/conflict resolution implementation yet; ADR-002 defines the
   next filesystem-backed implementation contract.
 - No mature legal, finance, or medicine domain packs.
@@ -195,12 +207,11 @@ The modernization and release verification boundary are complete on
 `codex/rdw-gpt56-modernization`, and the provider-neutral adapter boundary, the
 first deterministic vertical slice, the packet-lineage decision, the
 evidence-aware diff-QA contract, the bounded batch-executor implementation,
-and the first mature-domain decision are recorded. The next map action is to
-implement the basketball acceptance contract from
-[ADR-005](docs/architecture/ADR-005-first-mature-domain-pack.md) and close
-[Choose and harden the first mature domain pack](https://github.com/jakyeamos/research-domain-writing/issues/8).
-Review/merge of draft PR #9, tagging, and publishing remain separate release
-actions; do not infer them from local or remote verification.
+the first mature-domain decision, and the basketball acceptance implementation
+are recorded. The next map action is the full RDW writing-pipeline and human
+graduation review for the source-grounded basketball fixtures. Review/merge of
+draft PR #9, tagging, and publishing remain separate release actions; do not
+infer them from local or remote verification.
 
 ## Quality Ladder Notes
 
@@ -271,6 +282,15 @@ mature-domain target. The contract defines ranking packet metadata, source and
 freshness rules, confidence boundaries, five positive and seven negative
 acceptance fixtures, and promotion gates; the existing synthetic pack remains
 example-only until the rubric passes.
+
+2026-07-15: Ticket #11 implementation committed in `c3e6449`: opt-in mature
+basketball packet validation, ranking metadata and metric semantics, a
+deterministic claim-ledger CLI, four source-grounded packets, five positive
+matrix cases, and five negative provenance/semantic cases. Full checks passed
+with 66 tests, Ruff, formatting, basedpyright, Vulture, shellcheck, lock
+verification, package parity, pre-CR, sdist/wheel build, and isolated-wheel
+mature packet plus claim-ledger smoke. `example_only` remains true pending
+full pipeline and human review.
 
 2026-07-15: M2 committed as `ab2ef1f`: explicit planner overrides now shape
 the resolved task contract, ambiguous routing emits warnings, malformed YAML
