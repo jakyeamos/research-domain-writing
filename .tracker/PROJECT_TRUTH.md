@@ -1,10 +1,10 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: RDW v0.2.0 modernization is implementation-complete and release-proofed on a feature branch; the next-phase provider-neutral, one-task adapter contract is accepted in ADR-001 while the deterministic core remains offline and auditable.
+summary: RDW v0.2.0 modernization is implementation-complete and release-proofed on a feature branch; the provider-neutral adapter contract and first deterministic research-to-QA vertical slice are now verified while the core remains offline and auditable.
 healthScore: 97
-statusLabel: adapter_contract_decided
-nextStep: Implement the deterministic fixture adapter and receipt validator described in ADR-001 through Wayfinder ticket #4; review/merge draft PR #9, tagging, and publishing remain separate authorized release actions.
+statusLabel: fixture_vertical_slice_verified
+nextStep: Design packet lineage and conflict resolution in Wayfinder ticket #5; review/merge draft PR #9, tagging, and publishing remain separate authorized release actions.
 blockers:
   - A fresh Codex task was not opened for slash smoke; the installed Codex/agents surface was verified by symlink and skill-content inspection.
   - The modernization branch is not a release action; merge, tagging, and publishing remain explicitly deferred.
@@ -68,6 +68,12 @@ a time, adapter-owned namespaced staging and receipts, core-owned validation,
 promotion, and lifecycle events, with network and credentials kept outside
 the deterministic core. No provider SDK has been added.
 
+The first executable slice now runs `rdw task execute --fixture` through the
+same boundary. It validates a research packet and QA result, promotes only
+validated artifacts, records every attempt under `adapter-runs/fixture/`, and
+uses the existing lifecycle for `final-done`, `qa-failed`, and auditable retry
+behavior. The fixture runtime is deterministic and is not a provider API.
+
 ## What Exists
 
 - `README.md` explaining the full pipeline, slash-command usage, batch workflow, domain packs, and limitations.
@@ -90,6 +96,10 @@ the deterministic core. No provider SDK has been added.
   for the proposed in-place modernization.
 - `docs/architecture/ADR-001-provider-neutral-adapter-contract.md` defining
   the provider-neutral one-task adapter receipt and trust boundary.
+- `src/rdw/execution.py` as the core fixture executor and receipt/artifact
+  validation gate.
+- `src/rdw/adapters/fixture.py` plus `examples/fixtures/` as the deterministic
+  external-runtime seam and success, uncertain, and rejected fixtures.
 - `scripts/sync-package-assets.py --check|--sync` as the canonical root/package
   asset parity check and synchronization tool.
 - `--json` output for validation, task/batch planning, status, resume, and
@@ -109,9 +119,9 @@ the deterministic core. No provider SDK has been added.
 - No autonomous batch execution runner; `rdw batch plan` validates and expands planned task bundles only.
 - No robust packet merge/conflict resolution for concurrent updates.
 - No mature legal, finance, or medicine domain packs.
-- No typed adapter request/receipt executor or artifact-promotion gate exists
-  yet; adapters remain stubs and RDW does not call model APIs by default. The
-  accepted contract is documented in ADR-001.
+- No real provider adapter or autonomous external-runtime integration exists;
+  the typed receipt/promotion path is currently exercised by the deterministic
+  fixture adapter only. RDW does not call model APIs by default.
 - No diff-based regression tests on QA rules.
 - No fresh Codex task slash smoke has been captured; the installed Codex/agents
   surface has been verified by symlink and skill-content inspection.
@@ -119,11 +129,11 @@ the deterministic core. No provider SDK has been added.
 ## Next Step
 
 The modernization and release verification boundary are complete on
-`codex/rdw-gpt56-modernization`, and the provider-neutral adapter boundary is
-decided. The next implementation slice is the deterministic fixture adapter
-and receipt validator in Wayfinder ticket #4. Review/merge of draft PR #9,
-tagging, and publishing remain separate release actions; do not infer them
-from local or remote verification.
+`codex/rdw-gpt56-modernization`, and the provider-neutral adapter boundary plus
+the first deterministic vertical slice are verified. The next Wayfinder slice
+is [Design packet lineage and conflict resolution](https://github.com/jakyeamos/research-domain-writing/issues/5).
+Review/merge of draft PR #9, tagging, and publishing remain separate release
+actions; do not infer them from local or remote verification.
 
 ## Quality Ladder Notes
 
@@ -147,6 +157,12 @@ provider-neutral, one-task artifact-first adapter contract. Adapters stage
 namespaced receipts and artifacts; the core validates, promotes, and owns
 lifecycle events. Provider SDKs, browsing, and autonomous batch execution
 remain deferred.
+
+2026-07-15: Ticket #4 implemented in `602d049`: the deterministic fixture
+ adapter and core executor validate receipt identity, hashes, packet and QA
+ gates, promote five run-local artifacts, preserve rejected/uncertain work,
+ and demonstrate `qa-failed` -> `--resume` -> `final-done`. Full checks passed
+ with 52 tests, package/build gates, and isolated wheel execution.
 
 2026-07-15: M2 committed as `ab2ef1f`: explicit planner overrides now shape
 the resolved task contract, ambiguous routing emits warnings, malformed YAML
