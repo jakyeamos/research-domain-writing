@@ -38,6 +38,10 @@ uv run rdw task mark research-done /tmp/rdw-task-smoke
 uv run rdw task mark draft-done /tmp/rdw-task-smoke
 uv run rdw task mark qa-passed /tmp/rdw-task-smoke
 uv run rdw task mark final-done /tmp/rdw-task-smoke
+
+# Deterministic one-task adapter vertical slice
+uv run rdw task plan --request "Explain why true shooting on high usage is the key read on Demo Guard in the 2026 synthetic sample" --domain basketball --entity "Demo Guard" --output-type stat_interpretation --audience "analytics-literate fans" --packet-id basketball-player-demo-guard-2026 --task-id basketball-example-demo-guard-stat-interpretation --out /tmp/rdw-fixture-task
+uv run rdw task execute /tmp/rdw-fixture-task --fixture examples/fixtures/basketball-vertical-slice.yaml --root .
 ```
 
 5. Run wheel smoke:

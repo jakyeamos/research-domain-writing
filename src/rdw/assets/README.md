@@ -59,7 +59,23 @@ This writes:
 
 Give the prompt bundle to your agent. The agent is responsible for research, drafting, QA, and final output.
 
-### 3. Plan a batch
+### 3. Execute the deterministic vertical-slice fixture
+
+The repository includes a fixture-backed runtime for proving the handoff and
+lifecycle boundary without calling a model API:
+
+```bash
+rdw task execute .rdw-runs/demo-task \
+  --fixture examples/fixtures/basketball-vertical-slice.yaml \
+  --root .
+```
+
+The fixture stages a research packet, knowledge packet, draft, QA result, and
+final artifact under the run directory, validates the packet and QA gate, and
+advances the existing lifecycle. Use the QA-failed fixture with `--resume` to
+exercise an auditable retry.
+
+### 4. Plan a batch
 
 ```bash
 rdw batch plan examples/batch-tasks.yaml --out .rdw-runs/demo-batch
@@ -90,6 +106,7 @@ rdw validate-batch examples/batch-tasks.yaml
 rdw new-domain finance "Finance Writing"
 rdw task plan --request "explain idempotency keys" --domain technical --out .rdw-runs/idempotency
 rdw batch plan examples/batch-tasks.yaml --out .rdw-runs/demo-batch
+rdw task execute .rdw-runs/demo-task --fixture examples/fixtures/basketball-vertical-slice.yaml --root .
 rdw install --target claude
 rdw install --target cursor
 rdw install --target agents

@@ -8,6 +8,7 @@ from pathlib import Path
 from rdw import __version__
 from rdw.adapters import get_adapter, list_adapters
 from rdw.domain import create_domain
+from rdw.execution import execute_fixture
 from rdw.install import INSTALL_TARGETS, install
 from rdw.io import atomic_write_text
 from rdw.lifecycle import (
@@ -123,6 +124,17 @@ def _build_parser() -> argparse.ArgumentParser:
     task_mark.add_argument("--reason")
     task_mark.add_argument("--json", dest="json_output", action="store_true")
     task_mark.set_defaults(func=_task_mark)
+
+    task_execute = task_subcommands.add_parser(
+        "execute", help="Execute a deterministic fixture through the task lifecycle"
+    )
+    task_execute.add_argument("run_dir", type=Path)
+    task_execute.add_argument("--fixture", required=True, type=Path)
+    task_execute.add_argument("--root", type=Path, default=Path.cwd())
+    task_execute.add_argument("--resume", action="store_true")
+    task_execute.add_argument("--dry-run", action="store_true")
+    task_execute.add_argument("--json", dest="json_output", action="store_true")
+    task_execute.set_defaults(func=_task_execute)
 
     batch = subcommands.add_parser("batch", help="Batch planning commands")
     batch_subcommands = batch.add_subparsers(dest="batch_command", required=True)
@@ -291,6 +303,25 @@ def _task_mark(args: argparse.Namespace) -> int:
         print(f"Marked {view.task_id} -> {view.status}")
         if view.reason:
             print(f"reason: {view.reason}")
+    return 0
+
+
+def _task_execute(args: argparse.Namespace) -> int:
+    result = execute_fixture(
+        args.run_dir,
+        args.fixture,
+        root=args.root,
+        resume=bool(args.resume),
+        dry_run=bool(args.dry_run),
+    )
+    if args.json_output:
+        _emit_json(result.as_dict())
+    else:
+        print(f"Executed {result.task_id}: {result.adapter_status} -> {result.workflow_status}")
+        if result.receipt_path:
+            print(f"Receipt: {result.receipt_path}")
+        for path in result.promoted_paths:
+            print(f"Promoted: {path}")
     return 0
 
 

@@ -1,0 +1,15 @@
+fixture_version: 1
+name: basketball-demo-success
+task_id: basketball-example-demo-guard-stat-interpretation
+packet_id: basketball-player-demo-guard-2026
+output_id: basketball-example-demo-guard-stat-interpretation
+outcome: succeeded
+requested_stages: [research, draft, qa, final]
+needs_review: false
+missing_info: []
+artifacts:
+  research_packet: knowledge/basketball/demo-guard-2026-demo.yaml
+  knowledge_packet: examples/basketball-example/knowledge-packet.md
+  draft: examples/basketball-example/draft.md
+  qa: examples/basketball-example/qa-output.yaml
+  final: examples/basketball-example/final.md

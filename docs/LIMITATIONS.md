@@ -22,8 +22,12 @@ The `rdw` CLI is a deterministic planning and validation harness:
 - `rdw batch plan` expands a batch into per-task planned folders and logs.
 - `rdw install` installs slash command and skill templates.
 - `rdw status`, `rdw task mark`, `rdw batch status`, and `rdw batch resume` track lifecycle state in run artifacts.
+- `rdw task execute --fixture` runs one deterministic fixture through the
+  adapter receipt, artifact validation, and existing task lifecycle. It is a
+  prototype seam, not a provider runtime.
 - `rdw schema` exports JSON Schemas for packets, batches, and task contracts.
-- `rdw adapter` exposes optional provider-neutral runtime stubs (`local`, `openai`, `anthropic`).
+- `rdw adapter` exposes optional provider-neutral runtime stubs plus the local
+  `fixture` adapter used by the single-task vertical-slice prototype.
 
 The CLI does not call an LLM, browse the web, conduct autonomous research, or write final copy.
 
@@ -47,6 +51,6 @@ Each planned task starts at status `planned`. The agent or a future adapter is r
 
 ## Future upgrades
 
-- Real provider adapters that call external APIs (stubs exist today).
+- Real provider adapters that call external APIs (provider stubs exist today).
 - Direct integration with agent runtimes that can execute prompt bundles.
 - Richer packet schema migrations.
