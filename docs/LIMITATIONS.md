@@ -17,6 +17,8 @@ That means:
 The `rdw` CLI is a deterministic planning and validation harness:
 
 - `rdw validate-packet` validates research packets.
+- `rdw validate-packet --mature` applies the opt-in basketball acceptance gates.
+- `rdw validate-claim-ledger` validates QA issue counts and packet fact traceability.
 - `rdw validate-batch` validates batch YAML.
 - `rdw task plan` writes a task contract, prompt bundle, and initial status file.
 - `rdw batch plan` expands a batch into per-task planned folders and logs.
@@ -49,6 +51,7 @@ Each planned task starts at status `planned`. The agent or a future adapter is r
 | Need | v0.2 approach |
 | --- | --- |
 | Live stats or docs | Agent researches and saves packets under `knowledge/<domain>/` |
+| Basketball acceptance gate | `rdw validate-packet ... --mature` plus `rdw validate-claim-ledger ... --mature` |
 | Repeatable single task | `rdw task plan ... --out <run-dir>` |
 | Repeatable batch setup | `rdw batch plan <batch.yaml> --out <run-dir>` |
 | Deterministic batch fixture | `rdw batch execute <run-dir> --fixture-map <map.yaml> --root <repo>` |

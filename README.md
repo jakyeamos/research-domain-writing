@@ -146,6 +146,8 @@ rdw install --target claude
 rdw install --target cursor
 rdw install --target agents
 rdw validate-packet knowledge/basketball/demo-guard-2026-demo.yaml --strict --json
+rdw validate-packet examples/acceptance/basketball/packets/ranking-usage-ts-change.yaml --mature --json
+rdw validate-claim-ledger examples/acceptance/basketball/packets/ranking-usage-ts-change.yaml examples/acceptance/basketball/qa/ranking-usage-ts-change.yaml --mature --json
 rdw status .rdw-runs/lis-leaderboard --json
 rdw batch status .rdw-runs/demo-batch --json
 ```
@@ -208,6 +210,13 @@ See [docs/LIMITATIONS.md](docs/LIMITATIONS.md) for current boundaries.
 - `source_notes` shape and strict fact-id linkage
 - domain extension presence when strict mode requires it
 
+With `--mature`, the validator applies the opt-in basketball acceptance
+contract: source-grounded metric semantics, role and sample context, ranking
+metadata and freshness, confidence rules for small samples, and rejection of
+synthetic/demo provenance. `rdw validate-claim-ledger` checks QA issue counts
+and maps every accepted claim to a source-linked packet fact. These gates are
+deterministic and do not browse or call a provider.
+
 `rdw validate-batch` checks:
 
 - unique task IDs
@@ -222,6 +231,7 @@ See [docs/LIMITATIONS.md](docs/LIMITATIONS.md) for current boundaries.
 | `examples/basketball-example/` | synthetic task, packet-derived knowledge, draft, QA, final |
 | `examples/music-example/` | thin-evidence music task, research packet, knowledge, draft, QA, final |
 | `examples/technical-example/` | technical feature task, research packet, knowledge, draft, QA, final |
+| `examples/acceptance/basketball/` | source-grounded mature-pack packets, QA claim ledgers, and positive/negative gates |
 | `examples/batch-tasks.yaml` | deterministic batch planning input |
 
 The basketball example is explicitly fictional. It demonstrates schema and claim-boundary behavior, not real player analysis.

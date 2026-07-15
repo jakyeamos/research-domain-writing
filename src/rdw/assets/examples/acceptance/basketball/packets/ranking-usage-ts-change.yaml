@@ -1,0 +1,102 @@
+id: basketball-ranking-usage-ts-change-2025-26
+domain: basketball
+entity_type: ranking
+entity_name: Usage and true-shooting change comparison
+topic: Explain a supplied comparison of usage-rate and true-shooting changes
+time_period: 2025-26 season comparison published by NBA.com
+context: A bounded ranking surface that describes the supplied ordering without treating it as a complete player-value ranking.
+role_or_usage_context: Player roles are not ranked by this surface; role and team context must be added before impact claims.
+
+key_facts:
+  - id: fact-ranking-001
+    text: NBA.com defines the comparison around changes in usage rate and true shooting percentage between seasons.
+  - id: fact-ranking-002
+    text: The NBA.com comparison lists Dillon Brooks with a 9.6 percentage-point usage-rate increase and a 2.7 percentage-point true-shooting increase.
+  - id: fact-ranking-003
+    text: The NBA.com comparison lists Jaylen Brown with a 6.4 percentage-point usage-rate increase and a 3.4 percentage-point true-shooting increase.
+  - id: fact-ranking-004
+    text: The NBA.com comparison lists Shaedon Sharpe with a 6.6 percentage-point usage-rate increase and a 1.6 percentage-point true-shooting decrease.
+
+relevant_metrics:
+  - name: usage rate change
+    value: percentage-point change in USG%
+    unit: percentage points
+    denominator: team possessions ended by the player while on court
+    season: 2025-26 compared with prior season
+    sample: At least 250 minutes in the prior season and 100 minutes in the current season, per the source comparison.
+    what_it_captures: Change in the share of team possessions a player ends while on court.
+    what_it_misses: Defensive value, role difficulty, lineup context, and whether the extra possessions were efficient.
+    fact_ids: [fact-ranking-001, fact-ranking-002, fact-ranking-003, fact-ranking-004]
+  - name: true shooting percentage change
+    value: percentage-point change in TS%
+    unit: percentage points
+    denominator: field-goal attempts plus free-throw attempts under the TS% definition
+    season: 2025-26 compared with prior season
+    sample: Same player-season comparison and minutes filter as the source table.
+    what_it_captures: Scoring efficiency with two-point, three-point, and free-throw scoring included.
+    what_it_misses: Shot difficulty, defensive assignment, playmaking value, and lineup effects.
+    fact_ids: [fact-ranking-001, fact-ranking-002, fact-ranking-003, fact-ranking-004]
+
+domain_terms:
+  - usage rate
+  - true shooting percentage
+  - percentage-point change
+  - sample size
+concepts_that_apply:
+  - usage-illusion
+  - sample-size
+
+source_notes:
+  - source_type: url
+    source: https://www.nba.com/news/biggest-changes-usage-possession-time-2025-26
+    accessed: 2026-07-15
+    note: Official NBA comparison article used for the change definitions, player rows, and minutes filter.
+    fact_ids: [fact-ranking-001, fact-ranking-002, fact-ranking-003, fact-ranking-004]
+  - source_type: url
+    source: https://www.nba.com/news/inside-the-game-stat-glossary
+    accessed: 2026-07-15
+    note: Official NBA glossary used to anchor the metric-definition language.
+    fact_ids: [fact-ranking-001]
+
+interpretation_notes:
+  - The ordering describes change on named dimensions; it does not establish total player value.
+  - A usage increase paired with an efficiency change still requires role and lineup context.
+open_questions:
+  - Does the source comparison control for team, lineup, or opponent context?
+  - How do the changes translate to defensive and playoff impact?
+uncertainties:
+  - The supplied source comparison does not provide a full role-adjusted impact model.
+  - The fixture preserves the source table's comparison window and should be refreshed when the source changes.
+confidence_level: medium
+last_updated: 2026-07-15T12:00:00Z
+used_in_outputs:
+  - basketball-acceptance-ranking-methodology
+
+extensions:
+  ranking:
+    ranking_name: Usage and true-shooting change comparison
+    metric_definition: Percentage-point changes in USG% and TS% between the current and prior season.
+    population: Players meeting the NBA.com comparison's minutes filter.
+    filters: At least 250 prior-season minutes and 100 current-season minutes, as documented by the source.
+    season: 2025-26
+    update_window: Current-season comparison; refresh within 30 days of reuse.
+    rank_value: Usage-rate change in percentage points
+    tie_behavior: Preserve the source ordering; do not invent a tie-breaker.
+    missing_value_behavior: Exclude rows without both comparison-season values and disclose the exclusion.
+    methodology_notes: The fixture mirrors the supplied NBA.com comparison and reports the paired TS% change beside the usage change.
+    known_limitations: This is a descriptive change surface, not a role-adjusted player-value model.
+    updated_at: 2026-07-15T12:00:00Z
+    freshness_window_days: 30
+    ranked_entities:
+      - entity_name: Dillon Brooks
+        rank: 1
+        value: 9.6
+        fact_ids: [fact-ranking-002]
+      - entity_name: Shaedon Sharpe
+        rank: 2
+        value: 6.6
+        fact_ids: [fact-ranking-004]
+      - entity_name: Jaylen Brown
+        rank: 3
+        value: 6.4
+        fact_ids: [fact-ranking-003]

@@ -21,7 +21,12 @@ from rdw.lifecycle import (
 from rdw.planner import TaskRequest, plan_batch, plan_task
 from rdw.resources import asset_path
 from rdw.schema_export import export_schema
-from rdw.validation import ValidationResult, validate_batch_file, validate_packet_file
+from rdw.validation import (
+    ValidationResult,
+    validate_batch_file,
+    validate_claim_ledger_file,
+    validate_packet_file,
+)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -82,10 +87,25 @@ def _build_parser() -> argparse.ArgumentParser:
     validate_packet = subcommands.add_parser("validate-packet", help="Validate a research packet")
     validate_packet.add_argument("path", type=Path)
     validate_packet.add_argument("--strict", action="store_true")
+    validate_packet.add_argument(
+        "--mature",
+        action="store_true",
+        help="Apply the mature basketball acceptance gates and strict source checks",
+    )
     validate_packet.add_argument("--root", type=Path, default=Path.cwd())
     validate_packet.add_argument("--allow-disabled-domain", action="store_true")
     validate_packet.add_argument("--json", dest="json_output", action="store_true")
     validate_packet.set_defaults(func=_validate_packet)
+
+    validate_claims = subcommands.add_parser(
+        "validate-claim-ledger", help="Validate QA issues and packet claim traceability"
+    )
+    validate_claims.add_argument("packet", type=Path)
+    validate_claims.add_argument("ledger", type=Path)
+    validate_claims.add_argument("--mature", action="store_true")
+    validate_claims.add_argument("--root", type=Path, default=Path.cwd())
+    validate_claims.add_argument("--json", dest="json_output", action="store_true")
+    validate_claims.set_defaults(func=_validate_claim_ledger)
 
     validate_batch = subcommands.add_parser("validate-batch", help="Validate a batch task file")
     validate_batch.add_argument("path", type=Path)
@@ -265,8 +285,20 @@ def _validate_packet(args: argparse.Namespace) -> int:
         strict=bool(args.strict),
         root=args.root,
         allow_disabled=bool(args.allow_disabled_domain),
+        mature=bool(args.mature),
     )
     return _print_validation(result, f"OK: {args.path}", json_output=bool(args.json_output))
+
+
+def _validate_claim_ledger(args: argparse.Namespace) -> int:
+    result = validate_claim_ledger_file(
+        args.packet,
+        args.ledger,
+        root=args.root,
+        mature=bool(args.mature),
+    )
+    success = f"OK: {args.packet} + {args.ledger}"
+    return _print_validation(result, success, json_output=bool(args.json_output))
 
 
 def _validate_batch(args: argparse.Namespace) -> int:

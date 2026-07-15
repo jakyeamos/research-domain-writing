@@ -1,0 +1,37 @@
+version: 1
+domain: basketball
+example_only: true
+positive_cases:
+  - id: leaderboard-methodology
+    packet: packets/ranking-usage-ts-change.yaml
+    qa: qa/ranking-usage-ts-change.yaml
+    output_types: [ranking_explanation]
+  - id: player-stat-interpretation
+    packet: packets/player-jayson-tatum.yaml
+    qa: qa/player-jayson-tatum.yaml
+    output_types: [player_summary, stat_interpretation]
+  - id: player-comparison
+    packet: packets/player-nikola-jokic.yaml
+    qa: qa/player-nikola-jokic.yaml
+    comparison_packet: packets/player-jayson-tatum.yaml
+    output_types: [comparison_blurb]
+  - id: team-fit
+    packet: packets/team-denver-nuggets-fit.yaml
+    qa: qa/team-denver-nuggets-fit.yaml
+    output_types: [team_fit_notes]
+  - id: bounded-projection
+    packet: packets/player-nikola-jokic.yaml
+    qa: qa/player-nikola-jokic.yaml
+    output_types: [future_projection]
+negative_cases:
+  - id: ranking-missing-context
+    packet: negative/ranking-missing-context.yaml
+  - id: invented-tracking
+    packet: negative/invented-tracking.yaml
+  - id: small-sample-high-confidence
+    packet: negative/small-sample-high-confidence.yaml
+  - id: synthetic-real-player
+    packet: negative/synthetic-real-player.yaml
+  - id: claim-ledger-unknown-fact
+    packet: packets/player-jayson-tatum.yaml
+    qa: qa/negative-unknown-fact.yaml

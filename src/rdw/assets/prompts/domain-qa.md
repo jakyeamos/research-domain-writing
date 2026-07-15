@@ -25,6 +25,10 @@ issues:
     suggested_fix: string
 revised_draft_path: string | null  # if QA rewrote to fix blockers
 blocking_issue_count: number
+claim_ledger:
+  - claim_id: string
+    text: string
+    fact_ids: [fact-id]
 ```
 
 ## Checks
@@ -36,10 +40,14 @@ blocking_issue_count: number
 5. Missing caveats from open_questions / uncertainties
 6. Unsupported comparisons
 7. Forbidden phrases
+8. For mature basketball packets, emit one claim-ledger row for every factual
+   or numeric claim and map it to packet `key_facts[].id` values
 
 ## Pass criteria
 
 - `pass: true` only if zero blockers and zero major grounding/jargon issues
+- `blocking_issue_count` must equal blocker + major issue count
+- A mature basketball claim ledger must contain no unknown or source-unmapped fact IDs
 - Style issues alone are minor — defer to humanizer
 
 ## Revised draft

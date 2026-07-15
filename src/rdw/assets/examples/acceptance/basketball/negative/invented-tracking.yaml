@@ -1,0 +1,45 @@
+id: basketball-negative-invented-tracking
+domain: basketball
+entity_type: player
+entity_name: Unsupported Tracking Player
+topic: Invalid packet with an ungrounded tracking value
+time_period: 2025-26 regular season
+context: Negative fixture for invented tracking claims.
+role_or_usage_context: Player role is unknown; the tracking number is intentionally ungrounded.
+key_facts:
+  - id: fact-invented-001
+    text: The source identifies a player but does not supply drive frequency tracking.
+relevant_metrics:
+  - name: drive frequency
+    value: 14.2
+    unit: drives per game
+    denominator: games played
+    season: 2025-26 regular season
+    sample: unknown
+    what_it_captures: Alleged drive frequency.
+    what_it_misses: Source definition and verified sample.
+    fact_ids: [fact-invented-tracking]
+domain_terms: [tracking]
+concepts_that_apply: [uncertainty]
+source_notes:
+  - source_type: url
+    source: https://www.nba.com/stats
+    accessed: 2026-07-15
+    note: The official stats landing page does not support the invented metric value in this fixture.
+    fact_ids: [fact-invented-001]
+open_questions: ["What source defines and verifies the alleged tracking value?"]
+uncertainties: [The metric is not present in the supplied evidence.]
+confidence_level: low
+last_updated: 2026-07-15T12:00:00Z
+extensions:
+  player:
+    team: unknown
+    season: 2025-26
+    role: unknown
+    archetype: unknown
+    usage:
+      usg_pct: unknown
+      on_ball_pct: unknown
+    age: unknown
+    physical_profile: unknown
+    minutes_stability: unknown

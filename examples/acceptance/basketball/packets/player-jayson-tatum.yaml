@@ -1,0 +1,86 @@
+id: basketball-player-jayson-tatum-2023-24
+domain: basketball
+entity_type: player
+entity_name: Jayson Tatum
+topic: Interpret a documented regular-season stat line in role context
+time_period: 2023-24 NBA regular season
+context: A player-stat interpretation fixture limited to the official NBA.com bio line and explicit sample boundaries.
+role_or_usage_context: NBA.com lists Tatum as a Boston Celtics forward-guard; this packet does not infer a broader impact profile from the box score alone.
+
+key_facts:
+  - id: fact-tatum-001
+    text: NBA.com lists Jayson Tatum's 2023-24 regular-season line as 74 games, 26.9 points per game, 8.1 rebounds per game, and 4.9 assists per game.
+  - id: fact-tatum-002
+    text: NBA.com identifies Jayson Tatum with the Boston Celtics and the forward-guard position.
+
+relevant_metrics:
+  - name: points per game
+    value: 26.9
+    unit: points per game
+    denominator: games played
+    season: 2023-24 regular season
+    sample: 74 games
+    what_it_captures: Box-score scoring volume averaged over games played.
+    what_it_misses: Efficiency, shot difficulty, defensive value, and lineup context.
+    fact_ids: [fact-tatum-001]
+  - name: rebounds per game
+    value: 8.1
+    unit: rebounds per game
+    denominator: games played
+    season: 2023-24 regular season
+    sample: 74 games
+    what_it_captures: Box-score rebounding volume averaged over games played.
+    what_it_misses: Rebound chances, box-outs, transition effects, and defensive scheme.
+    fact_ids: [fact-tatum-001]
+  - name: assists per game
+    value: 4.9
+    unit: assists per game
+    denominator: games played
+    season: 2023-24 regular season
+    sample: 74 games
+    what_it_captures: Recorded assist volume averaged over games played.
+    what_it_misses: Potential assists, passing difficulty, turnovers, and creation burden.
+    fact_ids: [fact-tatum-001]
+
+domain_terms:
+  - box score
+  - sample size
+  - role context
+concepts_that_apply:
+  - sample-size
+  - role-context
+
+source_notes:
+  - source_type: url
+    source: https://www.nba.com/player/1628369/jayson-tatum/bio
+    accessed: 2026-07-15
+    note: Official NBA player bio used for the 2023-24 line, team, and position.
+    fact_ids: [fact-tatum-001, fact-tatum-002]
+
+interpretation_notes:
+  - The line establishes substantial scoring, rebounding, and assist volume in a 74-game regular-season sample.
+  - The packet does not support a claim about total impact, efficiency, or defensive value.
+open_questions:
+  - What were the efficiency and on/off results in the same season?
+  - Which lineup roles and matchup responsibilities shaped the box-score line?
+uncertainties:
+  - Usage, efficiency, tracking, and defensive metrics are not loaded here.
+  - The fixture uses one season and should not be generalized to every season.
+confidence_level: medium
+last_updated: 2026-07-15T12:00:00Z
+used_in_outputs:
+  - basketball-acceptance-player-stat-interpretation
+  - basketball-acceptance-player-comparison
+
+extensions:
+  player:
+    team: Boston Celtics
+    season: 2023-24
+    role: forward-guard
+    archetype: unknown
+    usage:
+      usg_pct: unknown
+      on_ball_pct: unknown
+    age: unknown
+    physical_profile: unknown
+    minutes_stability: unknown
