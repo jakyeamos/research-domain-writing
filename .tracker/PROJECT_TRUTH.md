@@ -1,10 +1,10 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: RDW v0.2.0 is a healthy installable agent-first CLI/package with canonical source/package asset parity and release metadata aligned on the modernization branch.
-healthScore: 86
-statusLabel: modernization_m1
-nextStep: Implement M2 by resolving planner/router contracts and adding structured CLI diagnostics.
+summary: RDW v0.2.0 is a healthy installable agent-first CLI/package with canonical assets, explicit task contracts, and machine-readable CLI diagnostics on the modernization branch.
+healthScore: 88
+statusLabel: modernization_m2
+nextStep: Implement M3 by enforcing lifecycle transitions and making run-artifact writes atomic.
 blockers:
   - Slash-command behavior still needs a manual post-install smoke in each target agent before broader announcement.
   - The modernization branch is not a release action; publishing remains explicitly deferred until final review and cutover.
@@ -48,9 +48,10 @@ The v0.2.0 repo has a real `rdw` Python CLI that validates packets and batches, 
 
 The 2026-07-15 modernization baseline is green for lint, formatting, types,
 tests, build, CLI smoke, shellcheck, scoped dead-code, and isolated wheel use.
-The first implementation slice now derives release version truth from
-`pyproject.toml`, checks the lockfile, and verifies that root authoring assets
-match the packaged wheel assets.
+The modernization branch derives release version truth from `pyproject.toml`,
+checks the lockfile, verifies root/package asset parity, resolves explicit
+planner overrides into the final contract, and supports JSON diagnostics for
+validation, planning, and lifecycle inspection.
 
 ## What Exists
 
@@ -74,6 +75,8 @@ match the packaged wheel assets.
   for the proposed in-place modernization.
 - `scripts/sync-package-assets.py --check|--sync` as the canonical root/package
   asset parity check and synchronization tool.
+- `--json` output for validation, task/batch planning, status, resume, and
+  doctor commands.
 
 ## What Does Not Exist Yet
 
@@ -83,13 +86,13 @@ match the packaged wheel assets.
 - Adapter extras are stubs; RDW does not call model APIs by default.
 - No diff-based regression tests on QA rules.
 - No dedicated dead-code CI gate is configured; the scoped Vulture baseline is clean.
-- Planner/router contracts and structured CLI diagnostics are not unified yet.
+- Lifecycle writes are still direct and status transitions are not enforced.
 
 ## Next Step
 
-Implement M2 from `docs/modernization/EXEC_PLAN.md`: make planner/router
-resolution explicit, add stable JSON diagnostics for machine consumers, and
-preserve the existing human-readable CLI output.
+Implement M3 from `docs/modernization/EXEC_PLAN.md`: enforce legal task status
+transitions, make status/summary/log writes atomic, and keep read-only status
+commands from mutating run artifacts.
 
 ## Quality Ladder Notes
 
@@ -101,6 +104,10 @@ source/isolated-wheel CLI smoke.
 2026-07-15: M0/M1 committed as `5bc91e3`: `uv.lock`, packaged release metadata,
 the PyPI wizard version, CI lock/shell/package checks, and the canonical
 root/package asset sync are aligned for v0.2.0.
+
+2026-07-15: M2 committed as `ab2ef1f`: explicit planner overrides now shape
+the resolved task contract, ambiguous routing emits warnings, malformed YAML
+returns a controlled error, and JSON diagnostics are parseable on the CLI.
 
 2026-07-15: Modernization strategy is deep refactor in place. Preserve the
 no-LLM core boundary, CLI names, packet semantics, and run-artifact paths;
