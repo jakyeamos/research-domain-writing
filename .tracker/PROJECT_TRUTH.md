@@ -1,10 +1,10 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: RDW v0.2.0 is a healthy installable agent-first CLI/package with explicit contracts, machine-readable diagnostics, and guarded lifecycle state on the modernization branch.
-healthScore: 90
-statusLabel: modernization_m3
-nextStep: Implement M4 by making package-asset installation and managed command writes safe for fresh and existing consumers.
+summary: RDW v0.2.0 is a healthy installable agent-first CLI/package with explicit contracts, guarded lifecycle state, transactional installs, and fresh-wheel parity on the modernization branch.
+healthScore: 93
+statusLabel: modernization_m4
+nextStep: Implement M5 by hardening release CI, documenting the canonical checks, and removing stale release-path assumptions.
 blockers:
   - Slash-command behavior still needs a manual post-install smoke in each target agent before broader announcement.
   - The modernization branch is not a release action; publishing remains explicitly deferred until final review and cutover.
@@ -51,7 +51,9 @@ tests, build, CLI smoke, shellcheck, scoped dead-code, and isolated wheel use.
 The modernization branch derives release version truth from `pyproject.toml`,
 checks the lockfile, verifies root/package asset parity, resolves explicit
 planner overrides into the final contract, supports JSON diagnostics, enforces
-legal lifecycle transitions, and atomically persists run state.
+legal lifecycle transitions, atomically persists run state, stages managed
+package assets before replacement, and proves critical flows from an isolated
+wheel.
 
 ## What Exists
 
@@ -79,6 +81,11 @@ legal lifecycle transitions, and atomically persists run state.
   doctor commands.
 - `rdw` lifecycle transitions owned by `src/rdw/lifecycle.py`, with atomic
   status/summary writes and append-only batch events.
+- Transactional package-asset installation with a managed-root marker,
+  explicit unmanaged-root protection, backup/force behavior, and rollback on
+  interrupted swaps.
+- Installed-wheel fallback to packaged knowledge/config assets when a caller
+  has no source checkout root.
 
 ## What Does Not Exist Yet
 
@@ -88,14 +95,14 @@ legal lifecycle transitions, and atomically persists run state.
 - Adapter extras are stubs; RDW does not call model APIs by default.
 - No diff-based regression tests on QA rules.
 - No dedicated dead-code CI gate is configured; the scoped Vulture baseline is clean.
-- Installer-managed command files and package-asset replacement are not yet
-  atomic or fully protected for existing consumers.
+- Release CI still needs the full fresh-wheel critical-flow matrix and the
+  user-facing release docs need to describe the new canonical checks.
 
 ## Next Step
 
-Implement M4 from `docs/modernization/EXEC_PLAN.md`: protect managed install
-paths, replace package assets safely, and verify fresh-consumer installs from
-an isolated wheel.
+Implement M5 from `docs/modernization/EXEC_PLAN.md`: make CI and release docs
+prove source/package/wheel/install parity, then audit stale version and manual
+package-copy assumptions.
 
 ## Quality Ladder Notes
 
@@ -115,6 +122,10 @@ returns a controlled error, and JSON diagnostics are parseable on the CLI.
 2026-07-15: M3 committed as `ae0510b` plus formatter follow-up `9c790df`:
 legal lifecycle transitions, required QA-failure reasons, atomic state writes,
 read-only batch status, and append-only batch events are covered by 42 tests.
+
+2026-07-15: M4 committed as `c627bc7`: staged managed asset replacement,
+unmanaged-root protection, command-file safety, packaged-resource fallback, and
+isolated-wheel proof passed with 46 tests.
 
 2026-07-15: Modernization strategy is deep refactor in place. Preserve the
 no-LLM core boundary, CLI names, packet semantics, and run-artifact paths;
