@@ -1,0 +1,18 @@
+handoff_version: 1
+output_id: basketball-acceptance-ranking-methodology
+stage: humanizer
+input_draft: pipeline/leaderboard-methodology/draft.md
+qa: pipeline/leaderboard-methodology/qa.yaml
+output_final: pipeline/leaderboard-methodology/final.md
+status: ready_for_human_graduation_review
+facts_added: false
+qualifiers_preserved: true
+preserved_fact_ids:
+  - fact-ranking-001
+  - fact-ranking-002
+  - fact-ranking-003
+  - fact-ranking-004
+style_pass_notes:
+  - tightened the opening definition
+  - reduced repetition around the paired metrics
+  - preserved the sample and role-context caveats

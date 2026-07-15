@@ -1,0 +1,17 @@
+output_id: basketball-acceptance-team-fit
+pass: true
+confidence_score: 0.76
+needs_human_review: false
+issues: []
+blocking_issue_count: 0
+claim_ledger:
+  - claim_id: claim-nuggets-role
+    text: NBA.com lists Jokić as a Denver Nuggets center.
+    fact_ids: [fact-nuggets-001]
+  - claim_id: claim-nuggets-playmaking
+    text: The current profile snapshot lists 10.7 assists per game.
+    fact_ids: [fact-nuggets-002]
+  - claim_id: claim-nuggets-fit-boundary
+    text: The supplied evidence supports only a bounded playmaking-hub interpretation, not a scheme or roster-quality conclusion.
+    fact_ids: [fact-nuggets-001, fact-nuggets-002]
+notes: The fit fixture deliberately preserves unknown roster, pace, and defensive-scheme fields.

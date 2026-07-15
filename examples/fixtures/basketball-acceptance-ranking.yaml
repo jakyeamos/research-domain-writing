@@ -1,0 +1,14 @@
+fixture_version: 1
+name: basketball-acceptance-ranking
+task_id: basketball-acceptance-ranking-methodology
+packet_id: basketball-ranking-usage-ts-change-2025-26
+output_id: basketball-acceptance-ranking-methodology
+outcome: succeeded
+requested_stages: [research, draft, qa, final]
+missing_info: []
+artifacts:
+  research_packet: examples/acceptance/basketball/packets/ranking-usage-ts-change.yaml
+  knowledge_packet: examples/acceptance/basketball/pipeline/leaderboard-methodology/knowledge-packet.md
+  draft: examples/acceptance/basketball/pipeline/leaderboard-methodology/draft.md
+  qa: examples/acceptance/basketball/pipeline/leaderboard-methodology/qa.yaml
+  final: examples/acceptance/basketball/pipeline/leaderboard-methodology/final.md

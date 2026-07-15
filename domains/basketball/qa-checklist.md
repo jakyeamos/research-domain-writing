@@ -6,6 +6,8 @@
 - [ ] Role and team context stated before impact claims
 - [ ] No invented tracking numbers; unknown metrics marked unknown
 - [ ] Projections labeled as projection, not fact
+- [ ] Every accepted claim has a `fact_ids` entry in the QA claim ledger
+- [ ] Injury or availability language has an explicit source-linked packet fact
 
 ## Stat interpretation
 
@@ -17,13 +19,16 @@
 
 - [ ] Comparison dimensions named; no "better player" without dimension
 - [ ] Sleeper/overrated claims cite specific stat-role mismatch
+- [ ] Rankings name the metric, population, period, update time, and limitations
 
 ## Basketball-specific misuse
 
 - [ ] No "high IQ" without behaviors
+- [ ] No "generational", "can do it all", or "blank canvas" without a documented exception
 - [ ] No single-number rankings without role
 - [ ] Playoff leap not extrapolated from <10 games without caveat
 
 ## Humanizer handoff
 
 - [ ] Draft ready for style-only pass; qualifiers on ceiling/floor preserved
+- [ ] QA has zero blocker/major issues before humanizer handoff

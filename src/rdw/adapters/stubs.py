@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from rdw.adapters.base import AdapterResult, TaskAdapter
+from rdw.io import atomic_write_text
 from rdw.lifecycle import load_task_status_view
 
 
@@ -31,7 +32,7 @@ class LocalAdapter(TaskAdapter):
             "generated_at": _now_iso(),
         }
         if not dry_run:
-            artifact_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+            atomic_write_text(artifact_path, json.dumps(payload, indent=2) + "\n")
         return AdapterResult(
             adapter=self.name,
             run_dir=run_dir,
@@ -76,7 +77,7 @@ def _stub_provider_adapter(name: str, run_dir: Path, *, dry_run: bool) -> Adapte
         "generated_at": _now_iso(),
     }
     if not dry_run:
-        artifact_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        atomic_write_text(artifact_path, json.dumps(payload, indent=2) + "\n")
     return AdapterResult(
         adapter=name,
         run_dir=run_dir,

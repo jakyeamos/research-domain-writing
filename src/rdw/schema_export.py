@@ -1,7 +1,12 @@
 from __future__ import annotations
 
 import json
-from typing import Any
+
+from rdw.contracts import (
+    BATCH_REQUIRED_FIELDS,
+    PACKET_REQUIRED_FIELDS,
+    TASK_CONTRACT_REQUIRED_FIELDS,
+)
 
 SCHEMA_TARGETS = ("packet", "batch", "task-contract")
 SCHEMA_FORMATS = ("jsonschema",)
@@ -26,23 +31,14 @@ def export_schema(target: str, *, format: str = "jsonschema") -> str:
     return json.dumps(builders[normalized_target](), indent=2) + "\n"
 
 
-def _packet_schema() -> dict[str, Any]:
+def _packet_schema() -> dict[str, object]:
     return {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "$id": "https://rdw.dev/schemas/packet.json",
         "title": "RDW Research Packet",
         "type": "object",
         "additionalProperties": True,
-        "required": [
-            "id",
-            "domain",
-            "entity_type",
-            "entity_name",
-            "key_facts",
-            "source_notes",
-            "confidence_level",
-            "last_updated",
-        ],
+        "required": list(PACKET_REQUIRED_FIELDS),
         "properties": {
             "id": {"type": "string", "minLength": 1},
             "domain": {"type": "string", "minLength": 1},
@@ -99,14 +95,14 @@ def _packet_schema() -> dict[str, Any]:
     }
 
 
-def _batch_schema() -> dict[str, Any]:
+def _batch_schema() -> dict[str, object]:
     return {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "$id": "https://rdw.dev/schemas/batch.json",
         "title": "RDW Batch Task File",
         "type": "object",
         "additionalProperties": True,
-        "required": ["batch_id", "tasks"],
+        "required": list(BATCH_REQUIRED_FIELDS),
         "properties": {
             "batch_id": {"type": "string", "minLength": 1},
             "defaults": {
@@ -146,25 +142,14 @@ def _batch_schema() -> dict[str, Any]:
     }
 
 
-def _task_contract_schema() -> dict[str, Any]:
+def _task_contract_schema() -> dict[str, object]:
     return {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "$id": "https://rdw.dev/schemas/task-contract.json",
         "title": "RDW Task Contract",
         "type": "object",
         "additionalProperties": True,
-        "required": [
-            "task_id",
-            "task",
-            "domain",
-            "entity_type",
-            "entity_name",
-            "output_type",
-            "output_format",
-            "audience",
-            "research_depth",
-            "packet_id",
-        ],
+        "required": list(TASK_CONTRACT_REQUIRED_FIELDS),
         "properties": {
             "task_id": {"type": "string", "minLength": 1},
             "task": {"type": "string", "minLength": 1},

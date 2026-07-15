@@ -1,0 +1,15 @@
+fixture_version: 1
+name: basketball-demo-qa-failed
+task_id: basketball-example-demo-guard-stat-interpretation
+packet_id: basketball-player-demo-guard-2026
+output_id: basketball-example-demo-guard-stat-interpretation
+outcome: incomplete
+requested_stages: [research, draft, qa, final]
+needs_review: true
+missing_info:
+  - "The draft needs a grounding review before final styling."
+artifacts:
+  research_packet: knowledge/basketball/demo-guard-2026-demo.yaml
+  knowledge_packet: examples/basketball-example/knowledge-packet.md
+  draft: examples/basketball-example/draft.md
+  qa: examples/fixtures/basketball-vertical-slice-qa-failed-output.yaml

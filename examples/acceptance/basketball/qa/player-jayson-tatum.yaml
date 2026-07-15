@@ -1,0 +1,17 @@
+output_id: basketball-acceptance-player-stat-interpretation
+pass: true
+confidence_score: 0.84
+needs_human_review: false
+issues: []
+blocking_issue_count: 0
+claim_ledger:
+  - claim_id: claim-tatum-line
+    text: Tatum's 2023-24 regular-season line was 74 games, 26.9 points, 8.1 rebounds, and 4.9 assists per game.
+    fact_ids: [fact-tatum-001]
+  - claim_id: claim-tatum-role
+    text: The supplied source identifies Tatum with the Boston Celtics and the forward-guard position.
+    fact_ids: [fact-tatum-002]
+  - claim_id: claim-tatum-boundary
+    text: The box-score line alone does not establish efficiency, defense, or total impact.
+    fact_ids: [fact-tatum-001]
+notes: The interpretation keeps role and sample visible before discussing what the box score does not capture.

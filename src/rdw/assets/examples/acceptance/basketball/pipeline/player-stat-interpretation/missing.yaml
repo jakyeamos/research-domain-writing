@@ -1,0 +1,10 @@
+task_id: basketball-acceptance-player-stat-interpretation
+packet_id: basketball-player-jayson-tatum-2023-24
+status: open
+missing_info:
+  - id: missing-tatum-efficiency
+    question: What were the efficiency and on/off results in the same season?
+    impact: The box-score line cannot support an efficiency or total-impact conclusion.
+  - id: missing-tatum-role-detail
+    question: Which lineup roles and matchup responsibilities shaped the box-score line?
+    impact: The role-sensitive read must stay limited to the listed forward-guard context.

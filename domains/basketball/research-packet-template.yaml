@@ -19,6 +19,23 @@ extensions:
     defensive_scheme: { type: string }
     roster_construction: { type: text }
 
+  ranking:
+    ranking_name: { type: string, required: true }
+    metric_definition: { type: text, required: true }
+    population: { type: text, required: true }
+    filters: { type: text, required: true }
+    season: { type: string, required: false }
+    update_window: { type: text, required: false }
+    rank_value: { type: string, required: true }
+    tie_behavior: { type: text, required: true }
+    missing_value_behavior: { type: text, required: true }
+    methodology_notes: { type: text, required: true }
+    known_limitations: { type: text, required: true }
+    updated_at: { type: datetime, required: true }
+    freshness_window_days: { type: number, required: true }
+    ranked_entities: { type: list, required: false }
+    source_reference: { type: string, required: false }
+
 stat_interpretation_block:
   metric_name: string
   value: string

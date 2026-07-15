@@ -1,0 +1,13 @@
+output_id: basketball-example-demo-guard-stat-interpretation
+pass: false
+confidence_score: 0.42
+needs_human_review: true
+issues:
+  - id: fixture-grounding-001
+    severity: blocker
+    category: grounding
+    description: "The draft needs a grounding review before final styling."
+    suggested_fix: "Verify every claim against the research packet."
+blocking_issue_count: 1
+revised_draft_path: null
+notes: "Deterministic uncertain-path fixture; do not publish."

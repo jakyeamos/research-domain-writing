@@ -1,0 +1,16 @@
+handoff_version: 1
+output_id: basketball-acceptance-team-fit
+stage: humanizer
+input_draft: pipeline/team-fit/draft.md
+qa: pipeline/team-fit/qa.yaml
+output_final: pipeline/team-fit/final.md
+status: ready_for_human_graduation_review
+facts_added: false
+qualifiers_preserved: true
+preserved_fact_ids:
+  - fact-nuggets-001
+  - fact-nuggets-002
+style_pass_notes:
+  - changed the opening to a conditional fit statement
+  - shortened the missing-context list without removing it
+  - preserved the low-confidence and scheme-boundary qualifiers

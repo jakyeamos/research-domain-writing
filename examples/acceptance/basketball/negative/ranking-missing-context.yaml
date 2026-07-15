@@ -1,0 +1,49 @@
+id: basketball-negative-ranking-missing-context
+domain: basketball
+entity_type: ranking
+entity_name: Unspecified player ranking
+topic: Invalid ranking without metric semantics or population
+time_period: 2025-26
+context: Negative fixture.
+role_or_usage_context: Ranking context is intentionally incomplete.
+key_facts:
+  - id: fact-negative-ranking-001
+    text: The source provides an ordering but this fixture omits the ranking definition and population.
+relevant_metrics:
+  - name: ranking value
+    value: 1
+    unit: rank
+    denominator: ranked population
+    season: 2025-26
+    sample: unknown
+    what_it_captures: Position in the supplied ordering.
+    what_it_misses: Metric definition, population, role, and limitations.
+    fact_ids: [fact-negative-ranking-001]
+domain_terms: [ranking]
+concepts_that_apply: [sample-size]
+source_notes:
+  - source_type: url
+    source: https://www.nba.com/stats/leaders?Season=2024-25
+    accessed: 2026-07-15
+    note: Official source placeholder for the intentionally incomplete ranking fixture.
+    fact_ids: [fact-negative-ranking-001]
+open_questions: ["What exactly is being ranked?"]
+uncertainties: [The metric and population are not supplied.]
+confidence_level: low
+last_updated: 2026-07-15T12:00:00Z
+extensions:
+  ranking:
+    ranking_name: Unspecified player ranking
+    filters: unknown
+    rank_value: unknown
+    tie_behavior: unknown
+    missing_value_behavior: unknown
+    methodology_notes: unknown
+    known_limitations: unknown
+    updated_at: 2026-07-15T12:00:00Z
+    freshness_window_days: 30
+    ranked_entities:
+      - entity_name: Unknown player
+        rank: 1
+        value: 1
+        fact_ids: [fact-negative-ranking-001]

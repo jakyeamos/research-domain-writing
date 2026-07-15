@@ -1,0 +1,20 @@
+output_id: basketball-acceptance-ranking-methodology
+pass: true
+confidence_score: 0.86
+needs_human_review: false
+issues: []
+blocking_issue_count: 0
+claim_ledger:
+  - claim_id: claim-ranking-definition
+    text: The surface compares usage-rate and true-shooting changes between seasons.
+    fact_ids: [fact-ranking-001]
+  - claim_id: claim-ranking-brooks
+    text: Dillon Brooks is listed with a 9.6 percentage-point usage-rate increase and a 2.7 percentage-point true-shooting increase.
+    fact_ids: [fact-ranking-002]
+  - claim_id: claim-ranking-brown
+    text: Jaylen Brown is listed with a 6.4 percentage-point usage-rate increase and a 3.4 percentage-point true-shooting increase.
+    fact_ids: [fact-ranking-003]
+  - claim_id: claim-ranking-limit
+    text: The ordering is not a complete role-adjusted player-value model.
+    fact_ids: [fact-ranking-001]
+notes: Every factual and numeric claim maps to a source-linked packet fact; the limitation is retained as an interpretation boundary.

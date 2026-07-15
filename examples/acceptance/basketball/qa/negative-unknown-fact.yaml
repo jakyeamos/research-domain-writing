@@ -1,0 +1,16 @@
+output_id: basketball-acceptance-negative-unknown-fact
+pass: false
+confidence_score: 0.1
+needs_human_review: true
+issues:
+  - id: claim-ledger-unknown-fact
+    severity: blocker
+    category: grounding
+    description: The claim points to a fact ID that is not present in the packet.
+    suggested_fix: Replace it with a source-linked packet fact or remove the claim.
+blocking_issue_count: 1
+claim_ledger:
+  - claim_id: claim-unknown-fact
+    text: This claim is not grounded in the packet.
+    fact_ids: [fact-does-not-exist]
+notes: Negative claim-traceability fixture; validation must reject it even though the YAML shape is valid.

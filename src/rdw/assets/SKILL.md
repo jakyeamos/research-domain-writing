@@ -30,7 +30,12 @@ Run planner + researcher prompts. **Use your tools** (web, files, APIs) to gathe
 ## Current limitations
 
 - `rdw task plan` and `rdw batch plan` validate inputs and emit deterministic prompt bundles.
-- The CLI does not call an LLM, browse, research, draft, or complete batch tasks by itself.
+- `rdw task execute --fixture` can run the checked-in deterministic vertical-slice fixture through receipt validation and lifecycle completion.
+- `rdw batch execute --fixture-map` can run a bounded serial fixture batch with
+  immutable attempts, retry limits, event replay, pause/cancel controls, and
+  explicit unknown-attempt recovery.
+- The CLI does not call an LLM, browse, research, or draft real copy by itself;
+  fixture execution only proves deterministic artifact and lifecycle handling.
 - The agent executes the emitted prompts and updates run artifacts.
 
 Details: `docs/LIMITATIONS.md`

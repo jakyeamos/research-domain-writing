@@ -1,0 +1,46 @@
+id: basketball-negative-small-sample-high-confidence
+domain: basketball
+entity_type: player
+entity_name: Small Sample Player
+topic: Invalid high-confidence packet for a sub-15-game sample
+time_period: 2025-26 playoffs
+context: Negative fixture for small-sample confidence handling.
+role_or_usage_context: Playoff role is known only as a small sample and must not be treated as durable.
+key_facts:
+  - id: fact-small-sample-001
+    text: The player appeared in an eight-game playoff sample.
+relevant_metrics:
+  - name: points per game
+    value: 22.0
+    unit: points per game
+    denominator: games played
+    season: 2025-26 playoffs
+    sample: 8 games
+    what_it_captures: Box-score scoring volume in the playoff sample.
+    what_it_misses: Stability, opponent context, and multi-season role evidence.
+    fact_ids: [fact-small-sample-001]
+domain_terms: [playoff sample, sample size]
+concepts_that_apply: [sample-size, uncertainty]
+source_notes:
+  - source_type: url
+    source: https://www.nba.com/stats
+    accessed: 2026-07-15
+    note: Official stats source for the bounded sample fixture.
+    fact_ids: [fact-small-sample-001]
+open_questions: ["Does the role persist across a larger sample?"]
+uncertainties: [The sample has only eight games.]
+confidence_level: high
+last_updated: 2026-07-15T12:00:00Z
+extensions:
+  player:
+    team: unknown
+    season: 2025-26 playoffs
+    role: unknown
+    archetype: unknown
+    usage:
+      usg_pct: unknown
+      on_ball_pct: unknown
+    age: unknown
+    physical_profile: unknown
+    minutes_stability: volatile
+    sample_games: 8

@@ -3,21 +3,15 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from datetime import datetime
+from importlib.resources.abc import Traversable
 from pathlib import Path
 
 from rdw.config import enabled_domains, known_domains, output_formats
-from rdw.yaml_io import YamlMapping, YamlValue, load_yaml_mapping
+from rdw.contracts import PACKET_REQUIRED_FIELDS
+from rdw.mature_validation import validate_mature_basketball_packet, validate_mature_draft_terms
+from rdw.resources import asset_path
+from rdw.yaml_io import YamlMapping, YamlValue, load_yaml_mapping, load_yaml_mapping_text
 
-REQUIRED_PACKET_FIELDS = {
-    "id",
-    "domain",
-    "entity_type",
-    "entity_name",
-    "key_facts",
-    "source_notes",
-    "confidence_level",
-    "last_updated",
-}
 CONFIDENCE_VALUES = {"high", "medium", "low"}
 DEPTH_ALIASES = {
     "1": "deep",
@@ -40,9 +34,17 @@ class ValidationResult:
     def ok(self) -> bool:
         return not self.errors
 
+    def as_dict(self) -> dict[str, object]:
+        return {"ok": self.ok, "errors": self.errors, "warnings": self.warnings}
+
 
 def validate_packet_file(
-    path: Path, *, strict: bool = False, root: Path | None = None, allow_disabled: bool = False
+    path: Path,
+    *,
+    strict: bool = False,
+    root: Path | None = None,
+    allow_disabled: bool = False,
+    mature: bool = False,
 ) -> ValidationResult:
     if not path.exists():
         return ValidationResult(errors=[f"not found: {path}"], warnings=[])
@@ -50,7 +52,13 @@ def validate_packet_file(
         data = load_yaml_mapping(path)
     except ValueError as exc:
         return ValidationResult(errors=[f"invalid: {exc}"], warnings=[])
-    return validate_packet(data, strict=strict, root=root, allow_disabled=allow_disabled)
+    return validate_packet(
+        data,
+        strict=strict,
+        root=root,
+        allow_disabled=allow_disabled,
+        mature=mature,
+    )
 
 
 def validate_packet(
@@ -59,10 +67,12 @@ def validate_packet(
     strict: bool = False,
     root: Path | None = None,
     allow_disabled: bool = False,
+    mature: bool = False,
 ) -> ValidationResult:
     errors: list[str] = []
     warnings: list[str] = []
-    for field in sorted(REQUIRED_PACKET_FIELDS):
+    validation_strict = strict or mature
+    for field in PACKET_REQUIRED_FIELDS:
         if _is_missing(data.get(field)):
             errors.append(f"missing or empty required field: {field}")
 
@@ -84,7 +94,7 @@ def validate_packet(
     key_facts = _list_value(data.get("key_facts"))
     if not key_facts:
         errors.append("key_facts must be a non-empty list")
-    elif strict:
+    elif validation_strict:
         for index, fact in enumerate(key_facts, start=1):
             if not isinstance(fact, dict) or not _string_value(fact.get("id")):
                 errors.append(f"key_facts[{index}] must be a mapping with an id in strict mode")
@@ -94,13 +104,13 @@ def validate_packet(
     if not source_notes:
         errors.append("source_notes must be a non-empty list")
     else:
-        errors.extend(_validate_source_notes(source_notes, fact_ids, strict=strict))
+        errors.extend(_validate_source_notes(source_notes, fact_ids, strict=validation_strict))
 
     last_updated = _string_value(data.get("last_updated"))
     if last_updated and not _is_datetime_like(last_updated):
         errors.append("last_updated must be an ISO date or datetime string")
     if (
-        strict
+        validation_strict
         and last_updated
         and _is_datetime_like(last_updated)
         and not _is_tz_aware(last_updated)
@@ -117,9 +127,116 @@ def validate_packet(
     ):
         errors.append(f"extensions must include domain-specific block: {entity_type}")
 
-    if not strict and not fact_ids:
+    if not validation_strict and not fact_ids:
         warnings.append("key_facts do not expose fact ids; strict source linkage is limited")
 
+    if mature:
+        if domain != "basketball":
+            errors.append("mature validation is currently implemented only for basketball")
+        else:
+            errors.extend(validate_mature_basketball_packet(data))
+
+    return ValidationResult(errors=errors, warnings=warnings)
+
+
+def validate_claim_ledger_file(
+    packet_path: Path,
+    ledger_path: Path,
+    *,
+    root: Path | None = None,
+    mature: bool = False,
+) -> ValidationResult:
+    for path in (packet_path, ledger_path):
+        if not path.exists():
+            return ValidationResult(errors=[f"not found: {path}"], warnings=[])
+    try:
+        packet = load_yaml_mapping(packet_path)
+        ledger = load_yaml_mapping(ledger_path)
+    except ValueError as exc:
+        return ValidationResult(errors=[f"invalid: {exc}"], warnings=[])
+    return validate_claim_ledger(packet, ledger, root=root, mature=mature)
+
+
+def validate_claim_ledger(
+    packet: YamlMapping,
+    ledger: YamlMapping,
+    *,
+    root: Path | None = None,
+    mature: bool = False,
+) -> ValidationResult:
+    packet_result = validate_packet(packet, strict=True, root=root, mature=mature)
+    if not packet_result.ok:
+        return packet_result
+
+    errors: list[str] = []
+    warnings: list[str] = []
+    if not isinstance(ledger.get("pass"), bool):
+        errors.append("claim ledger pass must be true or false")
+    issues = ledger.get("issues")
+    if not isinstance(issues, list):
+        errors.append("claim ledger issues must be a list")
+    blocking_count = ledger.get("blocking_issue_count")
+    if (
+        not isinstance(blocking_count, int)
+        or isinstance(blocking_count, bool)
+        or blocking_count < 0
+    ):
+        errors.append("claim ledger blocking_issue_count must be a non-negative integer")
+    else:
+        for index, issue in enumerate(_list_value(issues), start=1):
+            if not isinstance(issue, dict):
+                errors.append(f"claim ledger issues[{index}] must be a mapping")
+                continue
+            severity = _string_value(issue.get("severity"))
+            if severity not in {"blocker", "major", "minor"}:
+                errors.append(f"claim ledger issues[{index}] severity must be blocker|major|minor")
+        severe_count = sum(
+            1
+            for issue in _list_value(issues)
+            if isinstance(issue, dict)
+            and _string_value(issue.get("severity")) in {"blocker", "major"}
+        )
+        if blocking_count != severe_count:
+            errors.append(
+                "claim ledger blocking_issue_count must equal the number of blocker and major issues"
+            )
+        if ledger.get("pass") is True and severe_count:
+            errors.append("claim ledger cannot pass with blocker or major issues")
+
+    claims = _list_value(ledger.get("claim_ledger"))
+    if not claims:
+        errors.append("claim_ledger must be a non-empty list")
+    fact_ids = _fact_ids(_list_value(packet.get("key_facts")))
+    source_fact_ids = _source_fact_ids(_list_value(packet.get("source_notes")))
+    seen_claim_ids: set[str] = set()
+    for index, claim in enumerate(claims, start=1):
+        if not isinstance(claim, dict):
+            errors.append(f"claim_ledger[{index}] must be a mapping")
+            continue
+        claim_id = _string_value(claim.get("claim_id"))
+        if not claim_id:
+            errors.append(f"claim_ledger[{index}] missing claim_id")
+        elif claim_id in seen_claim_ids:
+            errors.append(f"claim_ledger duplicate claim_id: {claim_id}")
+        else:
+            seen_claim_ids.add(claim_id)
+        if not _string_value(claim.get("text")):
+            errors.append(f"claim_ledger[{index}] missing text")
+        linked_ids = _list_value(claim.get("fact_ids"))
+        if not linked_ids:
+            errors.append(f"claim_ledger[{index}] must link fact_ids")
+        for linked_id in linked_ids:
+            if not isinstance(linked_id, str) or not linked_id:
+                errors.append(f"claim_ledger[{index}] fact_ids must contain strings")
+            elif linked_id not in fact_ids:
+                errors.append(f"claim_ledger[{index}] references unknown fact id: {linked_id}")
+            elif linked_id not in source_fact_ids:
+                errors.append(f"claim_ledger[{index}] fact id lacks source mapping: {linked_id}")
+    draft = ledger.get("draft")
+    if draft is not None and not isinstance(draft, str):
+        errors.append("claim ledger draft must be a string when supplied")
+    elif isinstance(draft, str) and draft:
+        errors.extend(validate_mature_draft_terms(draft, packet, claims))
     return ValidationResult(errors=errors, warnings=warnings)
 
 
@@ -208,6 +325,17 @@ def _fact_ids(key_facts: list[YamlValue]) -> set[str]:
     return ids
 
 
+def _source_fact_ids(source_notes: list[YamlValue]) -> set[str]:
+    ids: set[str] = set()
+    for note in source_notes:
+        if not isinstance(note, dict):
+            continue
+        for fact_id in _list_value(note.get("fact_ids")):
+            if isinstance(fact_id, str) and fact_id:
+                ids.add(fact_id)
+    return ids
+
+
 def _validate_source_notes(
     source_notes: list[YamlValue], fact_ids: set[str], *, strict: bool
 ) -> list[str]:
@@ -280,22 +408,28 @@ def _domain_requires_extension(domain: str, entity_type: str, root: Path | None)
     if not domain or not entity_type:
         return False
     config_path = _domain_config_path(domain, root)
-    if config_path is None:
-        return False
     try:
-        config = load_yaml_mapping(config_path)
-    except ValueError:
+        if isinstance(config_path, Path):
+            config = load_yaml_mapping(config_path)
+        elif config_path is not None:
+            config = load_yaml_mapping_text(
+                config_path.read_text(encoding="utf-8"), source=str(config_path)
+            )
+        else:
+            return False
+    except (OSError, ValueError):
         return False
     schema = config.get("extensions_schema")
     return isinstance(schema, dict) and entity_type in schema
 
 
-def _domain_config_path(domain: str, root: Path | None) -> Path | None:
+def _domain_config_path(domain: str, root: Path | None) -> Path | Traversable | None:
     if root:
         candidate = root / "domains" / domain / "domain-config.yaml"
         if candidate.exists():
             return candidate
-    return None
+    candidate = asset_path("domains", domain, "domain-config.yaml")
+    return candidate if candidate.is_file() else None
 
 
 def _packet_exists(packet_id: str, domain: str, root: Path | None) -> bool:
@@ -307,12 +441,25 @@ def _packet_exists(packet_id: str, domain: str, root: Path | None) -> bool:
         if candidate.exists():
             return True
         knowledge_dir = root / "knowledge" / search_domain
-        if not knowledge_dir.exists():
+        if knowledge_dir.exists():
+            for packet_path in knowledge_dir.glob("*.yaml"):
+                try:
+                    packet = load_yaml_mapping(packet_path)
+                except ValueError:
+                    continue
+                if packet.get("id") == packet_id:
+                    return True
+        packaged_dir = asset_path("knowledge", search_domain)
+        if not packaged_dir.is_dir():
             continue
-        for packet_path in knowledge_dir.glob("*.yaml"):
+        for packet_path in packaged_dir.iterdir():
+            if not packet_path.name.endswith(".yaml"):
+                continue
             try:
-                packet = load_yaml_mapping(packet_path)
-            except ValueError:
+                packet = load_yaml_mapping_text(
+                    packet_path.read_text(encoding="utf-8"), source=str(packet_path)
+                )
+            except (OSError, ValueError):
                 continue
             if packet.get("id") == packet_id:
                 return True

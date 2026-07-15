@@ -14,7 +14,7 @@ allowed-tools:
 ---
 
 <objective>
-Plan and then execute multiple research-domain-writing tasks from a batch file. `rdw batch plan` validates and expands prompt bundles; the agent performs research, drafting, QA, and final output.
+Plan and then execute multiple research-domain-writing tasks from a batch file. `rdw batch plan` validates and expands prompt bundles; the agent performs research, drafting, QA, and final output. The optional fixture-backed batch executor is only for deterministic integration checks.
 </objective>
 
 <paths>
@@ -38,4 +38,8 @@ Default batch file: `__RDW_ROOT__/examples/batch-tasks.yaml` if no path is given
 2. Read `prompts/batch-runner.md`.
 3. Execute each planned task through the full RDW pipeline.
 4. Update task status/log artifacts and summarize completed vs needs_review.
+
+For a fixture-only verification run, provide a fixture map to
+`rdw batch execute <run-dir> --fixture-map <map.yaml> --root <repo>`. Keep this
+separate from real research: the executor never calls a model or browser.
 </process>
