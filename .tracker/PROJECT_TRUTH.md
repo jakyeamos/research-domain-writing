@@ -1,10 +1,10 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: RDW v0.2.0 modernization is implementation-complete and release-proofed on a feature branch; the provider-neutral adapter contract, deterministic research-to-QA slice, and packet-lineage decision are now verified while the core remains offline and auditable.
+summary: RDW v0.2.0 modernization is implementation-complete and release-proofed on a feature branch; the provider-neutral adapter contract, deterministic research-to-QA slice, packet-lineage decision, and evidence-aware diff-QA contract are now verified while the core remains offline and auditable.
 healthScore: 97
-statusLabel: packet_lineage_decided
-nextStep: Create an evidence-aware diff QA regression contract in Wayfinder ticket #6; review/merge draft PR #9, tagging, and publishing remain separate authorized release actions.
+statusLabel: diff_qa_contract_decided
+nextStep: Design the batch executor semantics in Wayfinder ticket #7; review/merge draft PR #9, tagging, and publishing remain separate authorized release actions.
 blockers:
   - A fresh Codex task was not opened for slash smoke; the installed Codex/agents surface was verified by symlink and skill-content inspection.
   - The modernization branch is not a release action; merge, tagging, and publishing remain explicitly deferred.
@@ -81,6 +81,15 @@ parent-head matching for explicit replacement, and preserve stale candidates in
 conflict/resolution artifacts. Automatic merges, last-write-wins behavior, and
 hidden persistence remain out of scope.
 
+The evidence-aware diff-QA contract is now recorded in
+`docs/architecture/ADR-003-evidence-aware-diff-qa-regression-contract.md`:
+compare approved, hash-pinned packet or draft baselines against normalized
+claims, source links, uncertainty, and stable machine rules; require an
+explicit draft claim ledger; and make missing or ambiguous evidence
+indeterminate rather than an automatic pass. The diff report remains additive
+to the existing QA artifact and blocks final promotion on blocker, major, or
+indeterminate findings.
+
 ## What Exists
 
 - `README.md` explaining the full pipeline, slash-command usage, batch workflow, domain packs, and limitations.
@@ -106,6 +115,9 @@ hidden persistence remain out of scope.
 - `docs/architecture/ADR-002-packet-lineage-and-conflict-resolution.md` defining
   file-backed packet revisions, claim/source provenance, conflict categories,
   human resolution artifacts, and explicit promotion rules.
+- `docs/architecture/ADR-003-evidence-aware-diff-qa-regression-contract.md`
+  defining deterministic packet/draft comparison units, baseline approval,
+  DQA diagnostic codes, fixture goldens, and lifecycle integration.
 - `src/rdw/execution.py` as the core fixture executor and receipt/artifact
   validation gate.
 - `src/rdw/adapters/fixture.py` plus `examples/fixtures/` as the deterministic
@@ -133,7 +145,8 @@ hidden persistence remain out of scope.
 - No real provider adapter or autonomous external-runtime integration exists;
   the typed receipt/promotion path is currently exercised by the deterministic
   fixture adapter only. RDW does not call model APIs by default.
-- No diff-based regression tests on QA rules.
+- No diff-based regression implementation or tests yet; ADR-003 defines the
+  deterministic contract and fixture/golden requirements.
 - No fresh Codex task slash smoke has been captured; the installed Codex/agents
   surface has been verified by symlink and skill-content inspection.
 
@@ -141,9 +154,9 @@ hidden persistence remain out of scope.
 
 The modernization and release verification boundary are complete on
 `codex/rdw-gpt56-modernization`, and the provider-neutral adapter boundary, the
-first deterministic vertical slice, and the packet-lineage decision are
-verified. The next Wayfinder slice is [Create an evidence-aware diff QA
-regression contract](https://github.com/jakyeamos/research-domain-writing/issues/6).
+first deterministic vertical slice, the packet-lineage decision, and the
+evidence-aware diff-QA contract are verified. The next Wayfinder slice is
+[Design the batch executor semantics](https://github.com/jakyeamos/research-domain-writing/issues/7).
 Review/merge of draft PR #9, tagging, and publishing remain separate release
 actions; do not infer them from local or remote verification.
 
@@ -181,6 +194,13 @@ identity, content-addressed revisions, claim/source provenance, append-only
 candidate review, explicit replacement, conflict artifacts, and human
 resolution rules. Architecture review evidence passed; full checks remain at
 52 tests with lint, types, lock, package parity, and shell gates green.
+
+2026-07-15: Ticket #6 committed in `dae826c`: ADR-003 defines approved
+hash-pinned baselines, normalized packet/draft claim records, explicit draft
+claim ledgers, DQA-001 through DQA-010 diagnostics, fixture/golden coverage,
+and fail/indeterminate lifecycle gates. TMCP review `tmcp-review-plan-5ec3d9c0`
+passed all validations; full checks remain at 52 tests with lint, types, lock,
+package parity, and shell gates green.
 
 2026-07-15: M2 committed as `ab2ef1f`: explicit planner overrides now shape
 the resolved task contract, ambiguous routing emits warnings, malformed YAML
