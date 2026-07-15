@@ -1,7 +1,7 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: RDW v0.2.0 modernization now includes the serial filesystem-first fixture batch executor; the provider-neutral adapter contract, deterministic research-to-QA slice, packet-lineage decision, evidence-aware diff-QA contract, and bounded batch-executor implementation are verified while the core remains offline and auditable.
+summary: RDW v0.2.0 modernization now includes the serial filesystem-first fixture batch executor with focused module boundaries; the provider-neutral adapter contract, deterministic research-to-QA slice, packet-lineage decision, evidence-aware diff-QA contract, and bounded batch-executor implementation are verified while the core remains offline and auditable.
 healthScore: 97
 statusLabel: batch_executor_implemented
 nextStep: Review and close Wayfinder ticket #10, then advance the parent map; review/merge draft PR #9, tagging, and publishing remain separate authorized release actions.
@@ -97,12 +97,16 @@ serial input-order dispatch first, bound attempts and time, make pause/cancel
 cooperative, require explicit reconciliation for unknown attempts, continue
 independent tasks after review/failure, and never roll back completed work.
 
-Wayfinder ticket #10 is now implemented in `src/rdw/batch_execution.py`.
+Wayfinder ticket #10 is now implemented across the focused batch executor
+modules in `src/rdw/batch_execution.py`, `batch_models.py`, `batch_support.py`,
+`batch_events.py`, `batch_projection.py`, and `batch_leases.py`.
 `rdw batch execute --fixture-map` runs the serial fixture slice with typed
 policy bounds, an exclusive filesystem lease, immutable attempt receipts,
 event-ID replay projection, cooperative pause/cancel, partial-success counts,
-and explicit unknown-attempt recovery. The implementation does not add a
-provider SDK, browser, model call, database, parallel worker, or packet merge.
+and explicit unknown-attempt recovery. The orchestration module is now below
+the repository's preferred single-file source limit; the implementation does
+not add a provider SDK, browser, model call, database, parallel worker, or
+packet merge.
 
 ## What Exists
 
@@ -137,6 +141,9 @@ provider SDK, browser, model call, database, parallel worker, or packet merge.
   cancel behavior, partial-success projection, recovery, and verification.
 - `src/rdw/execution.py` as the core fixture executor and receipt/artifact
   validation gate.
+- The batch executor split into policy/data models, shared filesystem support,
+  event replay, projections, leases, and serial orchestration modules under
+  `src/rdw/`.
 - `src/rdw/adapters/fixture.py` plus `examples/fixtures/` as the deterministic
   external-runtime seam and success, uncertain, and rejected fixtures.
 - `scripts/sync-package-assets.py --check|--sync` as the canonical root/package
@@ -237,6 +244,12 @@ checks passed with 62 tests, Ruff, basedpyright, Vulture, package parity, and
 the final sdist/wheel build; pre-CR also warned that the new executor module is
 larger than the preferred single-file source limit and needs a maintainability
 follow-up.
+
+2026-07-15: Maintainability follow-up committed in `33bcb45`: split the batch
+executor by responsibility into models, shared support, events, projections,
+leases, and orchestration. The behavior-neutral refactor passed all 62 tests,
+Ruff, formatting, basedpyright, Vulture, package parity, diff checks, and a
+fresh sdist/wheel build; the source-size warning is resolved.
 
 2026-07-15: M2 committed as `ab2ef1f`: explicit planner overrides now shape
 the resolved task contract, ambiguous routing emits warnings, malformed YAML
