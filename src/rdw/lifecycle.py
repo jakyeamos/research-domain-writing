@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
+from rdw.io import append_jsonl, atomic_write_text
 from rdw.yaml_io import YamlMapping, YamlValue, dump_yaml, load_yaml_mapping
 
 TASK_STATUSES = (
@@ -17,6 +18,14 @@ TASK_STATUSES = (
 )
 
 TERMINAL_TASK_STATUSES = frozenset({"final-done"})
+ALLOWED_TASK_TRANSITIONS: dict[str, frozenset[str]] = {
+    "planned": frozenset({"research-done"}),
+    "research-done": frozenset({"draft-done"}),
+    "draft-done": frozenset({"qa-passed", "qa-failed"}),
+    "qa-failed": frozenset({"research-done", "draft-done"}),
+    "qa-passed": frozenset({"final-done"}),
+    "final-done": frozenset(),
+}
 
 
 @dataclass(frozen=True)
@@ -92,6 +101,17 @@ def mark_task_status(run_dir: Path, status: str, *, reason: str | None = None) -
     if not status_path.exists():
         raise ValueError(f"not a planned task run: {run_dir} (missing status.json)")
     data = _load_status(status_path)
+    current_status = _normalize_status(str(data.get("status") or "planned"))
+    allowed = ALLOWED_TASK_TRANSITIONS.get(current_status)
+    if allowed is None:
+        raise ValueError(f"status file has unknown current status: {current_status}")
+    if normalized not in allowed:
+        allowed_text = ", ".join(sorted(allowed)) or "none"
+        raise ValueError(
+            f"cannot transition {current_status} -> {normalized} (allowed: {allowed_text})"
+        )
+    if normalized == "qa-failed" and not reason:
+        raise ValueError("qa-failed requires --reason")
     now = _now_iso()
     task_id = str(data.get("task_id") or _task_id_from_contract(run_dir))
     history = data.get("history")
@@ -106,7 +126,7 @@ def mark_task_status(run_dir: Path, status: str, *, reason: str | None = None) -
     elif normalized != "qa-failed":
         data.pop("reason", None)
     data["next_step"] = _next_step_for(normalized)
-    status_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    atomic_write_text(status_path, json.dumps(data, indent=2) + "\n")
     batch_root = _find_batch_root(run_dir)
     if batch_root is not None:
         _sync_batch_task(batch_root, task_id, normalized, reason=reason)
@@ -158,7 +178,7 @@ def load_batch_status_view(batch_dir: Path) -> BatchStatusView:
     summary = load_yaml_mapping(summary_path)
     tasks = summary.get("tasks")
     task_rows = [row for row in tasks if isinstance(row, dict)] if isinstance(tasks, list) else []
-    _refresh_batch_counts(summary, task_rows, batch_dir)
+    _refresh_batch_counts(summary, task_rows, batch_dir, persist=False)
     return BatchStatusView(
         batch_dir=batch_dir,
         batch_id=str(summary.get("batch_id") or batch_dir.name),
@@ -204,7 +224,11 @@ def format_batch_resume(batch_dir: Path) -> str:
 
 
 def _refresh_batch_counts(
-    summary: YamlMapping, task_rows: list[YamlMapping], batch_dir: Path
+    summary: YamlMapping,
+    task_rows: list[YamlMapping],
+    batch_dir: Path,
+    *,
+    persist: bool,
 ) -> None:
     completed = 0
     needs_review = 0
@@ -220,8 +244,7 @@ def _refresh_batch_counts(
             completed += 1
         if status == "qa-failed":
             failed += 1
-            needs_review += 1
-        elif status not in TERMINAL_TASK_STATUSES and status != "planned":
+        if needs_review_for(status):
             needs_review += 1
     summary["completed"] = completed
     summary["needs_review"] = needs_review
@@ -231,7 +254,8 @@ def _refresh_batch_counts(
         summary["status"] = "complete"
     elif completed or failed:
         summary["status"] = "in_progress"
-    (batch_dir / "summary.yaml").write_text(dump_yaml(summary), encoding="utf-8")
+    if persist:
+        atomic_write_text(batch_dir / "summary.yaml", dump_yaml(summary))
 
 
 def _sync_batch_task(batch_root: Path, task_id: str, status: str, *, reason: str | None) -> None:
@@ -245,19 +269,21 @@ def _sync_batch_task(batch_root: Path, task_id: str, status: str, *, reason: str
             row["status"] = status
             break
     task_rows = [row for row in tasks if isinstance(row, dict)]
-    _refresh_batch_counts(summary, task_rows, batch_root)
+    _refresh_batch_counts(summary, task_rows, batch_root, persist=True)
     log_path = batch_root / "batch-log.jsonl"
     event = {
         "task_id": task_id,
         "domain": _domain_for_task(batch_root, task_id, task_rows),
         "status": status,
         "confidence_level": "unknown",
-        "needs_review": status in {"qa-failed", "planned"} or status not in TERMINAL_TASK_STATUSES,
+        "needs_review": needs_review_for(status),
         "missing_info": [reason] if reason else [],
     }
-    existing = log_path.read_text(encoding="utf-8") if log_path.exists() else ""
-    line = json.dumps(event, sort_keys=True)
-    log_path.write_text(f"{existing}{line}\n" if existing else f"{line}\n", encoding="utf-8")
+    append_jsonl(log_path, event)
+
+
+def needs_review_for(status: str) -> bool:
+    return status not in {"planned", *TERMINAL_TASK_STATUSES}
 
 
 def _domain_for_task(batch_root: Path, task_id: str, task_rows: list[YamlMapping]) -> str:

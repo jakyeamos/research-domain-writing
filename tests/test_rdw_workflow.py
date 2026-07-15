@@ -37,9 +37,19 @@ def test_task_mark_qa_failed_with_reason(tmp_path: Path) -> None:
     run_dir = tmp_path / "task"
     plan_task(TaskRequest(request="explain idempotency keys"), run_dir, root=ROOT)
 
+    mark_task_status(run_dir, "research-done")
+    mark_task_status(run_dir, "draft-done")
     marked = mark_task_status(run_dir, "qa-failed", reason="unsupported claim")
     assert marked.status == "qa-failed"
     assert marked.reason == "unsupported claim"
+
+
+def test_task_mark_rejects_illegal_transition(tmp_path: Path) -> None:
+    run_dir = tmp_path / "task"
+    plan_task(TaskRequest(request="explain idempotency keys"), run_dir, root=ROOT)
+
+    with pytest.raises(ValueError, match="cannot transition planned -> final-done"):
+        mark_task_status(run_dir, "final-done")
 
 
 def test_batch_status_and_resume(tmp_path: Path) -> None:
@@ -51,6 +61,9 @@ def test_batch_status_and_resume(tmp_path: Path) -> None:
     assert view.completed == 0
 
     first_task = batch_dir / "tasks" / "batch-demo-guard-summary"
+    mark_task_status(first_task, "research-done")
+    mark_task_status(first_task, "draft-done")
+    mark_task_status(first_task, "qa-passed")
     mark_task_status(first_task, "final-done")
 
     refreshed = load_batch_status_view(batch_dir)
@@ -59,6 +72,19 @@ def test_batch_status_and_resume(tmp_path: Path) -> None:
     pending = batch_resume(batch_dir)
     assert len(pending) == 2
     assert pending[0]["task_id"] == "batch-album-blurb"
+
+
+def test_batch_status_read_does_not_rewrite_summary(tmp_path: Path) -> None:
+    batch_dir = tmp_path / "demo-batch"
+    plan_batch(ROOT / "examples" / "batch-tasks.yaml", batch_dir, root=ROOT)
+    summary_path = batch_dir / "summary.yaml"
+    before = summary_path.read_text(encoding="utf-8")
+    before_mtime = summary_path.stat().st_mtime_ns
+
+    load_batch_status_view(batch_dir)
+
+    assert summary_path.read_text(encoding="utf-8") == before
+    assert summary_path.stat().st_mtime_ns == before_mtime
 
 
 def test_cli_status_and_mark(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:

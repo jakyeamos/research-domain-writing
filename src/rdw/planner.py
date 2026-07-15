@@ -7,6 +7,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from rdw.config import default_output_format, output_formats
+from rdw.io import atomic_write_text
+from rdw.lifecycle import needs_review_for
 from rdw.resources import read_asset_text
 from rdw.router import route_request
 from rdw.validation import normalize_depth, validate_batch_file
@@ -51,15 +53,15 @@ def plan_task(
     if no_overwrite and contract_path.exists():
         raise ValueError(f"refusing to overwrite existing plan: {contract_path} (use --force)")
     output_dir.mkdir(parents=True, exist_ok=True)
-    contract_path.write_text(dump_yaml(contract), encoding="utf-8")
-    (output_dir / "prompt-bundle.md").write_text(prompt_bundle, encoding="utf-8")
+    atomic_write_text(contract_path, dump_yaml(contract))
+    atomic_write_text(output_dir / "prompt-bundle.md", prompt_bundle)
     status = {
         "task_id": task_id,
         "status": "planned",
         "created_at": datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "next_step": "Give prompt-bundle.md to an agent and run the RDW pipeline.",
     }
-    (output_dir / "status.json").write_text(json.dumps(status, indent=2) + "\n", encoding="utf-8")
+    atomic_write_text(output_dir / "status.json", json.dumps(status, indent=2) + "\n")
     return PlannedTask(
         task_id=task_id,
         contract=contract,
@@ -121,7 +123,7 @@ def plan_batch(batch_path: Path, output_dir: Path, *, root: Path | None = None) 
                     "domain": planned.contract["domain"],
                     "status": "planned",
                     "confidence_level": "unknown",
-                    "needs_review": False,
+                    "needs_review": needs_review_for("planned"),
                     "missing_info": [],
                 },
                 sort_keys=True,
@@ -136,8 +138,8 @@ def plan_batch(batch_path: Path, output_dir: Path, *, root: Path | None = None) 
         "failed": 0,
         "tasks": task_rows,
     }
-    (output_dir / "summary.yaml").write_text(dump_yaml(summary), encoding="utf-8")
-    (output_dir / "batch-log.jsonl").write_text("\n".join(log_lines) + "\n", encoding="utf-8")
+    atomic_write_text(output_dir / "summary.yaml", dump_yaml(summary))
+    atomic_write_text(output_dir / "batch-log.jsonl", "\n".join(log_lines) + "\n")
     return summary
 
 
