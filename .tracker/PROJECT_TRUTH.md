@@ -1,10 +1,10 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: RDW v0.2.0 modernization now includes the serial filesystem-first fixture batch executor with focused module boundaries; the provider-neutral adapter contract, deterministic research-to-QA slice, packet-lineage decision, evidence-aware diff-QA contract, and bounded batch-executor implementation are verified while the core remains offline and auditable.
+summary: RDW v0.2.0 modernization now includes the serial filesystem-first fixture batch executor with focused module boundaries, and ADR-005 selects basketball analytics as the first mature domain-pack target; the core remains offline and auditable.
 healthScore: 97
-statusLabel: batch_executor_implemented
-nextStep: Review and close Wayfinder ticket #10, then advance the parent map; review/merge draft PR #9, tagging, and publishing remain separate authorized release actions.
+statusLabel: domain_pack_selected
+nextStep: Implement ADR-005's basketball acceptance contract and source-grounded fixtures; review/merge draft PR #9, tagging, and publishing remain separate authorized release actions.
 blockers:
   - A fresh Codex task was not opened for slash smoke; the installed Codex/agents surface was verified by symlink and skill-content inspection.
   - The modernization branch is not a release action; merge, tagging, and publishing remain explicitly deferred.
@@ -97,6 +97,13 @@ serial input-order dispatch first, bound attempts and time, make pause/cancel
 cooperative, require explicit reconciliation for unknown attempts, continue
 independent tasks after review/failure, and never roll back completed work.
 
+ADR-005 now selects basketball analytics as RDW's first mature domain-pack
+target. The contract narrows the initial surface to ranking explanations,
+player/stat interpretation, comparisons, role context, team fit, and bounded
+projections; it defines ranking packet metadata, source/freshness rules,
+positive and negative acceptance fixtures, and objective QA gates. The current
+synthetic basketball pack remains `example_only` until those gates pass.
+
 Wayfinder ticket #10 is now implemented across the focused batch executor
 modules in `src/rdw/batch_execution.py`, `batch_models.py`, `batch_support.py`,
 `batch_events.py`, `batch_projection.py`, and `batch_leases.py`.
@@ -139,6 +146,9 @@ packet merge.
 - `docs/architecture/ADR-004-bounded-batch-executor-semantics.md` defining
   serial-first batch scheduling, leases, retry/backoff bounds, pause/resume/
   cancel behavior, partial-success projection, recovery, and verification.
+- `docs/architecture/ADR-005-first-mature-domain-pack.md` selecting basketball
+  analytics and defining its packet contract, ranking extension, source policy,
+  acceptance rubric, fixture matrix, and graduation sequence.
 - `src/rdw/execution.py` as the core fixture executor and receipt/artifact
   validation gate.
 - The batch executor split into policy/data models, shared filesystem support,
@@ -165,6 +175,9 @@ packet merge.
 - No live/provider-backed autonomous batch execution runner yet. The bounded
   serial fixture executor exists for deterministic integration proof; real
   research, drafting, QA, and humanizer work remain agent-led.
+- No production-ready mature domain pack yet; ADR-005 selects basketball
+  analytics, but the current packet corpus is still synthetic/demo data and
+  remains gated by the acceptance rubric.
 - No packet merge/conflict resolution implementation yet; ADR-002 defines the
   next filesystem-backed implementation contract.
 - No mature legal, finance, or medicine domain packs.
@@ -181,9 +194,11 @@ packet merge.
 The modernization and release verification boundary are complete on
 `codex/rdw-gpt56-modernization`, and the provider-neutral adapter boundary, the
 first deterministic vertical slice, the packet-lineage decision, the
-evidence-aware diff-QA contract, and the bounded batch-executor implementation
-are verified. The next map action is to review and close
-[Implement the serial filesystem-first batch executor](https://github.com/jakyeamos/research-domain-writing/issues/10), then advance the remaining fog items.
+evidence-aware diff-QA contract, the bounded batch-executor implementation,
+and the first mature-domain decision are recorded. The next map action is to
+implement the basketball acceptance contract from
+[ADR-005](docs/architecture/ADR-005-first-mature-domain-pack.md) and close
+[Choose and harden the first mature domain pack](https://github.com/jakyeamos/research-domain-writing/issues/8).
 Review/merge of draft PR #9, tagging, and publishing remain separate release
 actions; do not infer them from local or remote verification.
 
@@ -250,6 +265,12 @@ executor by responsibility into models, shared support, events, projections,
 leases, and orchestration. The behavior-neutral refactor passed all 62 tests,
 Ruff, formatting, basedpyright, Vulture, package parity, diff checks, and a
 fresh sdist/wheel build; the source-size warning is resolved.
+
+2026-07-15: ADR-005 committed in `4adf92a`: basketball analytics is the first
+mature-domain target. The contract defines ranking packet metadata, source and
+freshness rules, confidence boundaries, five positive and seven negative
+acceptance fixtures, and promotion gates; the existing synthetic pack remains
+example-only until the rubric passes.
 
 2026-07-15: M2 committed as `ab2ef1f`: explicit planner overrides now shape
 the resolved task contract, ambiguous routing emits warnings, malformed YAML
