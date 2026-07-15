@@ -1,10 +1,10 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: RDW v0.2.0 modernization is implementation-complete and release-proofed on a feature branch; the provider-neutral adapter contract, deterministic research-to-QA slice, packet-lineage decision, and evidence-aware diff-QA contract are now verified while the core remains offline and auditable.
+summary: RDW v0.2.0 modernization is implementation-complete and release-proofed on a feature branch; the provider-neutral adapter contract, deterministic research-to-QA slice, packet-lineage decision, evidence-aware diff-QA contract, and bounded batch-executor semantics are now verified while the core remains offline and auditable.
 healthScore: 97
-statusLabel: diff_qa_contract_decided
-nextStep: Design the batch executor semantics in Wayfinder ticket #7; review/merge draft PR #9, tagging, and publishing remain separate authorized release actions.
+statusLabel: batch_executor_semantics_decided
+nextStep: Implement the bounded serial-first batch executor described by ADR-004; review/merge draft PR #9, tagging, and publishing remain separate authorized release actions.
 blockers:
   - A fresh Codex task was not opened for slash smoke; the installed Codex/agents surface was verified by symlink and skill-content inspection.
   - The modernization branch is not a release action; merge, tagging, and publishing remain explicitly deferred.
@@ -90,6 +90,13 @@ indeterminate rather than an automatic pass. The diff report remains additive
 to the existing QA artifact and blocks final promotion on blocker, major, or
 indeterminate findings.
 
+The bounded batch-executor decision is now recorded in
+`docs/architecture/ADR-004-bounded-batch-executor-semantics.md`: keep the
+filesystem event stream and task receipts authoritative, use one writer and
+serial input-order dispatch first, bound attempts and time, make pause/cancel
+cooperative, require explicit reconciliation for unknown attempts, continue
+independent tasks after review/failure, and never roll back completed work.
+
 ## What Exists
 
 - `README.md` explaining the full pipeline, slash-command usage, batch workflow, domain packs, and limitations.
@@ -118,6 +125,9 @@ indeterminate findings.
 - `docs/architecture/ADR-003-evidence-aware-diff-qa-regression-contract.md`
   defining deterministic packet/draft comparison units, baseline approval,
   DQA diagnostic codes, fixture goldens, and lifecycle integration.
+- `docs/architecture/ADR-004-bounded-batch-executor-semantics.md` defining
+  serial-first batch scheduling, leases, retry/backoff bounds, pause/resume/
+  cancel behavior, partial-success projection, recovery, and verification.
 - `src/rdw/execution.py` as the core fixture executor and receipt/artifact
   validation gate.
 - `src/rdw/adapters/fixture.py` plus `examples/fixtures/` as the deterministic
@@ -138,7 +148,9 @@ indeterminate findings.
 
 ## What Does Not Exist Yet
 
-- No autonomous batch execution runner; `rdw batch plan` validates and expands planned task bundles only.
+- No autonomous batch execution runner yet; `rdw batch plan` still validates
+  and expands planned task bundles only. ADR-004 defines the bounded
+  serial-first implementation contract.
 - No packet merge/conflict resolution implementation yet; ADR-002 defines the
   next filesystem-backed implementation contract.
 - No mature legal, finance, or medicine domain packs.
@@ -154,9 +166,10 @@ indeterminate findings.
 
 The modernization and release verification boundary are complete on
 `codex/rdw-gpt56-modernization`, and the provider-neutral adapter boundary, the
-first deterministic vertical slice, the packet-lineage decision, and the
-evidence-aware diff-QA contract are verified. The next Wayfinder slice is
-[Design the batch executor semantics](https://github.com/jakyeamos/research-domain-writing/issues/7).
+first deterministic vertical slice, the packet-lineage decision, the
+evidence-aware diff-QA contract, and the batch-executor semantics are verified.
+The next slice is to implement the bounded serial-first executor described by
+ADR-004.
 Review/merge of draft PR #9, tagging, and publishing remain separate release
 actions; do not infer them from local or remote verification.
 
@@ -201,6 +214,13 @@ claim ledgers, DQA-001 through DQA-010 diagnostics, fixture/golden coverage,
 and fail/indeterminate lifecycle gates. TMCP review `tmcp-review-plan-5ec3d9c0`
 passed all validations; full checks remain at 52 tests with lint, types, lock,
 package parity, and shell gates green.
+
+2026-07-15: Ticket #7 committed in `eb48c25`: ADR-004 defines serial-first
+input-order dispatch, one-writer leases, bounded retries/backoff/time, honest
+pause/resume/cancel behavior, partial-success projection, explicit unknown-
+attempt reconciliation, and no rollback. TMCP review
+`tmcp-review-plan-3f488911` passed all validations; full checks remain at 52
+tests with lint, types, lock, package parity, and shell gates green.
 
 2026-07-15: M2 committed as `ab2ef1f`: explicit planner overrides now shape
 the resolved task contract, ambiguous routing emits warnings, malformed YAML
