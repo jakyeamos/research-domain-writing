@@ -46,6 +46,8 @@ def test_mature_acceptance_manifest_covers_the_initial_surface() -> None:
         "small-sample-high-confidence",
         "synthetic-real-player",
         "claim-ledger-unknown-fact",
+        "unsupported-injury",
+        "forbidden-generic-praise",
     }
 
 
@@ -77,20 +79,28 @@ def test_negative_packets_and_claim_ledger_are_rejected() -> None:
         "invented-tracking": "relevant_metrics[1] references unknown fact id",
         "small-sample-high-confidence": "player samples under 15 games require confidence_level: low",
         "synthetic-real-player": "synthetic/demo provenance is not allowed",
+        "unsupported-injury": "draft contains unsupported injury/availability claim",
+        "forbidden-generic-praise": "draft contains forbidden generic basketball phrase",
     }
 
     for case in negative:
         case_id = _string(case, "id")
         packet = ACCEPTANCE_ROOT / _string(case, "packet")
-        if case_id == "claim-ledger-unknown-fact":
+        qa = case.get("qa")
+        if isinstance(qa, str):
             ledger_result = validate_claim_ledger_file(
                 packet,
-                ACCEPTANCE_ROOT / _string(case, "qa"),
+                ACCEPTANCE_ROOT / qa,
                 root=ROOT,
                 mature=True,
             )
             assert not ledger_result.ok
-            assert any("references unknown fact id" in error for error in ledger_result.errors)
+            expected = (
+                "references unknown fact id"
+                if case_id == "claim-ledger-unknown-fact"
+                else expected_errors[case_id]
+            )
+            assert any(expected in error for error in ledger_result.errors)
             continue
 
         result = validate_packet_file(packet, root=ROOT, mature=True)

@@ -25,6 +25,7 @@ issues:
     suggested_fix: string
 revised_draft_path: string | null  # if QA rewrote to fix blockers
 blocking_issue_count: number
+draft: string # optional for deterministic mature-pack phrase and injury gates
 claim_ledger:
   - claim_id: string
     text: string
@@ -42,6 +43,8 @@ claim_ledger:
 7. Forbidden phrases
 8. For mature basketball packets, emit one claim-ledger row for every factual
    or numeric claim and map it to packet `key_facts[].id` values
+9. When the draft is supplied to the deterministic gate, reject forbidden
+   generic praise and injury/availability claims without packet evidence
 
 ## Pass criteria
 

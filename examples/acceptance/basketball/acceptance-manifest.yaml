@@ -35,3 +35,9 @@ negative_cases:
   - id: claim-ledger-unknown-fact
     packet: packets/player-jayson-tatum.yaml
     qa: qa/negative-unknown-fact.yaml
+  - id: unsupported-injury
+    packet: packets/player-jayson-tatum.yaml
+    qa: qa/negative-unsupported-injury.yaml
+  - id: forbidden-generic-praise
+    packet: packets/player-jayson-tatum.yaml
+    qa: qa/negative-forbidden-praise.yaml

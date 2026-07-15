@@ -231,6 +231,11 @@ def validate_claim_ledger(
                 errors.append(f"claim_ledger[{index}] references unknown fact id: {linked_id}")
             elif linked_id not in source_fact_ids:
                 errors.append(f"claim_ledger[{index}] fact id lacks source mapping: {linked_id}")
+    draft = ledger.get("draft")
+    if draft is not None and not isinstance(draft, str):
+        errors.append("claim ledger draft must be a string when supplied")
+    elif isinstance(draft, str) and draft:
+        _validate_mature_draft_terms(draft, packet, claims, errors)
     return ValidationResult(errors=errors, warnings=warnings)
 
 
@@ -420,6 +425,41 @@ def _validate_mature_team_extension(extension: dict[str, YamlValue], errors: lis
         "extensions.team",
         errors,
     )
+
+
+def _validate_mature_draft_terms(
+    draft: str, packet: YamlMapping, claims: list[YamlValue], errors: list[str]
+) -> None:
+    lowered = draft.casefold()
+    for phrase in ("high basketball iq", "generational", "can do it all", "blank canvas"):
+        if phrase in lowered:
+            errors.append(f"draft contains forbidden generic basketball phrase: {phrase}")
+
+    injury_terms = ("injury", "injured", "injuries", "availability", "missed time")
+    if not any(term in lowered for term in injury_terms):
+        return
+    factual_injury_ids: set[str] = set()
+    for fact in _list_value(packet.get("key_facts")):
+        if not isinstance(fact, dict):
+            continue
+        fact_text = _string_value(fact.get("text")).casefold()
+        if any(term in fact_text for term in injury_terms):
+            fact_id = _string_value(fact.get("id"))
+            if fact_id:
+                factual_injury_ids.add(fact_id)
+    claimed_injury_ids: set[str] = set()
+    for claim in claims:
+        if not isinstance(claim, dict):
+            continue
+        claim_text = _string_value(claim.get("text")).casefold()
+        if any(term in claim_text for term in injury_terms):
+            claimed_injury_ids.update(
+                fact_id
+                for fact_id in _list_value(claim.get("fact_ids"))
+                if isinstance(fact_id, str)
+            )
+    if not factual_injury_ids or not factual_injury_ids.intersection(claimed_injury_ids):
+        errors.append("draft contains unsupported injury/availability claim")
 
 
 def _require_mapping_fields(

@@ -7,6 +7,7 @@
 - [ ] No invented tracking numbers; unknown metrics marked unknown
 - [ ] Projections labeled as projection, not fact
 - [ ] Every accepted claim has a `fact_ids` entry in the QA claim ledger
+- [ ] Injury or availability language has an explicit source-linked packet fact
 
 ## Stat interpretation
 
@@ -23,6 +24,7 @@
 ## Basketball-specific misuse
 
 - [ ] No "high IQ" without behaviors
+- [ ] No "generational", "can do it all", or "blank canvas" without a documented exception
 - [ ] No single-number rankings without role
 - [ ] Playoff leap not extrapolated from <10 games without caveat
 
