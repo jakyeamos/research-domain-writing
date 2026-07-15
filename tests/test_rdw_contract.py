@@ -167,7 +167,9 @@ def test_infer_contract_includes_output_format() -> None:
     assert any("unknown output_format: pdf" in str(w) for w in warnings)
 
 
-def test_cli_json_validation_is_machine_readable(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+def test_cli_json_validation_is_machine_readable(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
     packet = tmp_path / "invalid.yaml"
     packet.write_text("domain: [broken\n", encoding="utf-8")
 
@@ -179,7 +181,9 @@ def test_cli_json_validation_is_machine_readable(tmp_path: Path, capsys: pytest.
     assert "invalid YAML" in payload["errors"][0]
 
 
-def test_cli_json_task_plan_is_machine_readable(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+def test_cli_json_task_plan_is_machine_readable(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
     output = tmp_path / "task"
 
     assert (
