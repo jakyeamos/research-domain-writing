@@ -1,13 +1,14 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: RDW v0.2.0 is a healthy installable agent-first CLI/package with explicit contracts, guarded lifecycle state, transactional installs, and a documented fresh-wheel release proof on the modernization branch.
-healthScore: 95
-statusLabel: modernization_m5
-nextStep: Run M6 adversarial review and final validation, then decide whether the branch is ready for merge/tag/publish.
+summary: RDW v0.2.0 modernization is implementation-complete and release-proofed on a clean feature branch, with source/package parity, guarded lifecycle state, transactional installs, and machine-readable CLI contracts.
+healthScore: 97
+statusLabel: modernization_m6_ready
+nextStep: Review and merge the modernization branch when ready; tag and publish remain separate explicitly authorized release actions.
 blockers:
   - Slash-command behavior still needs a manual post-install smoke in each target agent before broader announcement.
-  - The modernization branch is not a release action; publishing remains explicitly deferred until final review and cutover.
+  - Remote CI has not run on this branch; local release ladder and fresh-wheel proof are green.
+  - The modernization branch is not a release action; merge, tagging, and publishing remain explicitly deferred.
 lastUpdated: 2026-07-15
 tags: [aios, writing, research, skill, python, cli, pypi]
 areas: [engineering, writing]
@@ -50,10 +51,10 @@ The 2026-07-15 modernization baseline is green for lint, formatting, types,
 tests, build, CLI smoke, shellcheck, scoped dead-code, and isolated wheel use.
 The modernization branch derives release version truth from `pyproject.toml`,
 checks the lockfile, verifies root/package asset parity, resolves explicit
-planner overrides into the final contract, supports JSON diagnostics, enforces
-legal lifecycle transitions, atomically persists run state, stages managed
-package assets before replacement, and documents the full isolated-wheel proof
-in CI and `RELEASE.md`.
+planner overrides into the final contract, supports JSON diagnostics with
+stable exit categories, enforces legal lifecycle transitions, atomically
+persists run state, stages managed package assets before replacement, and
+documents the full isolated-wheel proof in CI and `RELEASE.md`.
 
 ## What Exists
 
@@ -79,6 +80,8 @@ in CI and `RELEASE.md`.
   asset parity check and synchronization tool.
 - `--json` output for validation, task/batch planning, status, resume, and
   doctor commands.
+- `src/rdw/contracts.py` shared required-field definitions used by validation
+  and schema export.
 - `rdw` lifecycle transitions owned by `src/rdw/lifecycle.py`, with atomic
   status/summary writes and append-only batch events.
 - Transactional package-asset installation with a managed-root marker,
@@ -94,17 +97,13 @@ in CI and `RELEASE.md`.
 - No mature legal, finance, or medicine domain packs.
 - Adapter extras are stubs; RDW does not call model APIs by default.
 - No diff-based regression tests on QA rules.
-- No dedicated dead-code CI gate is configured; the scoped Vulture baseline is clean.
-- Release CI still needs the full fresh-wheel critical-flow matrix and the
-- Remote CI has not yet run on this branch; local source, wheel, lock, asset,
-  shell, type, test, and pre-CR checks are green.
+- No remote CI result or target-agent slash smoke has been captured yet.
 
 ## Next Step
 
-Run M6 from `docs/modernization/EXEC_PLAN.md`: adversarially review contract
-compatibility, lifecycle/data integrity, installer safety, package parity,
-documentation drift, and the complete quality ladder. Do not publish from this
-branch as part of the review.
+Implementation is complete on `codex/rdw-gpt56-modernization`. The next
+decision is review/merge. Do not tag, push, or publish solely because local
+verification passed; those are separate release actions.
 
 ## Quality Ladder Notes
 
@@ -132,6 +131,11 @@ isolated-wheel proof passed with 46 tests.
 2026-07-15: M5 committed as `8dff263`: CI and release docs now prove locked
 source/package/wheel/install parity; the PyPI wizard runs lock, asset, and
 shell preflights; local release ladder passes 47 tests and pre-CR coverage.
+
+2026-07-15: M6 remediation committed as `1bcfe25`: shared required-field
+contracts, low-confidence general routing, atomic developer asset sync,
+atomic CLI/adapter artifacts, reproducible Vulture CI, and regenerated goldens
+are green across 48 tests plus fresh-wheel critical-flow smoke.
 
 2026-07-15: Modernization strategy is deep refactor in place. Preserve the
 no-LLM core boundary, CLI names, packet semantics, and run-artifact paths;

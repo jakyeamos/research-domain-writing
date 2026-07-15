@@ -3,9 +3,10 @@
 - Updated: 2026-07-15
 - Baseline: `main` / `9860d38` / `v0.2.0`
 - Branch: `codex/rdw-gpt56-modernization`
-- Current phase: M6 adversarial review and final validation
+- Current phase: M6 complete; release-ready pending review/merge
 - Implementation phase: in progress
-- Application-code changes: M0–M5 complete; M6 remediation in progress
+- Application-code changes: M0–M6 complete; merge/tag/publish remain separate
+  release decisions
 
 ## Completed
 
@@ -46,10 +47,9 @@
 
 ## Next step
 
-Complete the M6 checks against the full branch:
-contract compatibility, lifecycle/data integrity, installer safety, package
-parity, documentation drift, and the complete quality ladder. Only after that
-review should a maintainer decide whether to merge, tag, or publish.
+The implementation and local adversarial checks are complete. A maintainer can
+now review this branch and decide whether to merge it. Tagging and publishing
+remain separate explicitly authorized release actions.
 
 ## Blockers and boundaries
 
