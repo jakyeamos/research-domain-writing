@@ -29,6 +29,17 @@ class TaskStatusView:
     next_step: str | None
     reason: str | None
 
+    def as_dict(self) -> dict[str, object]:
+        return {
+            "run_dir": str(self.run_dir),
+            "task_id": self.task_id,
+            "status": self.status,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
+            "next_step": self.next_step,
+            "reason": self.reason,
+        }
+
 
 @dataclass(frozen=True)
 class BatchStatusView:
@@ -40,6 +51,18 @@ class BatchStatusView:
     needs_review: int
     failed: int
     tasks: list[YamlMapping]
+
+    def as_dict(self) -> dict[str, object]:
+        return {
+            "batch_dir": str(self.batch_dir),
+            "batch_id": self.batch_id,
+            "status": self.status,
+            "task_count": self.task_count,
+            "completed": self.completed,
+            "needs_review": self.needs_review,
+            "failed": self.failed,
+            "tasks": self.tasks,
+        }
 
 
 def show_task_status(run_dir: Path) -> str:

@@ -40,6 +40,9 @@ class ValidationResult:
     def ok(self) -> bool:
         return not self.errors
 
+    def as_dict(self) -> dict[str, object]:
+        return {"ok": self.ok, "errors": self.errors, "warnings": self.warnings}
+
 
 def validate_packet_file(
     path: Path, *, strict: bool = False, root: Path | None = None, allow_disabled: bool = False

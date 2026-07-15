@@ -11,7 +11,10 @@ YamlMapping = dict[str, YamlValue]
 
 
 def load_yaml(path: Path) -> YamlValue:
-    data: object = yaml.safe_load(path.read_text(encoding="utf-8"))
+    try:
+        data: object = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except yaml.YAMLError as exc:
+        raise ValueError(f"invalid YAML in {path}: {exc}") from exc
     return normalize_yaml(data)
 
 

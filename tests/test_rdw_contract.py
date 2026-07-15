@@ -131,6 +131,25 @@ def test_router_infers_music_and_technical() -> None:
     assert idempotency["output_type"] == "feature_explainer"
 
 
+def test_explicit_output_type_shapes_resolved_contract() -> None:
+    contract = infer_contract(
+        TaskRequest(request="explain idempotency keys", output_type="summary"), root=ROOT
+    )
+
+    assert contract["output_type"] == "summary"
+    assert contract["task_id"] == "technical-idempotency-keys-summary"
+    assert contract["topic"] == "summary: explain idempotency keys"
+    inference = cast("dict[str, YamlValue]", contract["inference"])
+    assert inference["mode"] == "mixed"
+
+
+def test_router_surfaces_ambiguous_domain_warning() -> None:
+    contract = infer_contract(TaskRequest(request="explain a feature about genre"), root=ROOT)
+
+    warnings = cast("list[YamlValue]", contract["warnings"])
+    assert any("ambiguous domain inference" in str(warning) for warning in warnings)
+
+
 def test_infer_contract_includes_output_format() -> None:
     default = infer_contract(TaskRequest(request="explain idempotency keys"), root=ROOT)
     assert default["output_format"] == "markdown"
@@ -146,6 +165,44 @@ def test_infer_contract_includes_output_format() -> None:
     assert unknown["output_format"] == "pdf"
     warnings = cast("list[YamlValue]", unknown["warnings"])
     assert any("unknown output_format: pdf" in str(w) for w in warnings)
+
+
+def test_cli_json_validation_is_machine_readable(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    packet = tmp_path / "invalid.yaml"
+    packet.write_text("domain: [broken\n", encoding="utf-8")
+
+    assert main(["validate-packet", str(packet), "--root", str(ROOT), "--json"]) == 1
+
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["ok"] is False
+    assert payload["errors"]
+    assert "invalid YAML" in payload["errors"][0]
+
+
+def test_cli_json_task_plan_is_machine_readable(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    output = tmp_path / "task"
+
+    assert (
+        main(
+            [
+                "task",
+                "plan",
+                "--request",
+                "explain idempotency keys",
+                "--out",
+                str(output),
+                "--root",
+                str(ROOT),
+                "--json",
+            ]
+        )
+        == 0
+    )
+
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["ok"] is True
+    assert payload["task_id"] == "technical-idempotency-keys-feature-explainer"
+    assert payload["contract"]["output_type"] == "feature_explainer"
 
 
 def test_task_plan_writes_deterministic_bundle(tmp_path: Path) -> None:

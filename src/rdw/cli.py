@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -17,7 +18,7 @@ from rdw.lifecycle import (
 from rdw.planner import TaskRequest, plan_batch, plan_task
 from rdw.resources import asset_path
 from rdw.schema_export import export_schema
-from rdw.validation import validate_batch_file, validate_packet_file
+from rdw.validation import ValidationResult, validate_batch_file, validate_packet_file
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -25,8 +26,11 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         return int(args.func(args))
-    except ValueError as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
+    except (OSError, ValueError) as exc:
+        if bool(getattr(args, "json_output", False)):
+            _emit_json({"ok": False, "error": str(exc)})
+        else:
+            print(f"ERROR: {exc}", file=sys.stderr)
         return 1
 
 
@@ -36,10 +40,12 @@ def _build_parser() -> argparse.ArgumentParser:
     subcommands = parser.add_subparsers(dest="command", required=True)
 
     doctor = subcommands.add_parser("doctor", help="Check RDW installation health")
+    doctor.add_argument("--json", dest="json_output", action="store_true")
     doctor.set_defaults(func=_doctor)
 
     status = subcommands.add_parser("status", help="Show status for a planned task run")
     status.add_argument("run_dir", type=Path)
+    status.add_argument("--json", dest="json_output", action="store_true")
     status.set_defaults(func=_status)
 
     schema = subcommands.add_parser("schema", help="Export public JSON Schemas")
@@ -63,11 +69,13 @@ def _build_parser() -> argparse.ArgumentParser:
     validate_packet.add_argument("--strict", action="store_true")
     validate_packet.add_argument("--root", type=Path, default=Path.cwd())
     validate_packet.add_argument("--allow-disabled-domain", action="store_true")
+    validate_packet.add_argument("--json", dest="json_output", action="store_true")
     validate_packet.set_defaults(func=_validate_packet)
 
     validate_batch = subcommands.add_parser("validate-batch", help="Validate a batch task file")
     validate_batch.add_argument("path", type=Path)
     validate_batch.add_argument("--root", type=Path, default=Path.cwd())
+    validate_batch.add_argument("--json", dest="json_output", action="store_true")
     validate_batch.set_defaults(func=_validate_batch)
 
     new_domain = subcommands.add_parser("new-domain", help="Scaffold a new domain pack")
@@ -93,12 +101,14 @@ def _build_parser() -> argparse.ArgumentParser:
     task_plan.add_argument("--force", action="store_true")
     task_plan.add_argument("--no-overwrite", action="store_true")
     task_plan.add_argument("--run-id")
+    task_plan.add_argument("--json", dest="json_output", action="store_true")
     task_plan.set_defaults(func=_task_plan)
 
     task_mark = task_subcommands.add_parser("mark", help="Update task lifecycle status")
     task_mark.add_argument("status")
     task_mark.add_argument("run_dir", type=Path)
     task_mark.add_argument("--reason")
+    task_mark.add_argument("--json", dest="json_output", action="store_true")
     task_mark.set_defaults(func=_task_mark)
 
     batch = subcommands.add_parser("batch", help="Batch planning commands")
@@ -107,14 +117,17 @@ def _build_parser() -> argparse.ArgumentParser:
     batch_plan.add_argument("path", type=Path)
     batch_plan.add_argument("--out", type=Path, default=None)
     batch_plan.add_argument("--root", type=Path, default=Path.cwd())
+    batch_plan.add_argument("--json", dest="json_output", action="store_true")
     batch_plan.set_defaults(func=_batch_plan)
 
     batch_status = batch_subcommands.add_parser("status", help="Show batch run status")
     batch_status.add_argument("batch_dir", type=Path)
+    batch_status.add_argument("--json", dest="json_output", action="store_true")
     batch_status.set_defaults(func=_batch_status)
 
     batch_resume = batch_subcommands.add_parser("resume", help="List next batch tasks to run")
     batch_resume.add_argument("batch_dir", type=Path)
+    batch_resume.add_argument("--json", dest="json_output", action="store_true")
     batch_resume.set_defaults(func=_batch_resume)
 
     install_parser = subcommands.add_parser("install", help="Install slash commands and skills")
@@ -129,7 +142,7 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _doctor(_args: argparse.Namespace) -> int:
+def _doctor(args: argparse.Namespace) -> int:
     required = [
         ("SKILL.md", asset_path("SKILL.md")),
         ("pipeline orchestrator", asset_path("prompts", "pipeline-orchestrator.md")),
@@ -137,20 +150,40 @@ def _doctor(_args: argparse.Namespace) -> int:
         ("install templates", asset_path("install", "claude-commands", "rdw.md")),
     ]
     failed = False
-    print(f"rdw {__version__}")
-    print(f"python {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
+    checks: dict[str, bool] = {}
     for label, path in required:
         exists = path.is_file()
-        print(f"{'OK' if exists else 'MISSING'} {label}")
+        checks[label] = exists
         failed = failed or not exists
     output_root = Path.cwd() / "outputs"
     writable = _writable(output_root)
-    print(f"{'OK' if writable else 'WARN'} writable outputs: {output_root}")
+    if args.json_output:
+        _emit_json(
+            {
+                "ok": not failed,
+                "version": __version__,
+                "python": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
+                "checks": checks,
+                "writable_outputs": writable,
+                "output_root": str(output_root),
+            }
+        )
+    else:
+        print(f"rdw {__version__}")
+        print(f"python {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
+        for label, exists in checks.items():
+            print(f"{'OK' if exists else 'MISSING'} {label}")
+        print(f"{'OK' if writable else 'WARN'} writable outputs: {output_root}")
     return 1 if failed else 0
 
 
 def _status(args: argparse.Namespace) -> int:
-    print(show_task_status(args.run_dir))
+    if args.json_output:
+        from rdw.lifecycle import load_task_status_view
+
+        _emit_json(load_task_status_view(args.run_dir).as_dict())
+    else:
+        print(show_task_status(args.run_dir))
     return 0
 
 
@@ -186,12 +219,12 @@ def _validate_packet(args: argparse.Namespace) -> int:
         root=args.root,
         allow_disabled=bool(args.allow_disabled_domain),
     )
-    return _print_validation(result.errors, result.warnings, f"OK: {args.path}")
+    return _print_validation(result, f"OK: {args.path}", json_output=bool(args.json_output))
 
 
 def _validate_batch(args: argparse.Namespace) -> int:
     result = validate_batch_file(args.path, root=args.root)
-    return _print_validation(result.errors, result.warnings, f"OK: {args.path}")
+    return _print_validation(result, f"OK: {args.path}", json_output=bool(args.json_output))
 
 
 def _new_domain(args: argparse.Namespace) -> int:
@@ -223,34 +256,60 @@ def _task_plan(args: argparse.Namespace) -> int:
         no_overwrite=bool(args.no_overwrite),
         run_id=args.run_id,
     )
-    print(f"Planned {planned.task_id}")
-    print(f"Prompt bundle: {planned.output_dir / 'prompt-bundle.md'}")
+    if args.json_output:
+        _emit_json(
+            {
+                "ok": True,
+                "task_id": planned.task_id,
+                "output_dir": str(planned.output_dir),
+                "contract": planned.contract,
+            }
+        )
+    else:
+        print(f"Planned {planned.task_id}")
+        print(f"Prompt bundle: {planned.output_dir / 'prompt-bundle.md'}")
     return 0
 
 
 def _task_mark(args: argparse.Namespace) -> int:
     view = mark_task_status(args.run_dir, args.status, reason=args.reason)
-    print(f"Marked {view.task_id} -> {view.status}")
-    if view.reason:
-        print(f"reason: {view.reason}")
+    if args.json_output:
+        _emit_json(view.as_dict())
+    else:
+        print(f"Marked {view.task_id} -> {view.status}")
+        if view.reason:
+            print(f"reason: {view.reason}")
     return 0
 
 
 def _batch_plan(args: argparse.Namespace) -> int:
     output_dir = args.out or (Path.cwd() / "outputs" / "batches" / args.path.stem)
-    plan_batch(args.path, output_dir, root=args.root)
-    print(f"Planned batch: {output_dir}")
-    print(f"Summary: {output_dir / 'summary.yaml'}")
+    summary = plan_batch(args.path, output_dir, root=args.root)
+    if args.json_output:
+        _emit_json({"ok": True, "batch_dir": str(output_dir), "summary": summary})
+    else:
+        print(f"Planned batch: {output_dir}")
+        print(f"Summary: {output_dir / 'summary.yaml'}")
     return 0
 
 
 def _batch_status(args: argparse.Namespace) -> int:
-    print(show_batch_status(args.batch_dir))
+    if args.json_output:
+        from rdw.lifecycle import load_batch_status_view
+
+        _emit_json(load_batch_status_view(args.batch_dir).as_dict())
+    else:
+        print(show_batch_status(args.batch_dir))
     return 0
 
 
 def _batch_resume(args: argparse.Namespace) -> int:
-    print(format_batch_resume(args.batch_dir))
+    if args.json_output:
+        from rdw.lifecycle import batch_resume
+
+        _emit_json({"tasks": batch_resume(args.batch_dir)})
+    else:
+        print(format_batch_resume(args.batch_dir))
     return 0
 
 
@@ -271,7 +330,12 @@ def _install(args: argparse.Namespace) -> int:
     return 0
 
 
-def _print_validation(errors: list[str], warnings: list[str], success: str) -> int:
+def _print_validation(result: ValidationResult, success: str, *, json_output: bool) -> int:
+    if json_output:
+        _emit_json(result.as_dict())
+        return 0 if result.ok else 1
+    errors = result.errors
+    warnings = result.warnings
     for warning in warnings:
         print(f"WARN: {warning}")
     if errors:
@@ -280,6 +344,10 @@ def _print_validation(errors: list[str], warnings: list[str], success: str) -> i
         return 1
     print(success)
     return 0
+
+
+def _emit_json(payload: object) -> None:
+    print(json.dumps(payload, indent=2, sort_keys=True, default=str))
 
 
 def _writable(path: Path) -> bool:
