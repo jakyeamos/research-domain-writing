@@ -15,6 +15,10 @@
 3. Run quality gates:
 
 ```bash
+uv sync --locked
+uv lock --check
+python3 scripts/sync-package-assets.py --check
+shellcheck scripts/*.sh
 uv run ruff check .
 uv run ruff format --check .
 uv run basedpyright src tests scripts
@@ -30,6 +34,10 @@ uv run rdw validate-packet knowledge/basketball/demo-guard-2026-demo.yaml --stri
 uv run rdw validate-batch examples/batch-tasks.yaml
 uv run rdw task plan --request "improve the copy on my LIS leaderboard" --out /tmp/rdw-task-smoke
 uv run rdw batch plan examples/batch-tasks.yaml --out /tmp/rdw-batch-smoke
+uv run rdw task mark research-done /tmp/rdw-task-smoke
+uv run rdw task mark draft-done /tmp/rdw-task-smoke
+uv run rdw task mark qa-passed /tmp/rdw-task-smoke
+uv run rdw task mark final-done /tmp/rdw-task-smoke
 ```
 
 5. Run wheel smoke:
@@ -37,10 +45,17 @@ uv run rdw batch plan examples/batch-tasks.yaml --out /tmp/rdw-batch-smoke
 ```bash
 python -m venv /tmp/rdw-wheel-smoke
 /tmp/rdw-wheel-smoke/bin/pip install dist/*.whl
-/tmp/rdw-wheel-smoke/bin/rdw doctor
-/tmp/rdw-wheel-smoke/bin/rdw validate-packet knowledge/basketball/demo-guard-2026-demo.yaml --strict
-/tmp/rdw-wheel-smoke/bin/rdw task plan --request "explain idempotency keys" --domain technical --out /tmp/rdw-wheel-task
-/tmp/rdw-wheel-smoke/bin/rdw batch plan examples/batch-tasks.yaml --out /tmp/rdw-wheel-batch
+ASSET_ROOT=$(/tmp/rdw-wheel-smoke/bin/python -c 'from importlib.resources import files; print(files("rdw.assets"))')
+/tmp/rdw-wheel-smoke/bin/rdw doctor --json
+/tmp/rdw-wheel-smoke/bin/rdw validate-packet "$ASSET_ROOT/knowledge/basketball/demo-guard-2026-demo.yaml" --strict --root /tmp/rdw-wheel-root --json
+/tmp/rdw-wheel-smoke/bin/rdw validate-batch "$ASSET_ROOT/examples/batch-tasks.yaml" --root /tmp/rdw-wheel-root --json
+/tmp/rdw-wheel-smoke/bin/rdw task plan --request "explain idempotency keys" --out /tmp/rdw-wheel-task --root /tmp/rdw-wheel-root --json
+/tmp/rdw-wheel-smoke/bin/rdw batch plan "$ASSET_ROOT/examples/batch-tasks.yaml" --out /tmp/rdw-wheel-batch --root /tmp/rdw-wheel-root --json
+/tmp/rdw-wheel-smoke/bin/rdw task mark research-done /tmp/rdw-wheel-task --json
+/tmp/rdw-wheel-smoke/bin/rdw task mark draft-done /tmp/rdw-wheel-task --json
+/tmp/rdw-wheel-smoke/bin/rdw task mark qa-passed /tmp/rdw-wheel-task --json
+/tmp/rdw-wheel-smoke/bin/rdw task mark final-done /tmp/rdw-wheel-task --json
+/tmp/rdw-wheel-smoke/bin/rdw install --target all --home /tmp/rdw-wheel-home
 ```
 
 6. Run manual slash smoke after installing templates:
@@ -48,6 +63,11 @@ python -m venv /tmp/rdw-wheel-smoke
 ```bash
 uv run rdw install --target all
 ```
+
+Installation stages the packaged skill tree before replacing its managed root.
+Existing unrelated real directories and command files are protected by
+default; use `--backup` or `--force` deliberately when an existing consumer
+surface must be replaced.
 
 Then start a fresh agent session and verify:
 
@@ -64,8 +84,9 @@ uv run python scripts/run-pre-cr-python-tests.py
 Use `pre-cr run --json --workspace .` only for changed-file readiness during PR work, not as the sole release coverage command.
 
 8. Confirm generated run outputs are ignored and only curated examples/package assets are committed.
-9. Commit release changes, merge to `main`, tag `v0.2.0`, push `main` and the tag.
-10. Publish to PyPI.
+9. Confirm `git diff --check` is clean and `.tracker/PROJECT_TRUTH.md` records the final verification state.
+10. Commit release changes, merge to `main`, tag `v0.2.0`, push `main` and the tag.
+11. Publish to PyPI.
 
 For an interactive PyPI token and publish flow, run:
 

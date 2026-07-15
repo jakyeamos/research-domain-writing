@@ -209,19 +209,21 @@ run_cmd() {
   "$@"
 }
 
+require_cmd git
+require_cmd uv
+require_cmd python3
+require_cmd shellcheck
+if [[ ! -f pyproject.toml || ! -d src/rdw ]]; then
+  warn "run this from the research-domain-writing repo root"
+  exit 1
+fi
+PROJECT_VERSION="$(python3 -c 'import tomllib; from pathlib import Path; print(tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))["project"]["version"])')"
+
 banner "RDW PyPI publish"
 
 stage "Release preflight" 2
 say "This wizard publishes ${PROJECT_NAME} ${PROJECT_VERSION} to PyPI."
 say "It assumes the release commit is already merged to main and tagged v${PROJECT_VERSION}."
-require_cmd git
-require_cmd uv
-require_cmd python3
-PROJECT_VERSION="$(python3 -c 'import tomllib; from pathlib import Path; print(tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))["project"]["version"])')"
-if [[ ! -f pyproject.toml || ! -d src/rdw ]]; then
-  warn "run this from the research-domain-writing repo root"
-  exit 1
-fi
 CURRENT_BRANCH="$(git branch --show-current)"
 CURRENT_HEAD="$(git rev-parse HEAD)"
 TAG_HEAD="$(git rev-list -n 1 "v${PROJECT_VERSION}" 2>/dev/null || true)"
@@ -240,6 +242,9 @@ if [[ -n "$(git status --porcelain --untracked-files=no)" ]]; then
   git status --short
   exit 1
 fi
+run_cmd uv lock --check
+run_cmd python3 scripts/sync-package-assets.py --check
+run_cmd shellcheck scripts/*.sh
 say "main and v${PROJECT_VERSION} both point at $CURRENT_HEAD."
 say "Untracked files are ignored by this preflight; generated build folders are expected."
 pause "Preflight looks good. Continue?"

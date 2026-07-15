@@ -26,9 +26,15 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         return int(args.func(args))
-    except (OSError, ValueError) as exc:
+    except OSError as exc:
         if bool(getattr(args, "json_output", False)):
-            _emit_json({"ok": False, "error": str(exc)})
+            _emit_json({"ok": False, "category": "environment", "error": str(exc)})
+        else:
+            print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
+    except ValueError as exc:
+        if bool(getattr(args, "json_output", False)):
+            _emit_json({"ok": False, "category": "validation", "error": str(exc)})
         else:
             print(f"ERROR: {exc}", file=sys.stderr)
         return 1
@@ -165,7 +171,6 @@ def _doctor(args: argparse.Namespace) -> int:
                 "python": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
                 "checks": checks,
                 "writable_outputs": writable,
-                "output_root": str(output_root),
             }
         )
     else:

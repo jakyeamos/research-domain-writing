@@ -67,6 +67,20 @@ rdw batch plan examples/batch-tasks.yaml --out .rdw-runs/demo-batch
 
 This validates the batch file, expands each task into a deterministic task folder, and writes `summary.yaml` plus `batch-log.jsonl` with `planned` statuses.
 
+### 4. Inspect and advance a run
+
+Lifecycle state is explicit and ordered:
+
+```text
+planned -> research-done -> draft-done -> qa-passed -> final-done
+                                      \-> qa-failed -> research-done or draft-done
+```
+
+Use `--reason` when marking `qa-failed`. Invalid jumps are rejected without
+changing the run artifacts. Status and batch views are read-only; automation
+can use `--json` on doctor, validators, planners, status, resume, and task
+marking commands.
+
 ## Core Commands
 
 ```bash
@@ -79,7 +93,14 @@ rdw batch plan examples/batch-tasks.yaml --out .rdw-runs/demo-batch
 rdw install --target claude
 rdw install --target cursor
 rdw install --target agents
+rdw validate-packet knowledge/basketball/demo-guard-2026-demo.yaml --strict --json
+rdw status .rdw-runs/lis-leaderboard --json
+rdw batch status .rdw-runs/demo-batch --json
 ```
+
+`rdw install` stages packaged assets before replacing its managed install root.
+Existing unrelated real directories and managed command files are protected by
+default; use `--backup` or `--force` explicitly when replacing them.
 
 Legacy scripts remain as thin wrappers:
 
@@ -191,6 +212,10 @@ Natural language is usually enough. The router infers domain, entity, output typ
 Before release or a serious PR:
 
 ```bash
+uv sync --locked
+uv lock --check
+python3 scripts/sync-package-assets.py --check
+shellcheck scripts/*.sh
 uv run ruff check .
 uv run ruff format --check .
 uv run basedpyright src tests scripts
@@ -203,8 +228,13 @@ Wheel smoke:
 ```bash
 python -m venv /tmp/rdw-wheel-smoke
 /tmp/rdw-wheel-smoke/bin/pip install dist/*.whl
-/tmp/rdw-wheel-smoke/bin/rdw doctor
+/tmp/rdw-wheel-smoke/bin/rdw doctor --json
 ```
+
+The wheel smoke should run the critical doctor, strict packet, batch
+validation/planning, schema export, lifecycle, and install commands against
+the wheel's packaged assets, not paths from the source checkout. See
+[RELEASE.md](RELEASE.md) for the complete sequence.
 
 ## License
 
