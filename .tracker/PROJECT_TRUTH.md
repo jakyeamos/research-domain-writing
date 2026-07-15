@@ -1,13 +1,13 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: RDW v0.2.0 is a healthy installable agent-first CLI/package with green code checks, but modernization planning found stale lock, release, and source/package truth surfaces.
-healthScore: 82
-statusLabel: modernization_baseline
-nextStep: Review docs/modernization/TARGET.md and EXEC_PLAN.md, then begin the protected M0 modernization slice.
+summary: RDW v0.2.0 is a healthy installable agent-first CLI/package with canonical source/package asset parity and release metadata aligned on the modernization branch.
+healthScore: 86
+statusLabel: modernization_m1
+nextStep: Implement M2 by resolving planner/router contracts and adding structured CLI diagnostics.
 blockers:
-  - Current release surfaces are not publish-ready until uv.lock, packaged release metadata, and the PyPI wizard version are aligned.
   - Slash-command behavior still needs a manual post-install smoke in each target agent before broader announcement.
+  - The modernization branch is not a release action; publishing remains explicitly deferred until final review and cutover.
 lastUpdated: 2026-07-15
 tags: [aios, writing, research, skill, python, cli, pypi]
 areas: [engineering, writing]
@@ -15,16 +15,16 @@ goals: []
 repoType: tool
 sourceOfTruth: mixed
 primaryLanguage: Python
-activeBranch: main
+activeBranch: codex/rdw-gpt56-modernization
 lastCommitDate: 2026-07-15
 quality:
   lint: pass
   types: pass
   tests: pass
   deadCode: pass
-  structure: warning
-  lock: fail
-  package: warning
+  structure: pass
+  lock: pass
+  package: pass
   shell: pass
 canonicalCommands:
   install: uv sync
@@ -48,8 +48,9 @@ The v0.2.0 repo has a real `rdw` Python CLI that validates packets and batches, 
 
 The 2026-07-15 modernization baseline is green for lint, formatting, types,
 tests, build, CLI smoke, shellcheck, scoped dead-code, and isolated wheel use.
-The baseline also confirms stale lock/package/release metadata and lifecycle/
-contract duplication risks; these are captured in `docs/modernization/`.
+The first implementation slice now derives release version truth from
+`pyproject.toml`, checks the lockfile, and verifies that root authoring assets
+match the packaged wheel assets.
 
 ## What Exists
 
@@ -71,6 +72,8 @@ contract duplication risks; these are captured in `docs/modernization/`.
 - `RELEASE.md` and `CHANGELOG.md` for release governance.
 - `docs/modernization/AUDIT.md`, `TARGET.md`, `EXEC_PLAN.md`, and `PROGRESS.md`
   for the proposed in-place modernization.
+- `scripts/sync-package-assets.py --check|--sync` as the canonical root/package
+  asset parity check and synchronization tool.
 
 ## What Does Not Exist Yet
 
@@ -80,32 +83,31 @@ contract duplication risks; these are captured in `docs/modernization/`.
 - Adapter extras are stubs; RDW does not call model APIs by default.
 - No diff-based regression tests on QA rules.
 - No dedicated dead-code CI gate is configured; the scoped Vulture baseline is clean.
-- No canonical source/package asset parity gate exists yet.
+- Planner/router contracts and structured CLI diagnostics are not unified yet.
 
 ## Next Step
 
-Review the modernization target and execution plan. If accepted, create the
-protected implementation branch/worktree and begin M0. Do not publish or retag
-until the lockfile, package assets, release docs, and publish wizard are aligned.
+Implement M2 from `docs/modernization/EXEC_PLAN.md`: make planner/router
+resolution explicit, add stable JSON diagnostics for machine consumers, and
+preserve the existing human-readable CLI output.
 
 ## Quality Ladder Notes
 
 2026-07-15: Baseline passed `uv run ruff check .`, `uv run ruff format --check .`,
 `uv run basedpyright src tests scripts`, `uv run pytest -q` (36), the pre-CR
 coverage wrapper, `shellcheck scripts/*.sh`, scoped Vulture, `uv build`, and
-source/isolated-wheel CLI smoke. `uv lock --check` failed because the editable
-package entry still says 0.1.0.
+source/isolated-wheel CLI smoke.
 
-2026-07-15: Root/package content directories match, but packaged RELEASE.md,
-root SKILL.md, packaged CHANGELOG.md, publish wizard version, and uv.lock drift
-from the v0.2.0 source release. See `docs/modernization/AUDIT.md`.
+2026-07-15: M0/M1 committed as `5bc91e3`: `uv.lock`, packaged release metadata,
+the PyPI wizard version, CI lock/shell/package checks, and the canonical
+root/package asset sync are aligned for v0.2.0.
 
 2026-07-15: Modernization strategy is deep refactor in place. Preserve the
 no-LLM core boundary, CLI names, packet semantics, and run-artifact paths;
 replace duplicated contracts, unsafe lifecycle writes, and manual asset mirrors.
 
-2026-07-15: Committed the modernization planning packet in `d6d9212`; application
-implementation has not started and remains paused for target review.
+2026-07-15: Committed the modernization planning packet in `d6d9212`; the
+approved implementation branch is now `codex/rdw-gpt56-modernization`.
 
 ## Agent Notes
 
