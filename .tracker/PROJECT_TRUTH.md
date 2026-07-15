@@ -1,10 +1,10 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: RDW v0.2.0 is a healthy installable agent-first CLI/package with explicit contracts, guarded lifecycle state, transactional installs, and fresh-wheel parity on the modernization branch.
-healthScore: 93
-statusLabel: modernization_m4
-nextStep: Implement M5 by hardening release CI, documenting the canonical checks, and removing stale release-path assumptions.
+summary: RDW v0.2.0 is a healthy installable agent-first CLI/package with explicit contracts, guarded lifecycle state, transactional installs, and a documented fresh-wheel release proof on the modernization branch.
+healthScore: 95
+statusLabel: modernization_m5
+nextStep: Run M6 adversarial review and final validation, then decide whether the branch is ready for merge/tag/publish.
 blockers:
   - Slash-command behavior still needs a manual post-install smoke in each target agent before broader announcement.
   - The modernization branch is not a release action; publishing remains explicitly deferred until final review and cutover.
@@ -52,8 +52,8 @@ The modernization branch derives release version truth from `pyproject.toml`,
 checks the lockfile, verifies root/package asset parity, resolves explicit
 planner overrides into the final contract, supports JSON diagnostics, enforces
 legal lifecycle transitions, atomically persists run state, stages managed
-package assets before replacement, and proves critical flows from an isolated
-wheel.
+package assets before replacement, and documents the full isolated-wheel proof
+in CI and `RELEASE.md`.
 
 ## What Exists
 
@@ -96,13 +96,15 @@ wheel.
 - No diff-based regression tests on QA rules.
 - No dedicated dead-code CI gate is configured; the scoped Vulture baseline is clean.
 - Release CI still needs the full fresh-wheel critical-flow matrix and the
-  user-facing release docs need to describe the new canonical checks.
+- Remote CI has not yet run on this branch; local source, wheel, lock, asset,
+  shell, type, test, and pre-CR checks are green.
 
 ## Next Step
 
-Implement M5 from `docs/modernization/EXEC_PLAN.md`: make CI and release docs
-prove source/package/wheel/install parity, then audit stale version and manual
-package-copy assumptions.
+Run M6 from `docs/modernization/EXEC_PLAN.md`: adversarially review contract
+compatibility, lifecycle/data integrity, installer safety, package parity,
+documentation drift, and the complete quality ladder. Do not publish from this
+branch as part of the review.
 
 ## Quality Ladder Notes
 
@@ -126,6 +128,10 @@ read-only batch status, and append-only batch events are covered by 42 tests.
 2026-07-15: M4 committed as `c627bc7`: staged managed asset replacement,
 unmanaged-root protection, command-file safety, packaged-resource fallback, and
 isolated-wheel proof passed with 46 tests.
+
+2026-07-15: M5 committed as `8dff263`: CI and release docs now prove locked
+source/package/wheel/install parity; the PyPI wizard runs lock, asset, and
+shell preflights; local release ladder passes 47 tests and pre-CR coverage.
 
 2026-07-15: Modernization strategy is deep refactor in place. Preserve the
 no-LLM core boundary, CLI names, packet semantics, and run-artifact paths;
