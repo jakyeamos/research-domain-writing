@@ -1,10 +1,10 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: RDW v0.2.0 modernization is implementation-complete and release-proofed on a feature branch; the provider-neutral adapter contract, deterministic research-to-QA slice, packet-lineage decision, evidence-aware diff-QA contract, and bounded batch-executor semantics are now verified while the core remains offline and auditable.
+summary: RDW v0.2.0 modernization now includes the serial filesystem-first fixture batch executor; the provider-neutral adapter contract, deterministic research-to-QA slice, packet-lineage decision, evidence-aware diff-QA contract, and bounded batch-executor implementation are verified while the core remains offline and auditable.
 healthScore: 97
-statusLabel: batch_executor_semantics_decided
-nextStep: Implement the serial filesystem-first batch executor in Wayfinder ticket #10; review/merge draft PR #9, tagging, and publishing remain separate authorized release actions.
+statusLabel: batch_executor_implemented
+nextStep: Review and close Wayfinder ticket #10, then advance the parent map; review/merge draft PR #9, tagging, and publishing remain separate authorized release actions.
 blockers:
   - A fresh Codex task was not opened for slash smoke; the installed Codex/agents surface was verified by symlink and skill-content inspection.
   - The modernization branch is not a release action; merge, tagging, and publishing remain explicitly deferred.
@@ -97,6 +97,13 @@ serial input-order dispatch first, bound attempts and time, make pause/cancel
 cooperative, require explicit reconciliation for unknown attempts, continue
 independent tasks after review/failure, and never roll back completed work.
 
+Wayfinder ticket #10 is now implemented in `src/rdw/batch_execution.py`.
+`rdw batch execute --fixture-map` runs the serial fixture slice with typed
+policy bounds, an exclusive filesystem lease, immutable attempt receipts,
+event-ID replay projection, cooperative pause/cancel, partial-success counts,
+and explicit unknown-attempt recovery. The implementation does not add a
+provider SDK, browser, model call, database, parallel worker, or packet merge.
+
 ## What Exists
 
 - `README.md` explaining the full pipeline, slash-command usage, batch workflow, domain packs, and limitations.
@@ -106,8 +113,8 @@ independent tasks after review/failure, and never roll back completed work.
 - `domains/` and `config/` for domain-specific writing and source rules.
 - `knowledge/` examples and reusable packet patterns.
 - `examples/` with end-to-end sample tasks.
-- `rdw doctor`, `rdw validate-packet`, `rdw validate-batch`, `rdw new-domain`, `rdw task plan`, `rdw batch plan`, and `rdw install`.
-- Lifecycle commands: `rdw status`, `rdw task mark`, `rdw batch status`, `rdw batch resume`.
+- `rdw doctor`, `rdw validate-packet`, `rdw validate-batch`, `rdw new-domain`, `rdw task plan`, `rdw batch plan`, `rdw batch execute`, `rdw batch pause`, `rdw batch cancel`, and `rdw install`.
+- Lifecycle commands: `rdw status`, `rdw task mark`, `rdw batch status`, and read-only `rdw batch resume`.
 - Schema export: `rdw schema packet|batch|task-contract --format jsonschema`.
 - Optional adapter stubs: `rdw adapter list`, `rdw adapter run <name> <run-dir>`.
 - Task and batch planning now carry `output_format` through inferred contracts, CLI overrides, warnings for unknown formats, and golden prompt bundles.
@@ -148,9 +155,9 @@ independent tasks after review/failure, and never roll back completed work.
 
 ## What Does Not Exist Yet
 
-- No autonomous batch execution runner yet; `rdw batch plan` still validates
-  and expands planned task bundles only. ADR-004 defines the bounded
-  serial-first implementation contract.
+- No live/provider-backed autonomous batch execution runner yet. The bounded
+  serial fixture executor exists for deterministic integration proof; real
+  research, drafting, QA, and humanizer work remain agent-led.
 - No packet merge/conflict resolution implementation yet; ADR-002 defines the
   next filesystem-backed implementation contract.
 - No mature legal, finance, or medicine domain packs.
@@ -167,8 +174,9 @@ independent tasks after review/failure, and never roll back completed work.
 The modernization and release verification boundary are complete on
 `codex/rdw-gpt56-modernization`, and the provider-neutral adapter boundary, the
 first deterministic vertical slice, the packet-lineage decision, the
-evidence-aware diff-QA contract, and the batch-executor semantics are verified.
-The next slice is [Implement the serial filesystem-first batch executor](https://github.com/jakyeamos/research-domain-writing/issues/10), the bounded serial-first implementation described by ADR-004.
+evidence-aware diff-QA contract, and the bounded batch-executor implementation
+are verified. The next map action is to review and close
+[Implement the serial filesystem-first batch executor](https://github.com/jakyeamos/research-domain-writing/issues/10), then advance the remaining fog items.
 Review/merge of draft PR #9, tagging, and publishing remain separate release
 actions; do not infer them from local or remote verification.
 
@@ -220,6 +228,15 @@ pause/resume/cancel behavior, partial-success projection, explicit unknown-
 attempt reconciliation, and no rollback. TMCP review
 `tmcp-review-plan-3f488911` passed all validations; full checks remain at 52
 tests with lint, types, lock, package parity, and shell gates green.
+
+2026-07-15: Ticket #10 implementation committed in `aae6dcd`: serial
+filesystem-first fixture batch execution, typed policy bounds, exclusive
+leases, immutable attempt receipts, retry/backoff, event replay dedupe,
+cooperative pause/cancel, partial success, and unknown-attempt recovery. Full
+checks passed with 62 tests, Ruff, basedpyright, Vulture, package parity, and
+the final sdist/wheel build; pre-CR also warned that the new executor module is
+larger than the preferred single-file source limit and needs a maintainability
+follow-up.
 
 2026-07-15: M2 committed as `ab2ef1f`: explicit planner overrides now shape
 the resolved task contract, ambiguous routing emits warnings, malformed YAML
