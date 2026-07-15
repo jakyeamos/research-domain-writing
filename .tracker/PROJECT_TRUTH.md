@@ -1,10 +1,10 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: RDW v0.2.0 modernization is implementation-complete and release-proofed on a feature branch, with source/package parity, guarded lifecycle state, transactional installs, machine-readable CLI contracts, verified remote CI, and Claude/Cursor target-agent smoke coverage.
+summary: RDW v0.2.0 modernization is implementation-complete and release-proofed on a feature branch; the next-phase provider-neutral, one-task adapter contract is accepted in ADR-001 while the deterministic core remains offline and auditable.
 healthScore: 97
-statusLabel: modernization_release_boundary_verified
-nextStep: Review and merge draft PR #9 when ready; tag and publish remain separate explicitly authorized release actions.
+statusLabel: adapter_contract_decided
+nextStep: Implement the deterministic fixture adapter and receipt validator described in ADR-001 through Wayfinder ticket #4; review/merge draft PR #9, tagging, and publishing remain separate authorized release actions.
 blockers:
   - A fresh Codex task was not opened for slash smoke; the installed Codex/agents surface was verified by symlink and skill-content inspection.
   - The modernization branch is not a release action; merge, tagging, and publishing remain explicitly deferred.
@@ -55,12 +55,18 @@ stable exit categories, enforces legal lifecycle transitions, atomically
 persists run state, stages managed package assets before replacement, and
 documents the full isolated-wheel proof in CI and `RELEASE.md`.
 
-The release boundary is now verified by draft PR #9: GitHub Actions run #2
+The release boundary is now verified by draft PR #9: GitHub Actions run #3
 passed on Python 3.12 and 3.13, and fresh Claude and Cursor sessions both
 recognized `/rdw improve the copy on my LIS leaderboard`, inferred a task
 contract, and stopped when grounded LIS source material was missing. The
 Codex/agents install surface is present and points at this checkout; a fresh
 Codex task smoke remains intentionally unrun.
+
+The next-phase trust boundary is now explicit in
+`docs/architecture/ADR-001-provider-neutral-adapter-contract.md`: one task at
+a time, adapter-owned namespaced staging and receipts, core-owned validation,
+promotion, and lifecycle events, with network and credentials kept outside
+the deterministic core. No provider SDK has been added.
 
 ## What Exists
 
@@ -82,6 +88,8 @@ Codex task smoke remains intentionally unrun.
 - `RELEASE.md` and `CHANGELOG.md` for release governance.
 - `docs/modernization/AUDIT.md`, `TARGET.md`, `EXEC_PLAN.md`, and `PROGRESS.md`
   for the proposed in-place modernization.
+- `docs/architecture/ADR-001-provider-neutral-adapter-contract.md` defining
+  the provider-neutral one-task adapter receipt and trust boundary.
 - `scripts/sync-package-assets.py --check|--sync` as the canonical root/package
   asset parity check and synchronization tool.
 - `--json` output for validation, task/batch planning, status, resume, and
@@ -101,17 +109,21 @@ Codex task smoke remains intentionally unrun.
 - No autonomous batch execution runner; `rdw batch plan` validates and expands planned task bundles only.
 - No robust packet merge/conflict resolution for concurrent updates.
 - No mature legal, finance, or medicine domain packs.
-- Adapter extras are stubs; RDW does not call model APIs by default.
+- No typed adapter request/receipt executor or artifact-promotion gate exists
+  yet; adapters remain stubs and RDW does not call model APIs by default. The
+  accepted contract is documented in ADR-001.
 - No diff-based regression tests on QA rules.
 - No fresh Codex task slash smoke has been captured; the installed Codex/agents
   surface has been verified by symlink and skill-content inspection.
 
 ## Next Step
 
-Implementation and the release verification boundary are complete on
-`codex/rdw-gpt56-modernization`. The next decision is review/merge of draft PR
-#9. Do not tag or publish solely because CI and local verification passed;
-those remain separate release actions.
+The modernization and release verification boundary are complete on
+`codex/rdw-gpt56-modernization`, and the provider-neutral adapter boundary is
+decided. The next implementation slice is the deterministic fixture adapter
+and receipt validator in Wayfinder ticket #4. Review/merge of draft PR #9,
+tagging, and publishing remain separate release actions; do not infer them
+from local or remote verification.
 
 ## Quality Ladder Notes
 
@@ -124,11 +136,17 @@ source/isolated-wheel CLI smoke.
 the PyPI wizard version, CI lock/shell/package checks, and the canonical
 root/package asset sync are aligned for v0.2.0.
 
-2026-07-15: Release boundary verified in draft PR #9: GitHub Actions run #2
+2026-07-15: Release boundary verified in draft PR #9: GitHub Actions run #3
 passed on Python 3.12 and 3.13; fresh Claude and Cursor `/rdw` smoke sessions
 inferred the LIS task contract and requested missing grounding instead of
 inventing facts. Codex/agents surface inspection passed; no fresh Codex task
 was opened.
+
+2026-07-15: Ticket #3 decision committed as `c2fdd40`: ADR-001 defines a
+provider-neutral, one-task artifact-first adapter contract. Adapters stage
+namespaced receipts and artifacts; the core validates, promotes, and owns
+lifecycle events. Provider SDKs, browsing, and autonomous batch execution
+remain deferred.
 
 2026-07-15: M2 committed as `ab2ef1f`: explicit planner overrides now shape
 the resolved task contract, ambiguous routing emits warnings, malformed YAML
