@@ -4,7 +4,7 @@ projectName: Research Domain Writing
 summary: RDW v0.2.0 modernization is implementation-complete and release-proofed on a feature branch; the provider-neutral adapter contract, deterministic research-to-QA slice, packet-lineage decision, evidence-aware diff-QA contract, and bounded batch-executor semantics are now verified while the core remains offline and auditable.
 healthScore: 97
 statusLabel: batch_executor_semantics_decided
-nextStep: Implement the bounded serial-first batch executor described by ADR-004; review/merge draft PR #9, tagging, and publishing remain separate authorized release actions.
+nextStep: Implement the serial filesystem-first batch executor in Wayfinder ticket #10; review/merge draft PR #9, tagging, and publishing remain separate authorized release actions.
 blockers:
   - A fresh Codex task was not opened for slash smoke; the installed Codex/agents surface was verified by symlink and skill-content inspection.
   - The modernization branch is not a release action; merge, tagging, and publishing remain explicitly deferred.
@@ -168,8 +168,7 @@ The modernization and release verification boundary are complete on
 `codex/rdw-gpt56-modernization`, and the provider-neutral adapter boundary, the
 first deterministic vertical slice, the packet-lineage decision, the
 evidence-aware diff-QA contract, and the batch-executor semantics are verified.
-The next slice is to implement the bounded serial-first executor described by
-ADR-004.
+The next slice is [Implement the serial filesystem-first batch executor](https://github.com/jakyeamos/research-domain-writing/issues/10), the bounded serial-first implementation described by ADR-004.
 Review/merge of draft PR #9, tagging, and publishing remain separate release
 actions; do not infer them from local or remote verification.
 
