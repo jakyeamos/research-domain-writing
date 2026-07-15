@@ -106,8 +106,8 @@ synthetic basketball pack remains `example_only` until those gates pass.
 
 Ticket #11 now implements an explicit `mature` basketball packet validator,
 source-grounded ranking/player/team-fit acceptance packets, positive and
-negative fixture coverage, and a deterministic claim-ledger validator exposed
-through `rdw validate-claim-ledger`. The generic validator remains compatible
+negative fixture coverage, deterministic claim-ledger and draft misuse checks
+exposed through `rdw validate-claim-ledger`. The generic validator remains compatible
 with the existing basketball demo, music packet, and technical packet; the
 new acceptance corpus remains example-only and does not add browsing, provider
 SDKs, ranking calculation, or model calls.
@@ -291,6 +291,12 @@ with 66 tests, Ruff, formatting, basedpyright, Vulture, shellcheck, lock
 verification, package parity, pre-CR, sdist/wheel build, and isolated-wheel
 mature packet plus claim-ledger smoke. `example_only` remains true pending
 full pipeline and human review.
+
+2026-07-15: Ticket #11 QA follow-up committed in `8eef1bb`: executable
+unsupported-injury and forbidden-generic-praise negatives now run through the
+claim-ledger gate; full tests, Ruff, basedpyright, and package parity remain
+green. Pre-CR flagged `src/rdw/validation.py` at 617 nonblank lines for a
+maintainability split before the ticket is closed.
 
 2026-07-15: M2 committed as `ab2ef1f`: explicit planner overrides now shape
 the resolved task contract, ambiguous routing emits warnings, malformed YAML
