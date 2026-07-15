@@ -16,7 +16,7 @@ repoType: tool
 sourceOfTruth: mixed
 primaryLanguage: Python
 activeBranch: main
-lastCommitDate: 2026-07-09
+lastCommitDate: 2026-07-15
 quality:
   lint: pass
   types: pass
@@ -103,6 +103,9 @@ from the v0.2.0 source release. See `docs/modernization/AUDIT.md`.
 2026-07-15: Modernization strategy is deep refactor in place. Preserve the
 no-LLM core boundary, CLI names, packet semantics, and run-artifact paths;
 replace duplicated contracts, unsafe lifecycle writes, and manual asset mirrors.
+
+2026-07-15: Committed the modernization planning packet in `d6d9212`; application
+implementation has not started and remains paused for target review.
 
 ## Agent Notes
 
