@@ -1,10 +1,10 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: RDW v0.2.0 modernization is implementation-complete and release-proofed on a feature branch; the provider-neutral adapter contract and first deterministic research-to-QA vertical slice are now verified while the core remains offline and auditable.
+summary: RDW v0.2.0 modernization is implementation-complete and release-proofed on a feature branch; the provider-neutral adapter contract, deterministic research-to-QA slice, and packet-lineage decision are now verified while the core remains offline and auditable.
 healthScore: 97
-statusLabel: fixture_vertical_slice_verified
-nextStep: Design packet lineage and conflict resolution in Wayfinder ticket #5; review/merge draft PR #9, tagging, and publishing remain separate authorized release actions.
+statusLabel: packet_lineage_decided
+nextStep: Create an evidence-aware diff QA regression contract in Wayfinder ticket #6; review/merge draft PR #9, tagging, and publishing remain separate authorized release actions.
 blockers:
   - A fresh Codex task was not opened for slash smoke; the installed Codex/agents surface was verified by symlink and skill-content inspection.
   - The modernization branch is not a release action; merge, tagging, and publishing remain explicitly deferred.
@@ -74,6 +74,13 @@ validated artifacts, records every attempt under `adapter-runs/fixture/`, and
 uses the existing lifecycle for `final-done`, `qa-failed`, and auditable retry
 behavior. The fixture runtime is deterministic and is not a provider API.
 
+The packet-lineage decision is now recorded in
+`docs/architecture/ADR-002-packet-lineage-and-conflict-resolution.md`: keep one
+accepted packet head, stage candidate revisions in run-local artifacts, require
+parent-head matching for explicit replacement, and preserve stale candidates in
+conflict/resolution artifacts. Automatic merges, last-write-wins behavior, and
+hidden persistence remain out of scope.
+
 ## What Exists
 
 - `README.md` explaining the full pipeline, slash-command usage, batch workflow, domain packs, and limitations.
@@ -96,6 +103,9 @@ behavior. The fixture runtime is deterministic and is not a provider API.
   for the proposed in-place modernization.
 - `docs/architecture/ADR-001-provider-neutral-adapter-contract.md` defining
   the provider-neutral one-task adapter receipt and trust boundary.
+- `docs/architecture/ADR-002-packet-lineage-and-conflict-resolution.md` defining
+  file-backed packet revisions, claim/source provenance, conflict categories,
+  human resolution artifacts, and explicit promotion rules.
 - `src/rdw/execution.py` as the core fixture executor and receipt/artifact
   validation gate.
 - `src/rdw/adapters/fixture.py` plus `examples/fixtures/` as the deterministic
@@ -117,7 +127,8 @@ behavior. The fixture runtime is deterministic and is not a provider API.
 ## What Does Not Exist Yet
 
 - No autonomous batch execution runner; `rdw batch plan` validates and expands planned task bundles only.
-- No robust packet merge/conflict resolution for concurrent updates.
+- No packet merge/conflict resolution implementation yet; ADR-002 defines the
+  next filesystem-backed implementation contract.
 - No mature legal, finance, or medicine domain packs.
 - No real provider adapter or autonomous external-runtime integration exists;
   the typed receipt/promotion path is currently exercised by the deterministic
@@ -129,9 +140,10 @@ behavior. The fixture runtime is deterministic and is not a provider API.
 ## Next Step
 
 The modernization and release verification boundary are complete on
-`codex/rdw-gpt56-modernization`, and the provider-neutral adapter boundary plus
-the first deterministic vertical slice are verified. The next Wayfinder slice
-is [Design packet lineage and conflict resolution](https://github.com/jakyeamos/research-domain-writing/issues/5).
+`codex/rdw-gpt56-modernization`, and the provider-neutral adapter boundary, the
+first deterministic vertical slice, and the packet-lineage decision are
+verified. The next Wayfinder slice is [Create an evidence-aware diff QA
+regression contract](https://github.com/jakyeamos/research-domain-writing/issues/6).
 Review/merge of draft PR #9, tagging, and publishing remain separate release
 actions; do not infer them from local or remote verification.
 
@@ -163,6 +175,12 @@ remain deferred.
  gates, promote five run-local artifacts, preserve rejected/uncertain work,
  and demonstrate `qa-failed` -> `--resume` -> `final-done`. Full checks passed
  with 52 tests, package/build gates, and isolated wheel execution.
+
+2026-07-15: Ticket #5 committed in `f859b4a`: ADR-002 defines stable packet
+identity, content-addressed revisions, claim/source provenance, append-only
+candidate review, explicit replacement, conflict artifacts, and human
+resolution rules. Architecture review evidence passed; full checks remain at
+52 tests with lint, types, lock, package parity, and shell gates green.
 
 2026-07-15: M2 committed as `ab2ef1f`: explicit planner overrides now shape
 the resolved task contract, ambiguous routing emits warnings, malformed YAML
