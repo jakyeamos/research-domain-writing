@@ -1,10 +1,10 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: RDW v0.2.0 is a healthy installable agent-first CLI/package with canonical assets, explicit task contracts, and machine-readable CLI diagnostics on the modernization branch.
-healthScore: 88
-statusLabel: modernization_m2
-nextStep: Implement M3 by enforcing lifecycle transitions and making run-artifact writes atomic.
+summary: RDW v0.2.0 is a healthy installable agent-first CLI/package with explicit contracts, machine-readable diagnostics, and guarded lifecycle state on the modernization branch.
+healthScore: 90
+statusLabel: modernization_m3
+nextStep: Implement M4 by making package-asset installation and managed command writes safe for fresh and existing consumers.
 blockers:
   - Slash-command behavior still needs a manual post-install smoke in each target agent before broader announcement.
   - The modernization branch is not a release action; publishing remains explicitly deferred until final review and cutover.
@@ -50,8 +50,8 @@ The 2026-07-15 modernization baseline is green for lint, formatting, types,
 tests, build, CLI smoke, shellcheck, scoped dead-code, and isolated wheel use.
 The modernization branch derives release version truth from `pyproject.toml`,
 checks the lockfile, verifies root/package asset parity, resolves explicit
-planner overrides into the final contract, and supports JSON diagnostics for
-validation, planning, and lifecycle inspection.
+planner overrides into the final contract, supports JSON diagnostics, enforces
+legal lifecycle transitions, and atomically persists run state.
 
 ## What Exists
 
@@ -77,6 +77,8 @@ validation, planning, and lifecycle inspection.
   asset parity check and synchronization tool.
 - `--json` output for validation, task/batch planning, status, resume, and
   doctor commands.
+- `rdw` lifecycle transitions owned by `src/rdw/lifecycle.py`, with atomic
+  status/summary writes and append-only batch events.
 
 ## What Does Not Exist Yet
 
@@ -86,13 +88,14 @@ validation, planning, and lifecycle inspection.
 - Adapter extras are stubs; RDW does not call model APIs by default.
 - No diff-based regression tests on QA rules.
 - No dedicated dead-code CI gate is configured; the scoped Vulture baseline is clean.
-- Lifecycle writes are still direct and status transitions are not enforced.
+- Installer-managed command files and package-asset replacement are not yet
+  atomic or fully protected for existing consumers.
 
 ## Next Step
 
-Implement M3 from `docs/modernization/EXEC_PLAN.md`: enforce legal task status
-transitions, make status/summary/log writes atomic, and keep read-only status
-commands from mutating run artifacts.
+Implement M4 from `docs/modernization/EXEC_PLAN.md`: protect managed install
+paths, replace package assets safely, and verify fresh-consumer installs from
+an isolated wheel.
 
 ## Quality Ladder Notes
 
@@ -108,6 +111,10 @@ root/package asset sync are aligned for v0.2.0.
 2026-07-15: M2 committed as `ab2ef1f`: explicit planner overrides now shape
 the resolved task contract, ambiguous routing emits warnings, malformed YAML
 returns a controlled error, and JSON diagnostics are parseable on the CLI.
+
+2026-07-15: M3 committed as `ae0510b` plus formatter follow-up `9c790df`:
+legal lifecycle transitions, required QA-failure reasons, atomic state writes,
+read-only batch status, and append-only batch events are covered by 42 tests.
 
 2026-07-15: Modernization strategy is deep refactor in place. Preserve the
 no-LLM core boundary, CLI names, packet semantics, and run-artifact paths;
