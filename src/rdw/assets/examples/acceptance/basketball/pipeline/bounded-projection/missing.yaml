@@ -1,0 +1,10 @@
+task_id: basketball-acceptance-bounded-projection
+packet_id: basketball-player-nikola-jokic-profile-2026-07-15
+status: open
+missing_info:
+  - id: missing-projection-window
+    question: What is the exact season and game sample behind the current profile snapshot?
+    impact: No time-normalized forecast can be established from the supplied profile alone.
+  - id: missing-projection-drivers
+    question: How does the assist volume change with different lineups and defensive coverages?
+    impact: Ceiling, floor, and dependency drivers remain unmeasured.

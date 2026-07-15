@@ -1,0 +1,11 @@
+task_id: basketball-acceptance-player-comparison
+packet_id: basketball-player-nikola-jokic-profile-2026-07-15
+comparison_packet_id: basketball-player-jayson-tatum-2023-24
+status: open
+missing_info:
+  - id: missing-comparison-window
+    question: What is the exact season and game sample behind the current Jokić profile snapshot?
+    impact: The two player lines should not be treated as a like-for-like season comparison.
+  - id: missing-comparison-context
+    question: How do the listed numbers change with efficiency, lineups, and defensive responsibilities?
+    impact: The comparison remains limited to named box-score dimensions and listed roles.

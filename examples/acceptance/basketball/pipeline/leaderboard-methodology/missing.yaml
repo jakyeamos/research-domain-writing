@@ -1,0 +1,10 @@
+task_id: basketball-acceptance-ranking-methodology
+packet_id: basketball-ranking-usage-ts-change-2025-26
+status: open
+missing_info:
+  - id: missing-ranking-role-context
+    question: Does the source comparison control for team, lineup, or opponent context?
+    impact: The surface remains descriptive rather than a role-adjusted player-value model.
+  - id: missing-ranking-impact-context
+    question: How do the paired changes translate to defensive and playoff impact?
+    impact: Those dimensions must remain outside the copy until separately sourced.

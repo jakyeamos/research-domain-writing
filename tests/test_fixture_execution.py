@@ -15,6 +15,7 @@ FIXTURES = ROOT / "examples" / "fixtures"
 SUCCESS_FIXTURE = FIXTURES / "basketball-vertical-slice.yaml"
 QA_FAILED_FIXTURE = FIXTURES / "basketball-vertical-slice-qa-failed.yaml"
 REJECTED_FIXTURE = FIXTURES / "basketball-vertical-slice-rejected.yaml"
+ACCEPTANCE_FIXTURE = FIXTURES / "basketball-acceptance-ranking.yaml"
 
 
 def _plan_demo(run_dir: Path) -> None:
@@ -31,6 +32,26 @@ def _plan_demo(run_dir: Path) -> None:
             depth="standard",
             packet_id="basketball-player-demo-guard-2026",
             task_id="basketball-example-demo-guard-stat-interpretation",
+        ),
+        run_dir,
+        root=ROOT,
+    )
+
+
+def _plan_acceptance_ranking(run_dir: Path) -> None:
+    plan_task(
+        TaskRequest(
+            request=(
+                "Explain how to read a supplied usage-rate and true-shooting change comparison "
+                "without turning it into a complete player-value ranking."
+            ),
+            domain="basketball",
+            entity="Usage and true-shooting change comparison",
+            output_type="ranking_explanation",
+            audience="analytics-literate basketball readers",
+            depth="standard",
+            packet_id="basketball-ranking-usage-ts-change-2025-26",
+            task_id="basketball-acceptance-ranking-methodology",
         ),
         run_dir,
         root=ROOT,
@@ -68,6 +89,28 @@ def test_fixture_execution_completes_vertical_slice(tmp_path: Path) -> None:
     assert receipt["status"] == "succeeded"
     assert receipt["idempotency_key"] == result.idempotency_key
     assert receipt["artifacts"]
+    assert [
+        item["status"] for item in json.loads((run_dir / "status.json").read_text())["history"]
+    ] == [
+        "research-done",
+        "draft-done",
+        "qa-passed",
+        "final-done",
+    ]
+
+
+def test_fixture_execution_completes_source_grounded_acceptance_slice(tmp_path: Path) -> None:
+    run_dir = tmp_path / "acceptance-ranking-task"
+    _plan_acceptance_ranking(run_dir)
+
+    result = execute_fixture(run_dir, ACCEPTANCE_FIXTURE, root=ROOT)
+
+    assert result.adapter_status == "succeeded"
+    assert result.workflow_status == "final-done"
+    assert len(result.promoted_paths) == 5
+    assert (
+        run_dir / "outputs" / "final" / "basketball-acceptance-ranking-methodology.md"
+    ).is_file()
     assert [
         item["status"] for item in json.loads((run_dir / "status.json").read_text())["history"]
     ] == [
