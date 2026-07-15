@@ -26,6 +26,8 @@ jobs:
         run: uv run python scripts/sync-package-assets.py --check
       - name: Shellcheck
         run: shellcheck scripts/*.sh
+      - name: Dead-code scan
+        run: uv run vulture src scripts tests --min-confidence 70
       - name: Lint
         run: uv run ruff check .
       - name: Format check

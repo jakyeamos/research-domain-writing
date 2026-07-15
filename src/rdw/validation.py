@@ -7,19 +7,10 @@ from importlib.resources.abc import Traversable
 from pathlib import Path
 
 from rdw.config import enabled_domains, known_domains, output_formats
+from rdw.contracts import PACKET_REQUIRED_FIELDS
 from rdw.resources import asset_path
 from rdw.yaml_io import YamlMapping, YamlValue, load_yaml_mapping, load_yaml_mapping_text
 
-REQUIRED_PACKET_FIELDS = {
-    "id",
-    "domain",
-    "entity_type",
-    "entity_name",
-    "key_facts",
-    "source_notes",
-    "confidence_level",
-    "last_updated",
-}
 CONFIDENCE_VALUES = {"high", "medium", "low"}
 DEPTH_ALIASES = {
     "1": "deep",
@@ -67,7 +58,7 @@ def validate_packet(
 ) -> ValidationResult:
     errors: list[str] = []
     warnings: list[str] = []
-    for field in sorted(REQUIRED_PACKET_FIELDS):
+    for field in PACKET_REQUIRED_FIELDS:
         if _is_missing(data.get(field)):
             errors.append(f"missing or empty required field: {field}")
 

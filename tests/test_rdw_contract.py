@@ -156,6 +156,15 @@ def test_router_surfaces_ambiguous_domain_warning() -> None:
     assert any("ambiguous domain inference" in str(warning) for warning in warnings)
 
 
+def test_router_surfaces_low_confidence_general_fallback() -> None:
+    contract = infer_contract(TaskRequest(request="explain the requested subject"), root=ROOT)
+
+    inference = cast("dict[str, YamlValue]", contract["inference"])
+    warnings = cast("list[YamlValue]", contract["warnings"])
+    assert inference["confidence"] == "low"
+    assert any("defaulted to general" in str(warning) for warning in warnings)
+
+
 def test_infer_contract_includes_output_format() -> None:
     default = infer_contract(TaskRequest(request="explain idempotency keys"), root=ROOT)
     assert default["output_format"] == "markdown"

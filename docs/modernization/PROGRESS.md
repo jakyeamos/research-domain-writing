@@ -3,9 +3,9 @@
 - Updated: 2026-07-15
 - Baseline: `main` / `9860d38` / `v0.2.0`
 - Branch: `codex/rdw-gpt56-modernization`
-- Current phase: M5 release, CI, and documentation hardening
+- Current phase: M6 adversarial review and final validation
 - Implementation phase: in progress
-- Application-code changes: M0–M4 complete; M5 release surfaces in progress
+- Application-code changes: M0–M5 complete; M6 remediation in progress
 
 ## Completed
 
@@ -24,6 +24,8 @@
 - M4 (`c627bc7`): staged and verified package assets before replacement,
   protected unmanaged roots and command files, added rollback coverage, and
   made installed validation fall back to packaged config/knowledge assets.
+- M5 (`8dff263`): added locked source/package/wheel/install CI proof, the
+  reproducible Vulture gate, release documentation, and publish preflights.
 - Built and exercised a fresh wheel through doctor, strict packet validation,
   packaged-resource batch validation/planning, task planning, schema export,
   lifecycle marking, and all-target installation.
@@ -34,13 +36,17 @@
   remain intact.
 - Source checkout and installed wheel now share the critical asset and config
   resolution path.
+- M6 review remediation has now shared required-field definitions between
+  validation and schema export, exposed low-confidence general routing,
+  atomized the developer asset sync, and removed remaining direct writes from
+  CLI/adapter artifacts.
 - Remaining product risk is operational rather than architectural: the final
-  CI/release proof still needs to run on the remote runner, and the slash
-  command behavior still needs a manual smoke in each target agent.
+  remote CI run and slash-command smoke in each target agent are still release
+  boundary checks.
 
 ## Next step
 
-Complete M5 checks, then run the M6 adversarial review against the full branch:
+Complete the M6 checks against the full branch:
 contract compatibility, lifecycle/data integrity, installer safety, package
 parity, documentation drift, and the complete quality ladder. Only after that
 review should a maintainer decide whether to merge, tag, or publish.

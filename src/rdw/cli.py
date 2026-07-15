@@ -9,6 +9,7 @@ from rdw import __version__
 from rdw.adapters import get_adapter, list_adapters
 from rdw.domain import create_domain
 from rdw.install import INSTALL_TARGETS, install
+from rdw.io import atomic_write_text
 from rdw.lifecycle import (
     format_batch_resume,
     mark_task_status,
@@ -38,6 +39,12 @@ def main(argv: list[str] | None = None) -> int:
         else:
             print(f"ERROR: {exc}", file=sys.stderr)
         return 1
+    except Exception as exc:
+        if bool(getattr(args, "json_output", False)):
+            _emit_json({"ok": False, "category": "internal", "error": str(exc)})
+        else:
+            print(f"ERROR: internal failure: {exc}", file=sys.stderr)
+        return 3
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -195,7 +202,7 @@ def _status(args: argparse.Namespace) -> int:
 def _schema(args: argparse.Namespace) -> int:
     payload = export_schema(args.target, format=args.format)
     if args.output:
-        args.output.write_text(payload, encoding="utf-8")
+        atomic_write_text(args.output, payload)
         print(f"Wrote {args.output}")
     else:
         print(payload, end="")

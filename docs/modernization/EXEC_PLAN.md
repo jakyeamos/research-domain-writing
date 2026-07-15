@@ -1,9 +1,9 @@
 # RDW Modernization Execution Plan
 
-- Status: proposed
-- Baseline: `main` / `8f3387f` / `v0.2.0`
+- Status: M6 final review in progress
+- Baseline: `main` / `9860d38` / `v0.2.0`
 - Owner: one lead implementation agent; specialist review passes are bounded and read-heavy
-- Application-code implementation: not started
+- Application-code implementation: M0–M5 complete; M6 remediation in progress
 
 ## Chosen strategy
 
@@ -53,15 +53,15 @@ budget on re-establishing behavior instead of improving the real risks.
 
 ## Milestone map
 
-| Milestone | Vertical outcome | Depends on |
-| --- | --- | --- |
-| M0 | Protected baseline, truthful docs, and drift gates | none |
-| M1 | One resolved contract model and canonical content pipeline | M0 |
-| M2 | Predictable router and machine-readable CLI | M1 |
-| M3 | Safe lifecycle state and batch projections | M1, M2 |
-| M4 | Atomic installer and fresh-consumer parity | M1, M2, M3 |
-| M5 | Release/CI hardening and cleanup | M1–M4 |
-| M6 | Adversarial review, cutover, and rollback-ready release | M5 |
+| Milestone | Vertical outcome | Depends on | Status |
+| --- | --- | --- | --- |
+| M0 | Protected baseline, truthful docs, and drift gates | none | complete |
+| M1 | Resolved planner contract foundations and canonical content pipeline | M0 | complete |
+| M2 | Predictable router and machine-readable CLI | M1 | complete |
+| M3 | Safe lifecycle state and batch projections | M1, M2 | complete |
+| M4 | Atomic installer and fresh-consumer parity | M1, M2, M3 | complete |
+| M5 | Release/CI hardening and cleanup | M1–M4 | complete |
+| M6 | Adversarial review, cutover, and rollback-ready release | M5 | in progress |
 
 ## M0 — Establish the protected modernization baseline
 
@@ -158,8 +158,9 @@ artifact shapes.
 
 ### Implementation shape
 
-1. Introduce typed models or a shared contract definition for packet, batch,
-   task, diagnostic, task status, and batch projection data.
+1. Introduce shared required-field definitions and a resolved planner contract
+   path for packet, batch, task, diagnostic, task status, and batch projection
+   data; keep semantic policies explicit where they depend on domain rules.
 2. Move strictness and domain-extension checks behind explicit policies.
 3. Derive JSON Schema and serialized contract fields from the shared definition
    where possible.
@@ -430,7 +431,9 @@ version.
 - One version source and one content source are enforced.
 - CI proves source, package, wheel, install, and release surfaces.
 - Release docs describe the shipped commands and limitations accurately.
-- No unexplained stale `0.1.0`/`0.2.0` reference remains.
+- No unexplained active source/release `0.1.0` reference remains; historical
+  audit evidence and the preserved pre-existing untracked skill are called out
+  as boundaries rather than silently rewritten.
 
 ### Delete
 

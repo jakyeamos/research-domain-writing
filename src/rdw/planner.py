@@ -254,6 +254,8 @@ def _fields_explicit(task: TaskRequest) -> list[YamlValue]:
         ("audience", task.audience),
         ("research_depth", task.depth),
         ("packet_id", task.packet_id),
+        ("task_id", task.task_id),
+        ("output_format", task.output_format),
     ):
         if value:
             fields.append(name)
@@ -261,7 +263,16 @@ def _fields_explicit(task: TaskRequest) -> list[YamlValue]:
 
 
 def _fields_inferred(task: TaskRequest) -> list[YamlValue]:
-    all_fields = {"domain", "entity_name", "output_type", "audience", "research_depth", "packet_id"}
+    all_fields = {
+        "domain",
+        "entity_name",
+        "output_type",
+        "audience",
+        "research_depth",
+        "packet_id",
+        "task_id",
+        "output_format",
+    }
     inferred: list[YamlValue] = []
     for field in sorted(all_fields - set(str(field) for field in _fields_explicit(task))):
         inferred.append(field)
