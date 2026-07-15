@@ -1,13 +1,12 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: RDW v0.2.0 modernization is implementation-complete and release-proofed on a clean feature branch, with source/package parity, guarded lifecycle state, transactional installs, and machine-readable CLI contracts.
+summary: RDW v0.2.0 modernization is implementation-complete and release-proofed on a feature branch, with source/package parity, guarded lifecycle state, transactional installs, machine-readable CLI contracts, verified remote CI, and Claude/Cursor target-agent smoke coverage.
 healthScore: 97
-statusLabel: modernization_m6_ready
-nextStep: Review and merge the modernization branch when ready; tag and publish remain separate explicitly authorized release actions.
+statusLabel: modernization_release_boundary_verified
+nextStep: Review and merge draft PR #9 when ready; tag and publish remain separate explicitly authorized release actions.
 blockers:
-  - Slash-command behavior still needs a manual post-install smoke in each target agent before broader announcement.
-  - Remote CI has not run on this branch; local release ladder and fresh-wheel proof are green.
+  - A fresh Codex task was not opened for slash smoke; the installed Codex/agents surface was verified by symlink and skill-content inspection.
   - The modernization branch is not a release action; merge, tagging, and publishing remain explicitly deferred.
 lastUpdated: 2026-07-15
 tags: [aios, writing, research, skill, python, cli, pypi]
@@ -56,6 +55,13 @@ stable exit categories, enforces legal lifecycle transitions, atomically
 persists run state, stages managed package assets before replacement, and
 documents the full isolated-wheel proof in CI and `RELEASE.md`.
 
+The release boundary is now verified by draft PR #9: GitHub Actions run #2
+passed on Python 3.12 and 3.13, and fresh Claude and Cursor sessions both
+recognized `/rdw improve the copy on my LIS leaderboard`, inferred a task
+contract, and stopped when grounded LIS source material was missing. The
+Codex/agents install surface is present and points at this checkout; a fresh
+Codex task smoke remains intentionally unrun.
+
 ## What Exists
 
 - `README.md` explaining the full pipeline, slash-command usage, batch workflow, domain packs, and limitations.
@@ -97,13 +103,15 @@ documents the full isolated-wheel proof in CI and `RELEASE.md`.
 - No mature legal, finance, or medicine domain packs.
 - Adapter extras are stubs; RDW does not call model APIs by default.
 - No diff-based regression tests on QA rules.
-- No remote CI result or target-agent slash smoke has been captured yet.
+- No fresh Codex task slash smoke has been captured; the installed Codex/agents
+  surface has been verified by symlink and skill-content inspection.
 
 ## Next Step
 
-Implementation is complete on `codex/rdw-gpt56-modernization`. The next
-decision is review/merge. Do not tag, push, or publish solely because local
-verification passed; those are separate release actions.
+Implementation and the release verification boundary are complete on
+`codex/rdw-gpt56-modernization`. The next decision is review/merge of draft PR
+#9. Do not tag or publish solely because CI and local verification passed;
+those remain separate release actions.
 
 ## Quality Ladder Notes
 
@@ -115,6 +123,12 @@ source/isolated-wheel CLI smoke.
 2026-07-15: M0/M1 committed as `5bc91e3`: `uv.lock`, packaged release metadata,
 the PyPI wizard version, CI lock/shell/package checks, and the canonical
 root/package asset sync are aligned for v0.2.0.
+
+2026-07-15: Release boundary verified in draft PR #9: GitHub Actions run #2
+passed on Python 3.12 and 3.13; fresh Claude and Cursor `/rdw` smoke sessions
+inferred the LIS task contract and requested missing grounding instead of
+inventing facts. Codex/agents surface inspection passed; no fresh Codex task
+was opened.
 
 2026-07-15: M2 committed as `ab2ef1f`: explicit planner overrides now shape
 the resolved task contract, ambiguous routing emits warnings, malformed YAML
