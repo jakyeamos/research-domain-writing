@@ -19,7 +19,13 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Sync
-        run: uv sync
+        run: uv sync --locked
+      - name: Lock check
+        run: uv lock --check
+      - name: Package asset parity
+        run: uv run python scripts/sync-package-assets.py --check
+      - name: Shellcheck
+        run: shellcheck scripts/*.sh
       - name: Lint
         run: uv run ruff check .
       - name: Format check
@@ -35,3 +41,5 @@ jobs:
           python -m venv /tmp/rdw-wheel-smoke
           /tmp/rdw-wheel-smoke/bin/pip install dist/*.whl
           /tmp/rdw-wheel-smoke/bin/rdw doctor
+          /tmp/rdw-wheel-smoke/bin/rdw validate-packet knowledge/basketball/demo-guard-2026-demo.yaml --strict
+          /tmp/rdw-wheel-smoke/bin/rdw validate-batch examples/batch-tasks.yaml

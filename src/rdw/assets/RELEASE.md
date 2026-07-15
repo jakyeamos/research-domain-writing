@@ -3,14 +3,14 @@
 ## Versioning
 
 - Use SemVer-style versions: `MAJOR.MINOR.PATCH`.
-- Current release target: `0.1.0`.
+- Current release target: `0.2.0`.
 - `PATCH`: prompt clarifications, validator fixes, or docs updates that preserve task/output shapes.
 - `MINOR`: additive domains, output formats, command templates, or validation fields.
 - `MAJOR`: breaking prompt pipeline order, packet schema, install surface, or output contract changes.
 
 ## Release Checklist
 
-1. Update version references in `pyproject.toml`, `src/rdw/__init__.py`, `SKILL.md`, install templates, `CHANGELOG.md`, and this file.
+1. Update version references in `pyproject.toml`, `SKILL.md`, install templates, `CHANGELOG.md`, and this file.
 2. Update `CHANGELOG.md`.
 3. Run quality gates:
 
@@ -64,7 +64,7 @@ uv run python scripts/run-pre-cr-python-tests.py
 Use `pre-cr run --json --workspace .` only for changed-file readiness during PR work, not as the sole release coverage command.
 
 8. Confirm generated run outputs are ignored and only curated examples/package assets are committed.
-9. Commit release changes, merge to `main`, tag `v0.1.0`, push `main` and the tag.
+9. Commit release changes, merge to `main`, tag `v0.2.0`, push `main` and the tag.
 10. Publish to PyPI.
 
 For an interactive PyPI token and publish flow, run:

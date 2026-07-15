@@ -8,7 +8,7 @@ That means:
 
 - The agent may use whatever tools it already has: browser, APIs, pasted stats, local files, notebooks, or user-provided material.
 - RDW structures, validates, saves, and reuses what was gathered.
-- There is no built-in crawler, live stats connector, publication database client, or model API runner in v0.1.
+- There is no built-in crawler, live stats connector, publication database client, or model API runner in v0.2.
 
 `config/research-sources.yaml` tells the agent what kinds of sources to prefer. It is not an automatic fetch configuration.
 
@@ -31,11 +31,11 @@ The CLI does not call an LLM, browse the web, conduct autonomous research, or wr
 
 `rdw batch plan` is not an autonomous batch writer. It validates and expands tasks so an agent can execute them consistently.
 
-Each planned task starts at status `planned`. The agent or an adapter records progress through research, draft, QA, final, and review states.
+Each planned task starts at status `planned`. The agent or a future adapter is responsible for moving tasks through research, draft, QA, final, and review states.
 
 ## Workarounds
 
-| Need | v0.1 approach |
+| Need | v0.2 approach |
 | --- | --- |
 | Live stats or docs | Agent researches and saves packets under `knowledge/<domain>/` |
 | Repeatable single task | `rdw task plan ... --out <run-dir>` |

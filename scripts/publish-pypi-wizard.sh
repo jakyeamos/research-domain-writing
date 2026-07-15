@@ -194,7 +194,7 @@ TOTAL_STAGES=5
 TOTAL_MINUTES=12
 
 PROJECT_NAME="research-domain-writing"
-PROJECT_VERSION="0.1.0"
+PROJECT_VERSION=""
 PYPI_TOKEN=""
 
 require_cmd() {
@@ -217,6 +217,7 @@ say "It assumes the release commit is already merged to main and tagged v${PROJE
 require_cmd git
 require_cmd uv
 require_cmd python3
+PROJECT_VERSION="$(python3 -c 'import tomllib; from pathlib import Path; print(tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))["project"]["version"])')"
 if [[ ! -f pyproject.toml || ! -d src/rdw ]]; then
   warn "run this from the research-domain-writing repo root"
   exit 1
