@@ -1,10 +1,10 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: RDW v0.2.0 modernization now includes the serial filesystem-first fixture batch executor and an executable basketball acceptance contract with source-grounded fixtures; the core remains offline and auditable.
+summary: RDW v0.2.0 modernization now includes the serial filesystem-first fixture batch executor, source-grounded basketball acceptance gates, and five positive research-to-humanizer handoffs; the core remains offline and auditable.
 healthScore: 97
-statusLabel: acceptance_gates_implemented
-nextStep: Run the full RDW writing pipeline and human review for the basketball acceptance fixtures; keep example_only true until graduation gates pass, with release actions separate.
+statusLabel: acceptance_pipeline_handoff_ready
+nextStep: Conduct the human graduation review for the five basketball handoffs; keep example_only true until that review and all graduation gates pass, with release actions separate.
 blockers:
   - A fresh Codex task was not opened for slash smoke; the installed Codex/agents surface was verified by symlink and skill-content inspection.
   - The modernization branch is not a release action; merge, tagging, and publishing remain explicitly deferred.
@@ -114,6 +114,16 @@ SDKs, ranking calculation, or model calls. Mature-only rules now live in
 `src/rdw/mature_validation.py`; the generic validator remains below the source
 size warning threshold.
 
+Ticket #12 now carries all five positive basketball cases through the agent-led
+research-to-knowledge-packet-to-draft-to-QA-to-humanizer handoff. Each case has
+an explicit missing-information log, source-grounded knowledge packet, draft,
+zero-blocker/major QA artifact, final copy, and humanizer lineage sidecar. The
+player comparison keeps its second packet and claim ledger separate and
+validates both packet boundaries. A deterministic ranking fixture also promotes
+the five artifacts through `final-done`. The handoffs are ready for human
+graduation review; `example_only` remains true and no provider runtime,
+browsing core, ranking calculation, or model call was added.
+
 Wayfinder ticket #10 is now implemented across the focused batch executor
 modules in `src/rdw/batch_execution.py`, `batch_models.py`, `batch_support.py`,
 `batch_events.py`, `batch_projection.py`, and `batch_leases.py`.
@@ -168,8 +178,11 @@ packet merge.
 - `src/rdw/adapters/fixture.py` plus `examples/fixtures/` as the deterministic
   external-runtime seam and success, uncertain, and rejected fixtures.
 - `examples/acceptance/basketball/` as the source-grounded mature-pack corpus:
-  one ranking surface, two player contexts, one team-fit context, QA ledgers,
-  and negative provenance/semantic fixtures.
+  one ranking surface, two player contexts, one team-fit context, five complete
+  positive pipeline handoffs, QA ledgers, and negative provenance/semantic
+  fixtures.
+- `examples/fixtures/basketball-acceptance-ranking.yaml` as a deterministic
+  research-to-final lifecycle proof for a source-grounded positive case.
 - `scripts/sync-package-assets.py --check|--sync` as the canonical root/package
   asset parity check and synchronization tool.
 - `--json` output for validation, task/batch planning, status, resume, and
@@ -190,8 +203,8 @@ packet merge.
   serial fixture executor exists for deterministic integration proof; real
   research, drafting, QA, and humanizer work remain agent-led.
 - No production-ready mature domain pack yet; the basketball acceptance
-  contract and source-grounded fixtures exist, but `example_only` remains true
-  until the full writing pipeline and human graduation review pass.
+  contract and five source-grounded handoffs exist, but `example_only` remains
+  true until the human graduation review and remaining promotion gates pass.
 - No packet merge/conflict resolution implementation yet; ADR-002 defines the
   next filesystem-backed implementation contract.
 - No mature legal, finance, or medicine domain packs.
@@ -210,8 +223,9 @@ The modernization and release verification boundary are complete on
 first deterministic vertical slice, the packet-lineage decision, the
 evidence-aware diff-QA contract, the bounded batch-executor implementation,
 the first mature-domain decision, and the basketball acceptance implementation
-are recorded. The next map action is the full RDW writing-pipeline and human
-graduation review for the source-grounded basketball fixtures. Review/merge of
+are recorded. The full RDW writing-pipeline handoff for all five positive
+basketball fixtures is now complete; the next map action is human graduation
+review before any `example_only` change. Review/merge of
 draft PR #9, tagging, and publishing remain separate release actions; do not
 infer them from local or remote verification.
 
@@ -300,6 +314,15 @@ claim-ledger gate; full tests, Ruff, basedpyright, and package parity remain
 green. Pre-CR initially flagged `src/rdw/validation.py` at 617 nonblank lines;
 the maintainability split in `f7d639a` reduces the generic validator to 466
 lines and the final changed-line readiness check passes without that warning.
+
+2026-07-15: Ticket #12 committed in `1c28a9e`: five positive basketball cases
+now include missing-information logs, knowledge packets, drafts, mature QA
+ledgers, final humanizer outputs, and no-new-facts lineage sidecars. The
+cross-packet comparison validates its secondary ledger separately, and the
+source-grounded ranking fixture reaches `final-done`. Full checks passed with
+68 tests, Ruff, formatting, basedpyright, Vulture, shellcheck, lock
+verification, package parity, diff checks, and the final sdist/wheel build.
+`example_only` remains true pending human graduation review.
 
 2026-07-15: M2 committed as `ab2ef1f`: explicit planner overrides now shape
 the resolved task contract, ambiguous routing emits warnings, malformed YAML
