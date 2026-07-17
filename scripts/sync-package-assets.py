@@ -65,10 +65,11 @@ def expected_files(package_root: Path = PACKAGE_ROOT) -> set[Path]:
 
 
 def package_files(package_root: Path = PACKAGE_ROOT) -> set[Path]:
-    files: set[Path] = set()
-    for pair in asset_pairs():
-        files.update(_files(_destination(pair, package_root)))
-    return files
+    return {
+        path
+        for path in _files(package_root)
+        if path.name != "__init__.py" and "__pycache__" not in path.parts
+    }
 
 
 def drift(package_root: Path = PACKAGE_ROOT) -> list[str]:

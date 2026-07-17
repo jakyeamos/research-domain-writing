@@ -1,7 +1,7 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: RDW 0.2.1 release candidate with the canonical rdw CLI, packaged asset parity, agent-owned execution guidance, and verified source and wheel smoke paths.
+summary: RDW 0.2.1 release candidate with the canonical rdw CLI, strict packaged asset parity, agent-owned execution guidance, and verified source and wheel smoke paths.
 healthScore: 90
 statusLabel: release_candidate
 nextStep: Push the verified 0.2.1 source tip, fold it into main, run fresh integration review and gates, tag v0.2.1, verify the remote tag, then run scripts/publish-pypi-wizard.sh.
@@ -76,7 +76,7 @@ Complete the public v0.2.1 release flow by pushing the verified source branch, f
 
 ## Quality Ladder Notes
 
-2026-07-17 (codex/rdw-source-0.2.1): `uv sync --locked`, `uv lock --check`, package-asset parity, ShellCheck, Ruff check/format, BasedPyright, 37 pytest tests, Vulture, `git diff --check`, `uv build`, source CLI smoke, and isolated wheel consumer smoke all passed. Manual slash smoke remains pending.
+2026-07-17 (codex/rdw-source-0.2.1): `uv sync --locked`, `uv lock --check`, strict package-asset parity (including unmapped-file detection), ShellCheck, Ruff check/format, BasedPyright, 38 pytest tests, Vulture, `git diff --check`, `uv build`, source CLI smoke, and isolated wheel consumer smoke all passed. Manual slash smoke remains pending.
 
 
 Additional check on 2026-07-04: `uv run ruff check .`, `uv run basedpyright`,
