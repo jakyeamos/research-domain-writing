@@ -1,27 +1,28 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: Installable RDW release candidate with an agent-first CLI harness, prompts, domain packs, packet/batch validation, packaged assets, examples, skill distribution, release governance, and explicit task output-format contracts.
+summary: RDW 0.2.1 release candidate with the canonical rdw CLI, packaged asset parity, agent-owned execution guidance, and verified source and wheel smoke paths.
 healthScore: 90
 statusLabel: release_candidate
-nextStep: Merge the v0.2.0 release branch, tag v0.2.0, and run scripts/publish-pypi-wizard.sh with a PyPI account token.
+nextStep: Push the verified 0.2.1 source tip, fold it into main, run fresh integration review and gates, tag v0.2.1, verify the remote tag, then run scripts/publish-pypi-wizard.sh.
 blockers:
   - Slash-command behavior should still receive a manual post-install smoke in each target agent before broader announcement.
+  - PyPI publication remains pending the verified v0.2.1 main/tag state and final token confirmation.
   - Packet merge/conflict resolution for concurrent updates is a post-0.1 enhancement.
-lastUpdated: 2026-07-09
+lastUpdated: 2026-07-17
 tags: [aios, writing, research, skill, python, cli, pypi]
 areas: [engineering, writing]
 goals: []
 repoType: tool
 sourceOfTruth: mixed
 primaryLanguage: Python
-activeBranch: feat/v0.2-hardening
-lastCommitDate: 2026-07-09
+activeBranch: codex/rdw-source-0.2.1
+lastCommitDate: 2026-07-17
 quality:
   lint: pass
   types: pass
   tests: pass
-  deadCode: unknown
+  deadCode: pass
   structure: pass
 canonicalCommands:
   install: uv sync
@@ -39,7 +40,7 @@ agentExpectationsVersion: 1
 
 Research Domain Writing is a standalone, installable, file-based pipeline for turning research into grounded domain copy, QA output, and a human style pass. It separates research, domain copywriting, domain QA, and humanizer/blader responsibilities so style transformation does not invent domain knowledge.
 
-The repo now has a real `rdw` Python CLI that acts as an agent harness: it validates packets and batches, creates deterministic task/batch planning folders with explicit output-format contracts, emits prompt bundles, installs agent skills/templates, and packages the curated assets for wheel installs. The CLI intentionally does not call LLM APIs, browse, research, or draft autonomously in v0.1.
+The repo now has a real `rdw` Python CLI that acts as an agent harness: it validates packets and batches, creates deterministic task/batch planning folders with explicit output-format contracts, emits prompt bundles, installs agent skills/templates, and packages the curated assets for wheel installs. The 0.2.1 candidate makes `rdw` the canonical human-facing command while retaining compatibility wrappers; it intentionally does not call LLM APIs, browse, research, or draft autonomously.
 
 ## What Exists
 
@@ -71,9 +72,11 @@ The repo now has a real `rdw` Python CLI that acts as an agent harness: it valid
 
 ## Next Step
 
-Complete the public v0.2 release flow by merging the release branch, tagging `v0.2.0`, publishing to PyPI with a valid account token, then running an installed `rdw doctor` smoke from PyPI. The README and packaged assets now identify the v0.2 release.
+Complete the public v0.2.1 release flow by pushing the verified source branch, folding it into `main`, running fresh integration review and gates, tagging `v0.2.1`, verifying the remote tag, and publishing to PyPI with a valid account token. The README and packaged assets identify 0.2.1 while the registry remains at 0.1.0 until publication.
 
 ## Quality Ladder Notes
+
+2026-07-17 (codex/rdw-source-0.2.1): `uv sync --locked`, `uv lock --check`, package-asset parity, ShellCheck, Ruff check/format, BasedPyright, 37 pytest tests, Vulture, `git diff --check`, `uv build`, source CLI smoke, and isolated wheel consumer smoke all passed. Manual slash smoke remains pending.
 
 
 Additional check on 2026-07-04: `uv run ruff check .`, `uv run basedpyright`,
