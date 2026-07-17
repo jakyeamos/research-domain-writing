@@ -1,13 +1,13 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: RDW 0.2.1 reviewed integration candidate with the canonical rdw CLI, strict packaged asset parity, agent-owned execution guidance, and verified source and wheel smoke paths.
+summary: RDW 0.2.1 is promoted on main and tagged, with the canonical rdw CLI, strict packaged asset parity, agent-owned execution guidance, and verified source and wheel smoke paths.
 healthScore: 90
-statusLabel: integration_candidate
-nextStep: Push the reviewed integration branch, promote it to main through the repository protection path, tag v0.2.1, verify the live main/tag SHAs, then run scripts/publish-pypi-wizard.sh.
+statusLabel: tagged_pending_publish
+nextStep: Complete the manual post-install slash smoke, then run scripts/publish-pypi-wizard.sh from a clean main checkout and verify the published registry version and artifact digest.
 blockers:
   - Slash-command behavior should still receive a manual post-install smoke in each target agent before broader announcement.
-  - PyPI publication remains pending the verified v0.2.1 main/tag state and final token confirmation.
+  - PyPI publication remains pending the final token confirmation and irreversible publish step; the live registry still reports 0.1.0.
   - Packet merge/conflict resolution for concurrent updates is a post-0.1 enhancement.
 lastUpdated: 2026-07-17
 tags: [aios, writing, research, skill, python, cli, pypi]
@@ -16,7 +16,7 @@ goals: []
 repoType: tool
 sourceOfTruth: mixed
 primaryLanguage: Python
-activeBranch: codex/rdw-main-fold-0.2.1
+activeBranch: main
 lastCommitDate: 2026-07-17
 quality:
   lint: pass
@@ -40,7 +40,7 @@ agentExpectationsVersion: 1
 
 Research Domain Writing is a standalone, installable, file-based pipeline for turning research into grounded domain copy, QA output, and a human style pass. It separates research, domain copywriting, domain QA, and humanizer/blader responsibilities so style transformation does not invent domain knowledge.
 
-The repo now has a real `rdw` Python CLI that acts as an agent harness: it validates packets and batches, creates deterministic task/batch planning folders with explicit output-format contracts, emits prompt bundles, installs agent skills/templates, and packages the curated assets for wheel installs. The reviewed 0.2.1 integration candidate makes `rdw` the canonical human-facing command while retaining compatibility wrappers; it intentionally does not call LLM APIs, browse, research, or draft autonomously.
+The repo now has a real `rdw` Python CLI that acts as an agent harness: it validates packets and batches, creates deterministic task/batch planning folders with explicit output-format contracts, emits prompt bundles, installs agent skills/templates, and packages the curated assets for wheel installs. The promoted and tagged 0.2.1 release makes `rdw` the canonical human-facing command while retaining compatibility wrappers; it intentionally does not call LLM APIs, browse, research, or draft autonomously.
 
 ## What Exists
 
@@ -72,11 +72,11 @@ The repo now has a real `rdw` Python CLI that acts as an agent harness: it valid
 
 ## Next Step
 
-Complete the public v0.2.1 release flow by promoting the reviewed integration candidate to `main`, tagging `v0.2.1`, verifying the live main/tag SHAs, and publishing to PyPI with a valid account token. The README and packaged assets identify 0.2.1 while the registry remains at 0.1.0 until publication.
+Complete the remaining v0.2.1 release flow by running the manual post-install slash smoke and publishing to PyPI with a valid account token. The live `main` and `v0.2.1` tag resolve to the reviewed release commit; the registry remains at 0.1.0 until publication.
 
 ## Quality Ladder Notes
 
-2026-07-17 (codex/rdw-main-fold-0.2.1): Verified remote source tip `feae190`, integrated from remote main `8f3387f` as `6cf6304`, and completed an independent integrated-diff inspection; the unmapped-package-file parity gap was fixed before this candidate. `uv sync --locked`, `uv lock --check`, strict package-asset parity, ShellCheck, Ruff check/format, BasedPyright, 38 pytest tests, Vulture, `git diff --check`, `uv build`, source CLI/lifecycle smoke, and fresh wheel consumer/install smoke all passed. Manual slash smoke remains pending.
+2026-07-17 (v0.2.1): Verified remote source tip `feae190`, integrated from remote main `8f3387f` as `bc39099`, promoted that commit to live `main`, and tagged `v0.2.1`; the unmapped-package-file parity gap was fixed before promotion. `uv sync --locked`, `uv lock --check`, strict package-asset parity, ShellCheck, Ruff check/format, BasedPyright, 38 pytest tests, Vulture, `git diff --check`, `uv build`, source CLI/lifecycle smoke, and fresh wheel consumer/install smoke all passed. Manual slash smoke and PyPI publication remain pending.
 
 
 Additional check on 2026-07-04: `uv run ruff check .`, `uv run basedpyright`,
