@@ -3,8 +3,8 @@
 ## Versioning
 
 - Use SemVer-style versions: `MAJOR.MINOR.PATCH`.
-- Current release target: `0.2.1`.
-- `pyproject.toml` is the package version source; the new `v0.2.1` tag and
+- Current release target: `0.2.2`.
+- `pyproject.toml` is the package version source; the new `v0.2.2` tag and
   PyPI's current `v0.1.0` release are separate states until publication.
 - `PATCH`: prompt clarifications, validator fixes, or docs updates that preserve task/output shapes.
 - `MINOR`: additive domains, output formats, command templates, or validation fields.
@@ -85,7 +85,7 @@ Use `pre-cr run --json --workspace .` only for changed-file readiness during PR 
 
 8. Confirm generated run outputs are ignored and only curated examples/package assets are committed.
 9. Confirm `git diff --check` is clean and `.tracker/PROJECT_TRUTH.md` records the final verification state.
-10. Commit release changes, merge to `main`, tag `v0.2.1`, push `main` and the tag.
+10. Commit release changes, merge to `main`, tag `v0.2.2`, push `main` and the tag.
 11. Publish to PyPI only after the tag and registry state are verified.
 
 For an interactive PyPI token and publish flow, run:
