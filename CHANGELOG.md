@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1 - 2026-07-17
+
+- Made `rdw` the canonical human-facing command while retaining compatibility wrappers.
+- Clarified agent-owned execution, truthful machine-readable limitations, and release guidance.
+- Added package-asset parity checks and a guided PyPI release workflow.
+
 ## 0.2.0 - 2026-07-09
 
 - Added lifecycle commands for task and batch status, marking, and resume flows.

@@ -6,9 +6,9 @@ The `rdw` CLI is not an LLM runner. It does not browse, call model APIs, or draf
 
 ## Release status
 
-This source checkout targets `v0.2.0`. PyPI currently publishes `v0.1.0`; the
-`v0.2.0` command surface documented below is available from this checkout and
-is not a claim that `v0.2.0` is already published. See the [PyPI project
+This source checkout targets `v0.2.1`. PyPI currently publishes `v0.1.0`; the
+`v0.2.1` command surface documented below is available from this checkout and
+is not a claim that `v0.2.1` is already published. See the [PyPI project
 page](https://pypi.org/project/research-domain-writing/) for the registry state.
 
 ## Install
@@ -94,7 +94,7 @@ autonomous batch executor.
 
 ### JSON and automation
 
-The `v0.2.0` baseline does not expose a general `rdw --json` output mode. For
+The `v0.2.1` baseline does not expose a general `rdw --json` output mode. For
 machine-readable contract schemas, use `rdw schema packet|batch|task-contract
 --format jsonschema`; planning also writes JSON and YAML run artifacts.
 
