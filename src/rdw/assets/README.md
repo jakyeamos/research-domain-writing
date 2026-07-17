@@ -2,11 +2,18 @@
 
 Research Domain Writing (RDW) is an agent-first harness for research-grounded writing. It validates structured research packets, plans repeatable writing runs, emits exact prompt bundles, and keeps outputs auditable.
 
-The `rdw` CLI in v0.2 is not an LLM runner. It does not browse, call model APIs, or draft autonomously. Your agent performs the research and writing by following the emitted prompts.
+The `rdw` CLI is not an LLM runner. It does not browse, call model APIs, or draft autonomously. Your agent performs the research and writing by following the emitted prompts.
+
+## Release status
+
+This source checkout targets `v0.2.0`. PyPI currently publishes `v0.1.0`; the
+`v0.2.0` command surface documented below is available from this checkout and
+is not a claim that `v0.2.0` is already published. See the [PyPI project
+page](https://pypi.org/project/research-domain-writing/) for the registry state.
 
 ## Install
 
-From PyPI after release:
+From the published PyPI release (`v0.1.0`):
 
 ```bash
 pip install research-domain-writing
@@ -16,6 +23,8 @@ rdw doctor
 From a source checkout:
 
 ```bash
+uv sync --locked
+uv run rdw --version
 uv run rdw doctor
 ```
 
@@ -33,9 +42,10 @@ For source checkouts, the compatibility wrapper still works:
 
 ## First Run Paths
 
-### 1. Check the install
+### 1. Confirm the install
 
 ```bash
+rdw --version
 rdw doctor
 ```
 
@@ -55,35 +65,65 @@ This writes:
 - `.rdw-runs/lis-leaderboard/prompt-bundle.md`
 - `.rdw-runs/lis-leaderboard/status.json`
 
-Give the prompt bundle to your agent. The agent is responsible for research, drafting, QA, and final output.
+### 3. Execute the plan with your agent
 
-### 3. Plan a batch
+`rdw task plan` is the handoff point: open `prompt-bundle.md` in your agent and
+follow its research → packet → draft → QA → humanizer sequence. The agent does
+the work; the CLI does not execute model calls or write final copy. Record
+progress in the planned run when each stage is complete:
+
+```bash
+rdw task mark research-done .rdw-runs/lis-leaderboard
+rdw status .rdw-runs/lis-leaderboard
+```
+
+Use `draft-done`, `qa-passed`, `qa-failed`, and `final-done` as the agent advances.
+
+### 4. Plan and track a batch
 
 ```bash
 rdw batch plan examples/batch-tasks.yaml --out .rdw-runs/demo-batch
+rdw batch status .rdw-runs/demo-batch
+rdw batch resume .rdw-runs/demo-batch
 ```
 
-This validates the batch file, expands each task into a deterministic task folder, and writes `summary.yaml` plus `batch-log.jsonl` with `planned` statuses.
+This validates the batch file, expands each task into a deterministic task
+folder, and writes `summary.yaml` plus `batch-log.jsonl` with `planned` statuses.
+`batch resume` lists the next prompt bundles for the agent; it is not an
+autonomous batch executor.
+
+### JSON and automation
+
+The `v0.2.0` baseline does not expose a general `rdw --json` output mode. For
+machine-readable contract schemas, use `rdw schema packet|batch|task-contract
+--format jsonschema`; planning also writes JSON and YAML run artifacts.
 
 ## Core Commands
 
 ```bash
+rdw --version
 rdw doctor
 rdw validate-packet knowledge/basketball/demo-guard-2026-demo.yaml --strict
 rdw validate-batch examples/batch-tasks.yaml
 rdw new-domain finance "Finance Writing"
 rdw task plan --request "explain idempotency keys" --domain technical --out .rdw-runs/idempotency
+rdw status .rdw-runs/idempotency
+rdw task mark research-done .rdw-runs/idempotency
 rdw batch plan examples/batch-tasks.yaml --out .rdw-runs/demo-batch
+rdw batch status .rdw-runs/demo-batch
+rdw batch resume .rdw-runs/demo-batch
+rdw schema task-contract --format jsonschema
 rdw install --target claude
 rdw install --target cursor
 rdw install --target agents
 ```
 
-Legacy scripts remain as thin wrappers:
+Legacy scripts remain secondary compatibility wrappers; prefer the equivalent `rdw` command:
 
 ```bash
 python scripts/validate-packet.py knowledge/basketball/demo-guard-2026-demo.yaml
 ./scripts/new-domain.sh finance "Finance Writing"
+./install/install.sh
 ```
 
 ## What RDW Provides
@@ -189,6 +229,12 @@ Natural language is usually enough. The router infers domain, entity, output typ
 Before release or a serious PR:
 
 ```bash
+uv sync --locked
+uv lock --check
+uv run python scripts/sync-package-assets.py --check
+shellcheck scripts/*.sh
+uv run rdw --version
+uv run rdw doctor
 uv run ruff check .
 uv run ruff format --check .
 uv run basedpyright src tests scripts
@@ -201,6 +247,7 @@ Wheel smoke:
 ```bash
 python -m venv /tmp/rdw-wheel-smoke
 /tmp/rdw-wheel-smoke/bin/pip install dist/*.whl
+/tmp/rdw-wheel-smoke/bin/rdw --version
 /tmp/rdw-wheel-smoke/bin/rdw doctor
 ```
 
