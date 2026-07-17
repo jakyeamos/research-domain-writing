@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.2 - 2026-07-17
+
+- Fixed the guided PyPI publish wizard under Bash `set -e` so normal stage, input, and completion paths no longer exit early.
+
 ## 0.2.1 - 2026-07-17
 
 - Made `rdw` the canonical human-facing command while retaining compatibility wrappers.
