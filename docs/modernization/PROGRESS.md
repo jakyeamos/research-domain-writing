@@ -1,6 +1,6 @@
 # RDW Modernization Progress
 
-- Updated: 2026-07-15
+- Updated: 2026-07-19
 - Baseline: `main` / `9860d38` / `v0.2.0`
 - Branch: `codex/rdw-gpt56-modernization`
 - Current phase: M6 complete; bounded batch executor slice complete; release-ready pending review/merge
@@ -30,6 +30,9 @@
 - Built and exercised a fresh wheel through doctor, strict packet validation,
   packaged-resource batch validation/planning, task planning, schema export,
   lifecycle marking, and all-target installation.
+- Added `scripts/smoke-install.py`, a disposable-home CLI smoke that invokes
+  `rdw install` separately for the Claude, Cursor, and agents targets and
+  verifies each consumer surface plus the managed packaged root.
 - Ticket #10: added the serial filesystem-first fixture batch executor with a
   typed policy, one-writer lease, input-order dispatch, immutable receipt
   attempts, bounded retry/backoff, event-ID replay projection, cooperative
@@ -46,9 +49,10 @@
   validation and schema export, exposed low-confidence general routing,
   atomized the developer asset sync, and removed remaining direct writes from
   CLI/adapter artifacts.
-- Remaining product risk is operational rather than architectural: the final
-  remote CI run and slash-command smoke in each target agent are still release
-  boundary checks.
+- Remaining product risk is operational rather than architectural: actual
+  fresh-session slash-command behavior in each target agent remains a release
+  boundary check; the install materialization path now has a repeatable local
+  CLI proof.
 - The executor remains intentionally fixture-backed. Provider adapters, live
   research execution, parallel workers, cost accounting, hosted queues, and
   packet auto-merge remain outside this slice.

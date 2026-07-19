@@ -62,6 +62,16 @@ ASSET_ROOT=$(/tmp/rdw-wheel-smoke/bin/python -c 'from importlib.resources import
 /tmp/rdw-wheel-smoke/bin/rdw install --target all --home /tmp/rdw-wheel-home
 ```
 
+Run the repeatable install-surface smoke from the checkout as well:
+
+```bash
+uv run python scripts/smoke-install.py
+```
+
+It invokes the public command separately for `claude`, `cursor`, and `agents`
+in disposable homes and verifies the resulting consumer files/links and
+managed packaged root.
+
 6. Run manual slash smoke after installing templates:
 
 ```bash

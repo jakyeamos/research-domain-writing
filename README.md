@@ -298,6 +298,17 @@ validation/planning, schema export, lifecycle, and install commands against
 the wheel's packaged assets, not paths from the source checkout. See
 [RELEASE.md](RELEASE.md) for the complete sequence.
 
+Install surface smoke:
+
+```bash
+uv run python scripts/smoke-install.py
+```
+
+This invokes the public `rdw install` command in disposable homes for the
+Claude, Cursor, and agents targets and verifies each installed surface plus
+the managed packaged root. It also works against a wheel when run from its
+isolated environment.
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
