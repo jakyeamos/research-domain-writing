@@ -1,13 +1,13 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: RDW v0.2.0 modernization now includes the serial filesystem-first fixture batch executor, source-grounded basketball acceptance gates, and five positive research-to-humanizer handoffs; the core remains offline and auditable.
+summary: RDW v0.2.0 modernization now includes the serial filesystem-first fixture batch executor, source-grounded basketball acceptance gates, five positive research-to-humanizer handoffs, and a tag-gated OIDC PyPI publish path; the core remains offline and auditable.
 healthScore: 97
 statusLabel: acceptance_pipeline_handoff_ready
 nextStep: Conduct the human graduation review for the five basketball handoffs; keep example_only true until that review and all graduation gates pass, with release actions separate.
 blockers:
   - Fresh-session slash-command behavior remains a release-boundary check; `scripts/smoke-install.py` now proves the public install materialization path for Claude, Cursor, and agents in disposable homes.
-  - The modernization branch is not a release action; merge, tagging, and publishing remain explicitly deferred.
+  - The tag-gated OIDC workflow is committed locally, but this modernization branch is not a release action; merge, PyPI registration, tagging, and publishing remain deferred.
 lastUpdated: 2026-07-19
 tags: [aios, writing, research, skill, python, cli, pypi]
 areas: [engineering, writing]
@@ -54,6 +54,13 @@ planner overrides into the final contract, supports JSON diagnostics with
 stable exit categories, enforces legal lifecycle transitions, atomically
 persists run state, stages managed package assets before replacement, and
 documents the full isolated-wheel proof in CI and `RELEASE.md`.
+
+The tagged release surface is now in `.github/workflows/ci.yml`: matching
+`vMAJOR.MINOR.PATCH` tags validate the project version, run the existing Python
+3.12/3.13 quality matrix and wheel smoke, upload those tested distributions,
+and publish through PyPI OIDC in the protected `pypi` environment. The manual
+token wizard remains only for explicitly approved recovery; PyPI-side trusted
+publisher registration and a first tagged publish are still external actions.
 
 The release boundary is now verified by draft PR #9: GitHub Actions run #3
 passed on Python 3.12 and 3.13, and fresh Claude and Cursor sessions both
@@ -154,7 +161,8 @@ packet merge.
 - Optional adapter stubs: `rdw adapter list`, `rdw adapter run <name> <run-dir>`.
 - Task and batch planning now carry `output_format` through inferred contracts, CLI overrides, warnings for unknown formats, and golden prompt bundles.
 - Compatibility wrappers in `scripts/` and `install/install.sh`.
-- `scripts/publish-pypi-wizard.sh` for guided PyPI token capture, artifact rebuild, dry-run check, and confirmed publish.
+- `.github/workflows/ci.yml` for tag-gated, version-checked quality, wheel-smoke, and OIDC PyPI publishing.
+- `scripts/publish-pypi-wizard.sh` as an explicit-recovery-only manual token path.
 - `docs/LIMITATIONS.md` and `docs/FUTURE-AIOS-INTEGRATION.md` documenting v1 boundaries.
 - `RELEASE.md` and `CHANGELOG.md` for release governance.
 - `docs/modernization/AUDIT.md`, `TARGET.md`, `EXEC_PLAN.md`, and `PROGRESS.md`
@@ -218,6 +226,9 @@ packet merge.
   deterministic contract and fixture/golden requirements.
 - No fresh agent-session slash smoke has been captured; the install
   materialization path is covered by `scripts/smoke-install.py`.
+- The PyPI trusted publisher has not been registered or exercised from this
+  branch; the workflow structure, tag guard, and local package proof are
+  verified.
 
 ## Next Step
 
@@ -229,10 +240,19 @@ the first mature-domain decision, and the basketball acceptance implementation
 are recorded. The full RDW writing-pipeline handoff for all five positive
 basketball fixtures is now complete; the next map action is human graduation
 review before any `example_only` change. Review/merge of
-draft PR #9, tagging, and publishing remain separate release actions; do not
-infer them from local or remote verification.
+draft PR #9, PyPI trusted-publisher registration, tagging, and publishing
+remain separate release actions; do not infer them from local or remote
+verification.
 
 ## Quality Ladder Notes
+
+2026-07-19: Release publishing committed as `c905f9d`: matching tags now run
+the existing quality matrix and wheel smoke before uploading distributions to a
+job-scoped PyPI OIDC publisher; root/package release docs are synchronized.
+Local verification passed lock, asset parity, shellcheck, Ruff, formatting,
+basedpyright, 68 tests, Vulture, the sdist/wheel build, and isolated-wheel
+critical-flow smoke. Workflow YAML parsed structurally and the `v0.2.0` tag
+guard passed; `actionlint` was not installed locally.
 
 2026-07-15: Baseline passed `uv run ruff check .`, `uv run ruff format --check .`,
 `uv run basedpyright src tests scripts`, `uv run pytest -q` (36), the pre-CR
