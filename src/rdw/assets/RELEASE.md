@@ -8,6 +8,28 @@
 - `MINOR`: additive domains, output formats, command templates, or validation fields.
 - `MAJOR`: breaking prompt pipeline order, packet schema, install surface, or output contract changes.
 
+## Canonical publish path
+
+RDW publishes from a version-matched `vMAJOR.MINOR.PATCH` tag. Pushing the tag
+starts `.github/workflows/ci.yml`, which runs the existing Python 3.12/3.13
+quality matrix, including the package parity checks, shellcheck, dead-code scan,
+lint, formatting, type checking, tests, build, and isolated wheel smoke. Only
+after that matrix passes does the `publish` job upload the tested distributions
+with GitHub Actions OIDC trusted publishing. The workflow does not use a PyPI
+API token or a `PYPI_TOKEN` secret.
+
+Before the first tagged release, configure the PyPI trusted publisher for this
+project at the project's PyPI publishing settings:
+
+- Owner: `jakyeamos`
+- Repository: `research-domain-writing`
+- Workflow: `ci.yml`
+- GitHub environment: `pypi`
+
+Protect the `pypi` environment and version tags in GitHub as appropriate for the
+repository. If the PyPI project does not exist yet, use PyPI's pending trusted
+publisher flow for the first release.
+
 ## Release Checklist
 
 1. Update version references in `pyproject.toml`, `SKILL.md`, install templates, `CHANGELOG.md`, and this file.
@@ -99,16 +121,23 @@ Use `pre-cr run --json --workspace .` only for changed-file readiness during PR 
 
 8. Confirm generated run outputs are ignored and only curated examples/package assets are committed.
 9. Confirm `git diff --check` is clean and `.tracker/PROJECT_TRUTH.md` records the final verification state.
-10. Commit release changes, merge to `main`, tag `v0.2.0`, push `main` and the tag.
-11. Publish to PyPI.
-
-For an interactive PyPI token and publish flow, run:
+10. Commit release changes and merge them to `main`.
+11. Create and push the matching annotated tag:
 
 ```bash
-scripts/publish-pypi-wizard.sh
+git tag -a v0.2.0 -m "Release v0.2.0"
+git push origin main
+git push origin v0.2.0
 ```
 
-The wizard opens the PyPI token page, captures the token with hidden input, rebuilds/verifies artifacts, runs a dry-run check, and only publishes after a final confirmation. It does not write the PyPI token to disk.
+12. Monitor the tagged `ci.yml` run. The `publish` job is the canonical PyPI
+publish step; it downloads the distributions produced and wheel-smoked by the
+quality matrix. Verify the package page after the job succeeds.
+
+The `scripts/publish-pypi-wizard.sh` token flow is retained only as an
+explicitly approved recovery path when GitHub Actions trusted publishing is
+unavailable. It is not the normal release path and should not be used for
+routine tagged releases.
 
 ## Release Framing
 
