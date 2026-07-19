@@ -6,9 +6,9 @@ healthScore: 97
 statusLabel: acceptance_pipeline_handoff_ready
 nextStep: Conduct the human graduation review for the five basketball handoffs; keep example_only true until that review and all graduation gates pass, with release actions separate.
 blockers:
-  - A fresh Codex task was not opened for slash smoke; the installed Codex/agents surface was verified by symlink and skill-content inspection.
+  - Fresh-session slash-command behavior remains a release-boundary check; `scripts/smoke-install.py` now proves the public install materialization path for Claude, Cursor, and agents in disposable homes.
   - The modernization branch is not a release action; merge, tagging, and publishing remain explicitly deferred.
-lastUpdated: 2026-07-15
+lastUpdated: 2026-07-19
 tags: [aios, writing, research, skill, python, cli, pypi]
 areas: [engineering, writing]
 goals: []
@@ -59,8 +59,11 @@ The release boundary is now verified by draft PR #9: GitHub Actions run #3
 passed on Python 3.12 and 3.13, and fresh Claude and Cursor sessions both
 recognized `/rdw improve the copy on my LIS leaderboard`, inferred a task
 contract, and stopped when grounded LIS source material was missing. The
-Codex/agents install surface is present and points at this checkout; a fresh
-Codex task smoke remains intentionally unrun.
+Codex/agents install surface is present and points at this checkout. The
+repeatable `scripts/smoke-install.py` proof now invokes the public `rdw install`
+command separately for Claude, Cursor, and agents in disposable homes, checking
+consumer files/links, the managed packaged root, and the `RDW_ROOT` marker. A
+fresh agent-session slash smoke remains intentionally unrun.
 
 The next-phase trust boundary is now explicit in
 `docs/architecture/ADR-001-provider-neutral-adapter-contract.md`: one task at
@@ -213,8 +216,8 @@ packet merge.
   fixture adapter only. RDW does not call model APIs by default.
 - No diff-based regression implementation or tests yet; ADR-003 defines the
   deterministic contract and fixture/golden requirements.
-- No fresh Codex task slash smoke has been captured; the installed Codex/agents
-  surface has been verified by symlink and skill-content inspection.
+- No fresh agent-session slash smoke has been captured; the install
+  materialization path is covered by `scripts/smoke-install.py`.
 
 ## Next Step
 
