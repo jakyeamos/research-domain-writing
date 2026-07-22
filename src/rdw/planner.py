@@ -207,7 +207,7 @@ def render_prompt_bundle(contract: YamlMapping) -> str:
         "## Router Prompt\n\n"
         f"{router}\n\n"
         "## Pipeline Orchestrator\n\n"
-        f"{orchestrator}\n"
+        f"{orchestrator.rstrip()}\n"
     )
 
 
