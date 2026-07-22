@@ -1,22 +1,22 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: RDW v0.2.0 modernization now includes the serial filesystem-first fixture batch executor, source-grounded basketball acceptance gates, five positive research-to-humanizer handoffs, and a tag-gated OIDC PyPI publish path; the core remains offline and auditable.
+summary: RDW v0.2.0 modernization is integrated on canonical dev with the serial filesystem-first fixture batch executor, source-grounded basketball acceptance gates, five positive research-to-humanizer handoffs, and a tag-gated OIDC PyPI publish path; the core remains offline and auditable.
 healthScore: 97
 statusLabel: acceptance_pipeline_handoff_ready
-nextStep: Conduct the human graduation review for the five basketball handoffs; keep example_only true until that review and all graduation gates pass, with release actions separate.
+nextStep: Conduct the human graduation review for the five basketball handoffs; keep example_only true until that review and all graduation gates pass, with the v0.2.0 release actions separate.
 blockers:
   - Fresh-session slash-command behavior remains a release-boundary check; `scripts/smoke-install.py` now proves the public install materialization path for Claude, Cursor, and agents in disposable homes.
-  - The tag-gated OIDC workflow is committed locally, but this modernization branch is not a release action; merge, PyPI registration, tagging, and publishing remain deferred.
-lastUpdated: 2026-07-19
+  - The tag-gated OIDC workflow is integrated on dev, but PyPI trusted-publisher registration, GitHub release/tagging, and publishing remain deferred external release actions.
+lastUpdated: 2026-07-22
 tags: [aios, writing, research, skill, python, cli, pypi]
 areas: [engineering, writing]
 goals: []
 repoType: tool
 sourceOfTruth: mixed
 primaryLanguage: Python
-activeBranch: codex/rdw-gpt56-modernization
-lastCommitDate: 2026-07-19
+activeBranch: dev
+lastCommitDate: 2026-07-22
 quality:
   lint: pass
   types: pass
@@ -48,7 +48,7 @@ The v0.2.0 repo has a real `rdw` Python CLI that validates packets and batches, 
 
 The 2026-07-15 modernization baseline is green for lint, formatting, types,
 tests, build, CLI smoke, shellcheck, scoped dead-code, and isolated wheel use.
-The modernization branch derives release version truth from `pyproject.toml`,
+Canonical dev derives release version truth from `pyproject.toml`,
 checks the lockfile, verifies root/package asset parity, resolves explicit
 planner overrides into the final contract, supports JSON diagnostics with
 stable exit categories, enforces legal lifecycle transitions, atomically
@@ -62,7 +62,7 @@ and publish through PyPI OIDC in the protected `pypi` environment. The manual
 token wizard remains only for explicitly approved recovery; PyPI-side trusted
 publisher registration and a first tagged publish are still external actions.
 
-The release boundary is now verified by draft PR #9: GitHub Actions run #3
+The release boundary was previously verified by draft PR #9: GitHub Actions run #3
 passed on Python 3.12 and 3.13, and fresh Claude and Cursor sessions both
 recognized `/rdw improve the copy on my LIS leaderboard`, inferred a task
 contract, and stopped when grounded LIS source material was missing. The
@@ -232,8 +232,8 @@ packet merge.
 
 ## Next Step
 
-The modernization and release verification boundary are complete on
-`codex/rdw-gpt56-modernization`, and the provider-neutral adapter boundary, the
+The modernization and release verification boundary are complete on canonical
+`dev`, and the provider-neutral adapter boundary, the
 first deterministic vertical slice, the packet-lineage decision, the
 evidence-aware diff-QA contract, the bounded batch-executor implementation,
 the first mature-domain decision, and the basketball acceptance implementation
@@ -245,6 +245,14 @@ remain separate release actions; do not infer them from local or remote
 verification.
 
 ## Quality Ladder Notes
+
+2026-07-22: Folded the 63-commit modernization branch into canonical `dev`
+with merge `6ac3844` and prompt-bundle newline remediation `522b7b6`, then
+promoted `dev` to `522b7b6`. Verified lock and package-asset parity, shellcheck,
+Vulture, Ruff lint/format, basedpyright, 68 tests, `uv build`, disposable
+Claude/Cursor/agents install smoke, and installed-wheel doctor, strict packet,
+batch, task lifecycle, schema, and install smoke. PyPI registration, tagging,
+GitHub release, and publication remain separate external release actions.
 
 2026-07-19: Release publishing committed as `c905f9d`: matching tags now run
 the existing quality matrix and wheel smoke before uploading distributions to a
