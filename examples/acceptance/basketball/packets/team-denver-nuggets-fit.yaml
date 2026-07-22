@@ -1,0 +1,71 @@
+id: basketball-team-denver-nuggets-fit-profile-2026-07-15
+domain: basketball
+entity_type: team
+entity_name: Denver Nuggets
+topic: Describe bounded team-fit evidence from a supplied player role and profile
+time_period: NBA.com current profile snapshot accessed 2026-07-15
+context: A team-fit fixture that limits itself to the supplied center and playmaking evidence instead of asserting a scheme or lineup result.
+role_or_usage_context: The fit discussion is limited to a listed center role and assist-volume evidence; roster construction, pace, and defensive scheme remain unknown.
+
+key_facts:
+  - id: fact-nuggets-001
+    text: NBA.com lists Nikola Jokić as a Denver Nuggets center.
+  - id: fact-nuggets-002
+    text: NBA.com's current Nikola Jokić profile snapshot lists 10.7 assists per game.
+
+relevant_metrics:
+  - name: assists per game
+    value: 10.7
+    unit: assists per game
+    denominator: games played
+    period: current NBA.com profile snapshot accessed 2026-07-15
+    sample: Current profile sample; exact season window is not expanded in this fixture.
+    what_it_captures: Recorded assist volume associated with the listed player profile.
+    what_it_misses: Lineup spacing, screen quality, defensive scheme, turnovers, and teammate conversion.
+    fact_ids: [fact-nuggets-002]
+  - name: listed player position
+    value: center
+    unit: position label
+    denominator: NBA.com player profile
+    period: current NBA.com profile snapshot accessed 2026-07-15
+    sample: Current profile snapshot.
+    what_it_captures: The source's listed position for the player used in the fit context.
+    what_it_misses: Actual lineup deployment, switching assignments, and scheme responsibilities.
+    fact_ids: [fact-nuggets-001]
+
+domain_terms:
+  - center
+  - playmaking hub
+  - lineup context
+  - uncertainty
+concepts_that_apply:
+  - role-context
+  - uncertainty
+
+source_notes:
+  - source_type: url
+    source: https://www.nba.com/player/203999/nikola-jokic
+    accessed: 2026-07-15
+    note: Official NBA player profile used for the listed team, position, and assist-volume evidence.
+    fact_ids: [fact-nuggets-001, fact-nuggets-002]
+
+interpretation_notes:
+  - A center with the supplied assist volume is a plausible playmaking hub, but this is a bounded interpretation rather than a scheme result.
+  - No conclusion about spacing, defensive coverage, or roster quality is supported by the supplied evidence.
+open_questions:
+  - Which lineups and actions produce the assist volume?
+  - What spacing and defensive responsibilities surround the center role?
+uncertainties:
+  - Roster construction, pace environment, defensive scheme, and lineup data are not loaded.
+  - Current-profile facts require freshness checks before reuse.
+confidence_level: low
+last_updated: 2026-07-15T12:00:00Z
+used_in_outputs:
+  - basketball-acceptance-team-fit
+
+extensions:
+  team:
+    conference: unknown
+    pace_environment: unknown
+    defensive_scheme: unknown
+    roster_construction: unknown

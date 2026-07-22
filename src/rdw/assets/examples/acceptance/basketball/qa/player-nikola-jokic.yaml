@@ -1,0 +1,17 @@
+output_id: basketball-acceptance-player-comparison
+pass: true
+confidence_score: 0.8
+needs_human_review: false
+issues: []
+blocking_issue_count: 0
+claim_ledger:
+  - claim_id: claim-jokic-line
+    text: The current NBA.com profile snapshot lists 27.7 points, 12.9 rebounds, and 10.7 assists per game.
+    fact_ids: [fact-jokic-001]
+  - claim_id: claim-jokic-role
+    text: The supplied source identifies Jokić with the Denver Nuggets and the center position.
+    fact_ids: [fact-jokic-002]
+  - claim_id: claim-jokic-boundary
+    text: The current profile does not by itself support a future projection or complete team-value conclusion.
+    fact_ids: [fact-jokic-001, fact-jokic-002]
+notes: This player context is comparison-ready only when matched against a comparable sample and named dimensions.

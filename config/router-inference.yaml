@@ -25,8 +25,9 @@ output_type_inference:
   - match: [improve copy, ui copy, tooltip, legend, column header, empty state, methodology]
     output_type: ranking_explanation
     note: Often sitewide + row copy; may split into multiple tasks in batch
-  - match: [stat interpretation, why the stat, what does .* measure]
+  - match: [stat interpretation, why the stat, what does .* measure, stat]
     output_type: stat_interpretation
+    entity_type: player
   - match: [player summary, player blurb, scouting]
     output_type: player_summary
     entity_type: player
@@ -35,11 +36,14 @@ output_type_inference:
   - match: [album review, album blurb]
     output_type: album_review_blurb
     entity_type: album
-  - match: [feature, release note, how it works]
+  - match: [feature, release note, how it works, api, idempotency]
     output_type: feature_explainer
     entity_type: feature
 
 entity_inference:
+  - pattern: "idempotency key"
+    entity_name: "Idempotency keys"
+    domain: technical
   # Extract product/surface name when user names it
   - pattern: "(?:my |the )?([A-Z][A-Za-z0-9]+) leaderboard"
     entity_name_template: "{1} leaderboard"
@@ -56,7 +60,7 @@ domain_inference:
   music:
     keywords: [album, artist, song, track, genre, production, review]
   technical:
-    keywords: [api, feature, product, deploy, architecture, sdk, latency]
+    keywords: [api, feature, product, deploy, architecture, sdk, latency, idempotency, release]
 
 depth_inference:
   deep: [controversial, lawsuit, medical, diagnosis, invest, fiduciary, definitive ranking, best ever]

@@ -1,0 +1,34 @@
+output_id: basketball-acceptance-player-comparison
+pass: true
+confidence_score: 0.78
+needs_human_review: true
+issues: []
+blocking_issue_count: 0
+draft: |
+  The supplied profiles are useful for a bounded comparison, but they are not like-for-like samples. NBA.com's current Jokić profile lists 27.7 points, 12.9 rebounds, and 10.7 assists per game and identifies him as a Denver Nuggets center. Tatum's supplied line covers the 2023-24 regular season: 74 games, 26.9 points, 8.1 rebounds, and 4.9 assists per game, with the Boston Celtics and forward-guard role listed.
+
+  On the named box-score dimensions, the packets show both players with substantial scoring and rebounding volume, while the assist figures sit in different role contexts. Jokić's center designation and listed assist volume support a bounded discussion of playmaking responsibility. Tatum's 74-game line supports a season-specific volume read in the listed forward-guard context.
+
+  The comparison should stop there. Jokić's exact sample window is not expanded, and the packets do not load efficiency, lineup, usage, tracking, or defensive metrics. The evidence does not support a complete ranking, a future projection, or a claim about who is better overall.
+claim_ledger:
+  - claim_id: claim-jokic-line
+    text: The current NBA.com profile snapshot lists 27.7 points, 12.9 rebounds, and 10.7 assists per game.
+    fact_ids: [fact-jokic-001]
+  - claim_id: claim-jokic-role
+    text: The supplied source identifies Jokić with the Denver Nuggets and the center position.
+    fact_ids: [fact-jokic-002]
+  - claim_id: claim-jokic-boundary
+    text: The current profile does not by itself support a complete ranking or future projection.
+    fact_ids: [fact-jokic-001, fact-jokic-002]
+secondary_packet: packets/player-jayson-tatum.yaml
+secondary_claim_ledger:
+  - claim_id: claim-tatum-line-secondary
+    text: Tatum's 2023-24 regular-season line was 74 games, 26.9 points, 8.1 rebounds, and 4.9 assists per game.
+    fact_ids: [fact-tatum-001]
+  - claim_id: claim-tatum-role-secondary
+    text: The supplied source identifies Tatum with the Boston Celtics and the forward-guard position.
+    fact_ids: [fact-tatum-002]
+  - claim_id: claim-tatum-boundary-secondary
+    text: Tatum's line supports a season-specific volume read rather than a complete impact conclusion.
+    fact_ids: [fact-tatum-001, fact-tatum-002]
+notes: The primary and comparison packets are kept separate; the secondary claim ledger makes the cross-packet evidence auditable without merging packets.

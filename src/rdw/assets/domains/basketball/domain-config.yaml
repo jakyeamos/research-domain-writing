@@ -63,6 +63,7 @@ research_packet:
 extensions_schema:
   player: [team, season, role, archetype, usage, age, physical_profile, minutes_stability]
   team: [conference, roster_construction, pace_environment, defensive_scheme]
+  ranking: [ranking_name, metric_definition, population, filters, season, update_window, rank_value, tie_behavior, missing_value_behavior, methodology_notes, known_limitations, updated_at, freshness_window_days]
 
 writing_output_types:
   - ranking_explanation

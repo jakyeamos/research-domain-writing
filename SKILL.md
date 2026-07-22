@@ -6,7 +6,7 @@ description: |
   finance, medicine, academic, etc.). Separates research, domain drafting, QA, and
   final humanizer/blader style pass. Do NOT use humanizer alone for domain knowledge.
   Slash commands: /rdw (single task), /rdw-batch (YAML batch).
-version: 0.1.0
+version: 0.2.0
 ---
 
 # Research Domain Writing
@@ -27,10 +27,15 @@ version: 0.1.0
 
 Run planner + researcher prompts. **Use your tools** (web, files, APIs) to gather facts; save YAML under `knowledge/<domain>/`. The skill does not include a built-in crawler — that is by design.
 
-## v0.1 limitation
+## Current limitations
 
 - `rdw task plan` and `rdw batch plan` validate inputs and emit deterministic prompt bundles.
-- The CLI does not call an LLM, browse, research, draft, or complete batch tasks by itself.
+- `rdw task execute --fixture` can run the checked-in deterministic vertical-slice fixture through receipt validation and lifecycle completion.
+- `rdw batch execute --fixture-map` can run a bounded serial fixture batch with
+  immutable attempts, retry limits, event replay, pause/cancel controls, and
+  explicit unknown-attempt recovery.
+- The CLI does not call an LLM, browse, research, or draft real copy by itself;
+  fixture execution only proves deterministic artifact and lifecycle handling.
 - The agent executes the emitted prompts and updates run artifacts.
 
 Details: `docs/LIMITATIONS.md`

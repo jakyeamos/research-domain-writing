@@ -1,0 +1,25 @@
+output_id: basketball-acceptance-player-stat-interpretation
+pass: true
+confidence_score: 0.84
+needs_human_review: true
+issues: []
+blocking_issue_count: 0
+draft: |
+  NBA.com lists Jayson Tatum's 2023-24 regular-season line as 74 games, 26.9 points per game, 8.1 rebounds per game, and 4.9 assists per game. That is a substantial box-score sample, but the read should stay attached to that season and those recorded categories.
+
+  Points, rebounds, and assists describe scoring, rebounding, and recorded assist volume averaged over games played. They do not answer how efficient the scoring was, how difficult the shots were, what defensive value he supplied, or how lineups shaped the results.
+
+  The source identifies Tatum with the Boston Celtics and the forward-guard position. That role context makes the combination of scoring, rebounding, and assists relevant to a broad box-score description, but it does not establish a complete impact profile.
+
+  The responsible conclusion is narrow: the packet supports a 74-game volume read in the listed role. Efficiency, usage, tracking, and defensive questions remain open.
+claim_ledger:
+  - claim_id: claim-tatum-line
+    text: Tatum's 2023-24 regular-season line was 74 games, 26.9 points, 8.1 rebounds, and 4.9 assists per game.
+    fact_ids: [fact-tatum-001]
+  - claim_id: claim-tatum-role
+    text: The supplied source identifies Tatum with the Boston Celtics and the forward-guard position.
+    fact_ids: [fact-tatum-002]
+  - claim_id: claim-tatum-boundary
+    text: The box-score line does not establish efficiency, defense, or total impact.
+    fact_ids: [fact-tatum-001]
+notes: The draft keeps the 74-game sample and listed role visible while explicitly leaving efficiency, tracking, and defense unresolved.

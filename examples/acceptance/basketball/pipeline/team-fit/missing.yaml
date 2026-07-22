@@ -1,0 +1,10 @@
+task_id: basketball-acceptance-team-fit
+packet_id: basketball-team-denver-nuggets-fit-profile-2026-07-15
+status: open
+missing_info:
+  - id: missing-team-actions
+    question: Which lineups and actions produce the assist volume?
+    impact: The evidence cannot establish a specific scheme or action-level result.
+  - id: missing-team-context
+    question: What spacing and defensive responsibilities surround the center role?
+    impact: The fit note must leave roster, pace, and defensive-scheme conclusions open.

@@ -1,0 +1,17 @@
+output_id: basketball-acceptance-negative-forbidden-praise
+pass: false
+confidence_score: 0.1
+needs_human_review: true
+issues:
+  - id: forbidden-generic-praise
+    severity: blocker
+    category: overclaim
+    description: The draft uses generic basketball praise without observable evidence.
+    suggested_fix: Replace the phrase with a source-linked behavior or remove it.
+blocking_issue_count: 1
+draft: Jayson Tatum has high basketball IQ and can do it all.
+claim_ledger:
+  - claim_id: claim-praise-context
+    text: The packet identifies Tatum as a Boston Celtics forward-guard.
+    fact_ids: [fact-tatum-002]
+notes: Negative QA fixture for forbidden generic phrases.
