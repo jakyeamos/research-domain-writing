@@ -1,10 +1,10 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: RDW v0.3.0 release candidate is reconciled on the fold branch from canonical dev with the serial filesystem-first fixture batch executor, source-grounded basketball acceptance gates, five positive research-to-humanizer handoffs, and a tag-gated OIDC PyPI publish path; the core remains offline and auditable.
+summary: RDW v0.3.0 release candidate is integrated on canonical dev with the serial filesystem-first fixture batch executor, source-grounded basketball acceptance gates, five positive research-to-humanizer handoffs, and a tag-gated OIDC PyPI publish path; the core remains offline and auditable.
 healthScore: 97
 statusLabel: release_candidate
-nextStep: Promote the reconciled v0.3.0 candidate to canonical dev after human graduation review, then perform the external tag, GitHub release, and PyPI trusted-publisher verification.
+nextStep: Complete human graduation review for the five basketball handoffs, then perform the external v0.3.0 tag, GitHub release, and PyPI trusted-publisher verification.
 blockers:
   - Fresh-session slash-command behavior remains a release-boundary check; `scripts/smoke-install.py` now proves the public install materialization path for Claude, Cursor, and agents in disposable homes.
   - The tag-gated OIDC workflow is integrated on dev, but PyPI trusted-publisher registration, GitHub release/tagging, and publishing remain deferred external release actions.
@@ -15,7 +15,7 @@ goals: []
 repoType: tool
 sourceOfTruth: mixed
 primaryLanguage: Python
-activeBranch: codex/full-audit-fold-rdw
+activeBranch: dev
 lastCommitDate: 2026-07-22
 quality:
   lint: pass
@@ -246,7 +246,7 @@ from local or remote verification.
 ## Quality Ladder Notes
 
 2026-07-22 (v0.3.0 candidate): Reconciled the canonical-dev candidate with the v0.2.2
-release hardening from `main`, retained the tag-gated OIDC publication path,
+release hardening from `main`, promoted it to canonical `dev` at `75fa796`, and retained the tag-gated OIDC publication path,
 and verified lock/package-asset parity, shellcheck, Vulture, Ruff lint/format,
 basedpyright, the full test suite, `uv build`, disposable Claude/Cursor/agents
 install smoke, and installed-wheel doctor, strict packet, batch, lifecycle,
