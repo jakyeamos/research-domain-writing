@@ -1,6 +1,6 @@
 [project]
 name = "research-domain-writing"
-version = "0.2.0"
+version = "0.3.0"
 description = "Research-grounded domain writing pipeline prompts, domain packs, packet validation, and agent skill distribution."
 readme = "README.md"
 requires-python = ">=3.12"

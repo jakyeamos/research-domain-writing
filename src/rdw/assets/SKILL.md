@@ -6,7 +6,7 @@ description: |
   finance, medicine, academic, etc.). Separates research, domain drafting, QA, and
   final humanizer/blader style pass. Do NOT use humanizer alone for domain knowledge.
   Slash commands: /rdw (single task), /rdw-batch (YAML batch).
-version: 0.2.0
+version: 0.3.0
 ---
 
 # Research Domain Writing

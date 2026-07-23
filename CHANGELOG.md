@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.3.0 - 2026-07-22
+
+- Added provider-neutral adapter contracts and a deterministic fixture-backed
+  task execution seam with validated receipts and lifecycle promotion.
+- Added packet-lineage, evidence-aware diff-QA, and bounded serial batch
+  execution contracts with pause, cancel, retry, lease, and recovery semantics.
+- Added the source-grounded basketball acceptance pack, mature validation, claim
+  ledgers, positive handoff fixtures, and negative provenance/semantic gates.
+- Added explicit planner diagnostics, atomic lifecycle state, transactional
+  package-asset installation, packaged-resource fallback, and locked OIDC release
+  verification for source and wheel consumers.
+
+## 0.2.2 - 2026-07-17
+
+- Fixed the guided PyPI publish wizard under Bash `set -e` so normal stage, input, and completion paths no longer exit early.
+
+## 0.2.1 - 2026-07-17
+
+- Made `rdw` the canonical human-facing command while retaining compatibility wrappers.
+- Clarified agent-owned execution, truthful machine-readable limitations, and release guidance.
+- Added package-asset parity checks and a guided PyPI release workflow.
+
 ## 0.2.0 - 2026-07-09
 
 - Added lifecycle commands for task and batch status, marking, and resume flows.

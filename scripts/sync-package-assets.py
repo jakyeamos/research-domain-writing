@@ -42,8 +42,16 @@ def asset_pairs() -> tuple[AssetPair, ...]:
     return directory_pairs + file_pairs
 
 
-def _destination(package_root: Path, pair: AssetPair) -> Path:
+def _destination(pair: AssetPair, package_root: Path) -> Path:
     return package_root / pair.destination.relative_to(PACKAGE_ROOT)
+
+
+def _files(path: Path) -> set[Path]:
+    if path.is_file():
+        return {path}
+    if not path.is_dir():
+        return set()
+    return {candidate for candidate in path.rglob("*") if candidate.is_file()}
 
 
 def expected_files(package_root: Path = PACKAGE_ROOT) -> set[Path]:
@@ -51,24 +59,19 @@ def expected_files(package_root: Path = PACKAGE_ROOT) -> set[Path]:
     for pair in asset_pairs():
         if pair.source.is_dir():
             expected.update(
-                package_root / source_path.relative_to(ROOT)
-                for source_path in pair.source.rglob("*")
-                if source_path.is_file()
+                package_root / source_path.relative_to(ROOT) for source_path in _files(pair.source)
             )
         else:
-            expected.add(_destination(package_root, pair))
+            expected.add(_destination(pair, package_root))
     return expected
 
 
 def package_files(package_root: Path = PACKAGE_ROOT) -> set[Path]:
-    files: set[Path] = set()
-    for pair in asset_pairs():
-        destination = _destination(package_root, pair)
-        if destination.is_dir():
-            files.update(path for path in destination.rglob("*") if path.is_file())
-        elif destination.is_file():
-            files.add(destination)
-    return files
+    return {
+        path
+        for path in _files(package_root)
+        if path.name != "__init__.py" and "__pycache__" not in path.parts
+    }
 
 
 def drift(package_root: Path = PACKAGE_ROOT) -> list[str]:
@@ -76,18 +79,17 @@ def drift(package_root: Path = PACKAGE_ROOT) -> list[str]:
     expected = expected_files(package_root)
     actual = package_files(package_root)
     for pair in asset_pairs():
-        destination_root = _destination(package_root, pair)
+        destination = _destination(pair, package_root)
         if pair.source.is_dir():
-            source_files = [path for path in pair.source.rglob("*") if path.is_file()]
-            for source_path in source_files:
-                destination = package_root / source_path.relative_to(ROOT)
-                if not destination.exists():
-                    differences.append(f"missing: {destination.relative_to(package_root)}")
-                elif source_path.read_bytes() != destination.read_bytes():
+            for source_path in _files(pair.source):
+                package_path = package_root / source_path.relative_to(ROOT)
+                if not package_path.exists():
+                    differences.append(f"missing: {package_path.relative_to(package_root)}")
+                elif source_path.read_bytes() != package_path.read_bytes():
                     differences.append(f"different: {source_path.relative_to(ROOT)}")
-        elif not destination_root.exists():
-            differences.append(f"missing: {destination_root.relative_to(package_root)}")
-        elif pair.source.read_bytes() != destination_root.read_bytes():
+        elif not destination.exists():
+            differences.append(f"missing: {destination.relative_to(package_root)}")
+        elif pair.source.read_bytes() != destination.read_bytes():
             differences.append(f"different: {pair.source.relative_to(ROOT)}")
     for extra in sorted(actual - expected):
         differences.append(f"extra: {extra.relative_to(package_root)}")
@@ -101,7 +103,7 @@ def sync() -> None:
     try:
         shutil.copytree(PACKAGE_ROOT, stage, dirs_exist_ok=True)
         for pair in asset_pairs():
-            destination = _destination(stage, pair)
+            destination = _destination(pair, stage)
             if pair.source.is_dir():
                 _remove_path(destination)
                 destination.parent.mkdir(parents=True, exist_ok=True)

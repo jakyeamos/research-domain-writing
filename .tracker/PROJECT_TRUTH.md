@@ -1,10 +1,10 @@
 ---
 schemaVersion: 1
 projectName: Research Domain Writing
-summary: RDW v0.2.0 modernization is integrated on canonical dev with the serial filesystem-first fixture batch executor, source-grounded basketball acceptance gates, five positive research-to-humanizer handoffs, and a tag-gated OIDC PyPI publish path; the core remains offline and auditable.
+summary: RDW v0.3.0 release candidate is reconciled on the fold branch from canonical dev with the serial filesystem-first fixture batch executor, source-grounded basketball acceptance gates, five positive research-to-humanizer handoffs, and a tag-gated OIDC PyPI publish path; the core remains offline and auditable.
 healthScore: 97
-statusLabel: acceptance_pipeline_handoff_ready
-nextStep: Conduct the human graduation review for the five basketball handoffs; keep example_only true until that review and all graduation gates pass, with the v0.2.0 release actions separate.
+statusLabel: release_candidate
+nextStep: Promote the reconciled v0.3.0 candidate to canonical dev after human graduation review, then perform the external tag, GitHub release, and PyPI trusted-publisher verification.
 blockers:
   - Fresh-session slash-command behavior remains a release-boundary check; `scripts/smoke-install.py` now proves the public install materialization path for Claude, Cursor, and agents in disposable homes.
   - The tag-gated OIDC workflow is integrated on dev, but PyPI trusted-publisher registration, GitHub release/tagging, and publishing remain deferred external release actions.
@@ -15,7 +15,7 @@ goals: []
 repoType: tool
 sourceOfTruth: mixed
 primaryLanguage: Python
-activeBranch: dev
+activeBranch: codex/full-audit-fold-rdw
 lastCommitDate: 2026-07-22
 quality:
   lint: pass
@@ -44,7 +44,7 @@ agentExpectationsVersion: 1
 
 Research Domain Writing is a standalone, installable, file-based pipeline for turning research into grounded domain copy, QA output, and a human style pass. It separates research, domain copywriting, domain QA, and humanizer/blader responsibilities so style transformation does not invent domain knowledge.
 
-The v0.2.0 repo has a real `rdw` Python CLI that validates packets and batches, creates deterministic task/batch planning folders with explicit output-format contracts, emits prompt bundles, installs agent skills/templates, exports schemas, records lifecycle state, and packages curated assets for wheel installs. The CLI intentionally does not call LLM APIs, browse, research, or draft autonomously.
+The v0.3.0 candidate has a real `rdw` Python CLI that validates packets and batches, creates deterministic task/batch planning folders with explicit output-format contracts, emits prompt bundles, installs agent skills/templates, exports schemas, records lifecycle state, and packages curated assets for wheel installs. The CLI intentionally does not call LLM APIs, browse, research, or draft autonomously.
 
 The 2026-07-15 modernization baseline is green for lint, formatting, types,
 tests, build, CLI smoke, shellcheck, scoped dead-code, and isolated wheel use.
@@ -233,26 +233,35 @@ packet merge.
 ## Next Step
 
 The modernization and release verification boundary are complete on canonical
-`dev`, and the provider-neutral adapter boundary, the
-first deterministic vertical slice, the packet-lineage decision, the
-evidence-aware diff-QA contract, the bounded batch-executor implementation,
-the first mature-domain decision, and the basketball acceptance implementation
-are recorded. The full RDW writing-pipeline handoff for all five positive
-basketball fixtures is now complete; the next map action is human graduation
-review before any `example_only` change. Review/merge of
-draft PR #9, PyPI trusted-publisher registration, tagging, and publishing
-remain separate release actions; do not infer them from local or remote
-verification.
+`dev`, and the provider-neutral adapter boundary, the first deterministic
+vertical slice, packet lineage, evidence-aware diff QA, bounded batch
+execution, the first mature-domain decision, and the basketball acceptance
+implementation are recorded. The full RDW writing-pipeline handoff for all
+five positive basketball fixtures is complete; the next map action is human
+graduation review before any `example_only` change. The v0.3.0 candidate is
+ready for external PyPI trusted-publisher registration, tagging, GitHub release,
+and publication; those remain separate release actions and must not be inferred
+from local or remote verification.
 
 ## Quality Ladder Notes
 
-2026-07-22: Folded the 63-commit modernization branch into canonical `dev`
-with merge `6ac3844` and prompt-bundle newline remediation `522b7b6`, then
-promoted `dev` to `522b7b6`. Verified lock and package-asset parity, shellcheck,
-Vulture, Ruff lint/format, basedpyright, 68 tests, `uv build`, disposable
-Claude/Cursor/agents install smoke, and installed-wheel doctor, strict packet,
-batch, task lifecycle, schema, and install smoke. PyPI registration, tagging,
-GitHub release, and publication remain separate external release actions.
+2026-07-22 (v0.3.0 candidate): Reconciled the canonical-dev candidate with the v0.2.2
+release hardening from `main`, retained the tag-gated OIDC publication path,
+and verified lock/package-asset parity, shellcheck, Vulture, Ruff lint/format,
+basedpyright, the full test suite, `uv build`, disposable Claude/Cursor/agents
+install smoke, and installed-wheel doctor, strict packet, batch, lifecycle,
+schema, and install smoke. External tag, GitHub release, and PyPI publication
+remain pending trusted-publisher and human graduation checks.
+
+2026-07-17 (v0.2.2): Found that the 0.2.1 publish wizard exited during its first
+stage under Bash `set -e`; corrected expected-false `&&` guards, integrated the
+fix on live main, tagged `v0.2.2`, and passed the locked quality, package,
+source, and wheel consumer checks. Manual slash smoke and PyPI publication
+remained pending.
+
+2026-07-17 (v0.2.1): Integrated the release hardening on live `main`, tagged
+`v0.2.1`, and passed lock, parity, quality, build, source, and wheel consumer
+checks; manual slash smoke and PyPI publication remained pending.
 
 2026-07-19: Release publishing committed as `c905f9d`: matching tags now run
 the existing quality matrix and wheel smoke before uploading distributions to a

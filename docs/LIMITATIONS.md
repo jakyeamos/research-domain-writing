@@ -8,7 +8,7 @@ That means:
 
 - The agent may use whatever tools it already has: browser, APIs, pasted stats, local files, notebooks, or user-provided material.
 - RDW structures, validates, saves, and reuses what was gathered.
-- There is no built-in crawler, live stats connector, publication database client, or model API runner in v0.2.
+- There is no built-in crawler, live stats connector, publication database client, or model API runner in the current `v0.3.0` release candidate.
 
 `config/research-sources.yaml` tells the agent what kinds of sources to prefer. It is not an automatic fetch configuration.
 
@@ -48,7 +48,7 @@ Each planned task starts at status `planned`. The agent or a future adapter is r
 
 ## Workarounds
 
-| Need | v0.2 approach |
+| Need | v0.3 approach |
 | --- | --- |
 | Live stats or docs | Agent researches and saves packets under `knowledge/<domain>/` |
 | Basketball acceptance gate | `rdw validate-packet ... --mature` plus `rdw validate-claim-ledger ... --mature` |
