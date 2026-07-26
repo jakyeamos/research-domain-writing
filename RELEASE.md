@@ -134,7 +134,7 @@ uv run python scripts/run-pre-cr-python-tests.py
 Use `pre-cr run --json --workspace .` only for changed-file readiness during PR work, not as the sole release coverage command.
 
 8. Confirm generated run outputs are ignored and only curated examples/package assets are committed.
-9. Confirm `git diff --check` is clean and `.tracker/PROJECT_TRUTH.md` records the final verification state.
+9. Confirm `git diff --check` is clean and the release note records the final verification state.
 10. Commit release changes and merge them to `main`.
 11. Create and push the matching annotated tag:
 
