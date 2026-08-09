@@ -11,6 +11,7 @@ from typing import cast
 import pytest
 
 from rdw import __version__
+from rdw.artifact_validation import validate_artifact_request
 from rdw.cli import main
 from rdw.planner import TaskRequest, infer_contract, plan_batch, plan_task
 from rdw.validation import validate_batch_file, validate_packet_file
@@ -25,6 +26,47 @@ def test_cli_version_matches_package_metadata(capsys: pytest.CaptureFixture[str]
 
     assert exc_info.value.code == 0
     assert capsys.readouterr().out.strip() == f"rdw {__version__}"
+
+
+def _outreach_artifact_request() -> dict[str, YamlValue]:
+    return {
+        "schema_version": "rdw-artifact-request/v1",
+        "artifact_id": "example-ai-backend-hiring-manager",
+        "artifact_type": "outreach_email",
+        "channel": "email",
+        "intent": "start_conversation",
+        "audience": {"recipient_role": "hiring_manager", "relationship": "cold"},
+        "content": {
+            "subject": "Backend AI role at Example AI",
+            "body": (
+                "Hi Taylor,\n\nExample AI's focus on reliable AI infrastructure caught my attention. "
+                "I built production data systems during three Amazon SDE internships. "
+                "Would you be open to sharing how your team approaches reliability? "
+                "https://jakye.netlify.app/\n\nThanks,\nJakye"
+            ),
+        },
+        "evidence": [
+            {
+                "id": "role-focus",
+                "kind": "recipient_relevance",
+                "text": "Example AI focuses on reliable AI infrastructure",
+                "source": "official job posting",
+            },
+            {
+                "id": "candidate-proof",
+                "kind": "candidate_proof",
+                "text": "Built production data systems during three Amazon SDE internships",
+                "source": "candidate profile",
+            },
+        ],
+        "claim_bindings": [
+            {
+                "claim": "I built production data systems during three Amazon SDE internships.",
+                "evidence_ids": ["candidate-proof"],
+            }
+        ],
+        "constraints": {"human_approval_required": True, "max_words": 120},
+    }
 
 
 def test_cli_doctor_passes(capsys: pytest.CaptureFixture[str]) -> None:
@@ -144,6 +186,81 @@ def test_router_infers_music_and_technical() -> None:
     assert idempotency["domain"] == "technical"
     assert idempotency["entity_name"] == "Idempotency keys"
     assert idempotency["output_type"] == "feature_explainer"
+
+
+def test_router_infers_career_artifacts() -> None:
+    outreach = infer_contract(
+        TaskRequest(request="draft a concise outreach email to the hiring manager"), root=ROOT
+    )
+    resume = infer_contract(TaskRequest(request="rewrite this resume bullet"), root=ROOT)
+
+    assert outreach["domain"] == "career"
+    assert outreach["output_type"] == "outreach_email"
+    assert outreach["artifact_type"] == "outreach_email"
+    assert outreach["channel"] == "email"
+    assert outreach["intent"] == "start_conversation"
+    assert outreach["human_approval_required"] is True
+    assert resume["domain"] == "career"
+    assert resume["output_type"] == "resume_bullet"
+
+
+def test_artifact_receipt_approves_evidence_bound_outreach_for_human_review() -> None:
+    request = _outreach_artifact_request()
+
+    receipt = validate_artifact_request(request, root=ROOT)
+
+    assert receipt["ok"] is True
+    assert receipt["status"] == "approved_for_human_review"
+    assert receipt["human_approval_required"] is True
+    assert len(str(receipt["artifact_hash"])) == 64
+
+
+def test_artifact_receipt_blocks_generic_or_unbound_outreach() -> None:
+    request = _outreach_artifact_request()
+    request["content"] = {
+        "subject": "Great opportunity",
+        "body": "Hi Taylor, I'm passionate about your company. Could we connect? https://example.com",
+    }
+    request["claim_bindings"] = []
+
+    receipt = validate_artifact_request(request, root=ROOT)
+
+    assert receipt["ok"] is False
+    assert receipt["status"] == "blocked"
+    check_ids = {
+        str(cast("dict[str, YamlValue]", item)["id"])
+        for item in cast("list[YamlValue]", receipt["checks"])
+        if cast("dict[str, YamlValue]", item)["status"] == "fail"
+    }
+    assert {"claim_bindings", "evidence_in_content", "blocked_phrases"} <= check_ids
+
+
+def test_cli_validate_artifact_emits_machine_readable_receipt(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    request_path = tmp_path / "artifact.json"
+    receipt_path = tmp_path / "receipt.json"
+    request_path.write_text(json.dumps(_outreach_artifact_request()), encoding="utf-8")
+
+    assert (
+        main(
+            [
+                "validate-artifact",
+                str(request_path),
+                "--root",
+                str(ROOT),
+                "--receipt",
+                str(receipt_path),
+                "--json",
+            ]
+        )
+        == 0
+    )
+
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["schema_version"] == "rdw-artifact-receipt/v1"
+    assert payload["status"] == "approved_for_human_review"
+    assert json.loads(receipt_path.read_text(encoding="utf-8")) == payload
 
 
 def test_explicit_output_type_shapes_resolved_contract() -> None:

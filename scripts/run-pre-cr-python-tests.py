@@ -10,6 +10,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_PATH = ROOT / "build" / "pre-cr-python.lcov"
 COVERAGE_FILES = [
+    ROOT / "src" / "rdw" / "artifact_validation.py",
     ROOT / "src" / "rdw" / "cli.py",
     ROOT / "src" / "rdw" / "domain.py",
     ROOT / "src" / "rdw" / "install.py",

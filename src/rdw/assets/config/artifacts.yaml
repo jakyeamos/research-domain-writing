@@ -1,0 +1,78 @@
+version: 1
+request_schema: rdw-artifact-request/v1
+receipt_schema: rdw-artifact-receipt/v1
+
+# Profiles are deterministic promotion gates. Passing means eligible for human
+# review; it never authorizes publishing, submission, or sending.
+artifact_profiles:
+  summary:
+    minimum_evidence: 0
+    minimum_claim_bindings: 0
+
+  outreach_email:
+    minimum_evidence: 2
+    required_evidence_kinds: [recipient_relevance, candidate_proof]
+    minimum_claim_bindings: 1
+    max_words: 120
+    max_sentences: 6
+    max_subject_words: 9
+    max_subject_chars: 72
+    require_cta: true
+    require_proof_link: true
+    blocked_phrases:
+      - "i'm passionate about"
+      - "i am passionate about"
+      - "pick your brain"
+      - "perfect fit"
+      - "dear sir or madam"
+
+  outreach_followup_email:
+    minimum_evidence: 1
+    required_evidence_kinds: [recipient_relevance]
+    minimum_claim_bindings: 0
+    max_words: 80
+    max_sentences: 5
+    max_subject_words: 9
+    max_subject_chars: 72
+    require_cta: true
+    blocked_phrases:
+      - "just bumping this"
+      - "pick your brain"
+      - "perfect fit"
+
+  professional_message:
+    minimum_evidence: 2
+    required_evidence_kinds: [recipient_relevance, candidate_proof]
+    minimum_claim_bindings: 1
+    max_chars: 400
+    max_sentences: 4
+    require_cta: true
+    blocked_phrases:
+      - "i'm passionate about"
+      - "i am passionate about"
+      - "pick your brain"
+      - "perfect fit"
+
+  resume_bullet:
+    minimum_evidence: 1
+    required_evidence_kinds: [candidate_proof]
+    minimum_claim_bindings: 1
+    max_words: 35
+    max_sentences: 1
+
+  cover_letter:
+    minimum_evidence: 2
+    required_evidence_kinds: [role_requirement, candidate_proof]
+    minimum_claim_bindings: 2
+    max_words: 400
+
+  application_answer:
+    minimum_evidence: 1
+    required_evidence_kinds: [candidate_proof]
+    minimum_claim_bindings: 1
+    max_words: 300
+
+  social_post:
+    minimum_evidence: 1
+    minimum_claim_bindings: 1
+    max_words: 300

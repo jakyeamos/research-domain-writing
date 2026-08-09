@@ -8,7 +8,13 @@ from rdw.contracts import (
     TASK_CONTRACT_REQUIRED_FIELDS,
 )
 
-SCHEMA_TARGETS = ("packet", "batch", "task-contract")
+SCHEMA_TARGETS = (
+    "packet",
+    "batch",
+    "task-contract",
+    "artifact-request",
+    "artifact-receipt",
+)
 SCHEMA_FORMATS = ("jsonschema",)
 
 
@@ -27,6 +33,8 @@ def export_schema(target: str, *, format: str = "jsonschema") -> str:
         "packet": _packet_schema,
         "batch": _batch_schema,
         "task-contract": _task_contract_schema,
+        "artifact-request": _artifact_request_schema,
+        "artifact-receipt": _artifact_receipt_schema,
     }
     return json.dumps(builders[normalized_target](), indent=2) + "\n"
 
@@ -159,6 +167,9 @@ def _task_contract_schema() -> dict[str, object]:
             "entity_name": {"type": "string", "minLength": 1},
             "topic": {"type": "string"},
             "output_type": {"type": "string", "minLength": 1},
+            "artifact_type": {"type": "string", "minLength": 1},
+            "channel": {"type": "string", "minLength": 1},
+            "intent": {"type": "string", "minLength": 1},
             "output_format": {"type": "string", "minLength": 1},
             "audience": {"type": "string", "minLength": 1},
             "research_needed": {"type": "boolean"},
@@ -174,7 +185,121 @@ def _task_contract_schema() -> dict[str, object]:
             "qa_checklist_path": {"type": "string"},
             "writing_template": {"type": "string"},
             "style_profile_path": {"type": "string"},
+            "artifact_profile_path": {"type": "string"},
+            "human_approval_required": {"type": "boolean"},
             "warnings": {"type": "array", "items": {"type": "string"}},
             "inference": {"type": "object"},
+        },
+    }
+
+
+def _artifact_request_schema() -> dict[str, object]:
+    evidence_item = {
+        "type": "object",
+        "additionalProperties": True,
+        "required": ["id", "kind", "text", "source"],
+        "properties": {
+            "id": {"type": "string", "minLength": 1},
+            "kind": {"type": "string", "minLength": 1},
+            "text": {"type": "string", "minLength": 1},
+            "source": {"type": "string", "minLength": 1},
+        },
+    }
+    return {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://rdw.dev/schemas/artifact-request.json",
+        "title": "RDW Writing Artifact Request",
+        "type": "object",
+        "additionalProperties": True,
+        "required": [
+            "schema_version",
+            "artifact_id",
+            "artifact_type",
+            "channel",
+            "intent",
+            "content",
+            "evidence",
+            "claim_bindings",
+            "constraints",
+        ],
+        "properties": {
+            "schema_version": {"const": "rdw-artifact-request/v1"},
+            "artifact_id": {"type": "string", "minLength": 1},
+            "artifact_type": {"type": "string", "minLength": 1},
+            "channel": {"type": "string", "minLength": 1},
+            "intent": {"type": "string", "minLength": 1},
+            "audience": {"type": "object"},
+            "content": {
+                "type": "object",
+                "required": ["body"],
+                "properties": {
+                    "subject": {"type": "string"},
+                    "body": {"type": "string", "minLength": 1},
+                },
+                "additionalProperties": True,
+            },
+            "evidence": {"type": "array", "items": evidence_item},
+            "claim_bindings": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "required": ["claim", "evidence_ids"],
+                    "properties": {
+                        "claim": {"type": "string", "minLength": 1},
+                        "evidence_ids": {
+                            "type": "array",
+                            "minItems": 1,
+                            "items": {"type": "string", "minLength": 1},
+                        },
+                    },
+                    "additionalProperties": True,
+                },
+            },
+            "constraints": {
+                "type": "object",
+                "required": ["human_approval_required"],
+                "properties": {"human_approval_required": {"const": True}},
+                "additionalProperties": True,
+            },
+        },
+    }
+
+
+def _artifact_receipt_schema() -> dict[str, object]:
+    return {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://rdw.dev/schemas/artifact-receipt.json",
+        "title": "RDW Writing Artifact Quality Receipt",
+        "type": "object",
+        "additionalProperties": False,
+        "required": [
+            "schema_version",
+            "policy_version",
+            "artifact_id",
+            "artifact_type",
+            "channel",
+            "request_hash",
+            "contract_hash",
+            "artifact_hash",
+            "ok",
+            "status",
+            "human_approval_required",
+            "checks",
+            "reasons",
+        ],
+        "properties": {
+            "schema_version": {"const": "rdw-artifact-receipt/v1"},
+            "policy_version": {"type": "integer", "minimum": 1},
+            "artifact_id": {"type": "string"},
+            "artifact_type": {"type": "string"},
+            "channel": {"type": "string"},
+            "request_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+            "contract_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+            "artifact_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+            "ok": {"type": "boolean"},
+            "status": {"enum": ["approved_for_human_review", "blocked"]},
+            "human_approval_required": {"const": True},
+            "checks": {"type": "array"},
+            "reasons": {"type": "array", "items": {"type": "string"}},
         },
     }

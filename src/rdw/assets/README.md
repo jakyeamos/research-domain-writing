@@ -1,6 +1,6 @@
 # Research Domain Writing
 
-Research Domain Writing (RDW) is an agent-first harness for research-grounded writing. It validates structured research packets, plans repeatable writing runs, emits exact prompt bundles, and keeps outputs auditable.
+Research Domain Writing (RDW) is an agent-first harness for research-grounded writing. It validates structured research packets, plans repeatable writing runs, emits exact prompt bundles, and gives externally consumed artifacts content-bound quality receipts.
 
 The `rdw` CLI is not an LLM runner. It does not browse, call model APIs, or draft autonomously. Your agent performs the research and writing by following the emitted prompts.
 
@@ -79,7 +79,23 @@ rdw status .rdw-runs/lis-leaderboard
 
 Use `draft-done`, `qa-passed`, `qa-failed`, and `final-done` as the agent advances.
 
-### 4. Execute the deterministic vertical-slice fixture
+### 4. Validate an externally consumed artifact
+
+Use the artifact request contract for resumes, application materials, outreach,
+professional messages, social posts, and other consequential writing:
+
+```bash
+rdw validate-artifact path/to/artifact-request.yaml \
+  --receipt path/to/artifact-receipt.json --json
+```
+
+The request binds final content to evidence, claims, channel constraints, and a
+human-approval boundary. The receipt hashes both the contract and the content.
+`approved_for_human_review` means the artifact cleared deterministic RDW checks;
+it never authorizes sending, submission, or publication. Export the portable
+schemas with `rdw schema artifact-request` and `rdw schema artifact-receipt`.
+
+### 5. Execute the deterministic vertical-slice fixture
 
 The repository includes a fixture-backed runtime for proving the handoff and
 lifecycle boundary without calling a model API:
@@ -95,7 +111,7 @@ final artifact under the run directory, validates the packet and QA gate, and
 advances the existing lifecycle. Use the QA-failed fixture with `--resume` to
 exercise an auditable retry.
 
-### 5. Plan and track a batch
+### 6. Plan and track a batch
 
 ```bash
 rdw batch plan examples/batch-tasks.yaml --out .rdw-runs/demo-batch
@@ -262,6 +278,12 @@ deterministic and do not browse or call a provider.
 - packet references when supplied
 - supported output formats
 
+`rdw validate-artifact` checks the selected profile in `config/artifacts.yaml`,
+including required evidence kinds, claim bindings, content/evidence overlap,
+channel length, blocked filler, CTA and proof-link requirements, and the
+mandatory human-review boundary. The career pack contains the current outreach,
+resume, cover-letter, application-answer, and professional-message guidance.
+
 ## Examples
 
 | Example | Artifacts |
@@ -269,6 +291,7 @@ deterministic and do not browse or call a provider.
 | `examples/basketball-example/` | synthetic task, packet-derived knowledge, draft, QA, final |
 | `examples/music-example/` | thin-evidence music task, research packet, knowledge, draft, QA, final |
 | `examples/technical-example/` | technical feature task, research packet, knowledge, draft, QA, final |
+| `domains/career/` | sourced professional-writing structures and QA rules for consequential artifacts |
 | `examples/acceptance/basketball/` | source-grounded mature-pack packets, QA claim ledgers, and positive/negative gates |
 | `examples/batch-tasks.yaml` | deterministic batch planning input |
 

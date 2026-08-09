@@ -34,6 +34,13 @@ domains:
     enabled: true
     entity_types: [product, feature, system, api, release, repo]
 
+  career:
+    pack_path: domains/career
+    knowledge_path: knowledge/career
+    description: Evidence-bound professional artifacts for applications and outreach
+    enabled: true
+    entity_types: [role, company, recipient, experience, application]
+
   legal:
     pack_path: domains/_template
     knowledge_path: knowledge/legal
@@ -53,6 +60,7 @@ router_rules:
     basketball: [nba, player, PER, BPM, usage, archetype, pick-and-roll, rim pressure, leaderboard, LIS, fantasy, ranking]
     music: [album, track, mix, production, genre, chorus, verse, mastering]
     technical: [api, deploy, architecture, latency, sdk, feature flag, roadmap]
+    career: [resume, cv, cover letter, application answer, recruiter, hiring manager, outreach, networking email, linkedin message]
 
 research_depth_defaults:
   light: { max_open_questions: 3, require_sources: false }

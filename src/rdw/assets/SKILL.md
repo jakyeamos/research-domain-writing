@@ -1,10 +1,12 @@
 ---
 name: research-domain-writing
 description: |
-  Research-grounded domain writing pipeline. Use when producing jargon-heavy or
-  knowledge-heavy copy (sports analytics, music criticism, technical writing, policy,
-  finance, medicine, academic, etc.). Separates research, domain drafting, QA, and
-  final humanizer/blader style pass. Do NOT use humanizer alone for domain knowledge.
+  Research-grounded writing and artifact quality pipeline. Use for externally consumed
+  factual, persuasive, or voice-sensitive writing, including resumes, cover letters,
+  application answers, outreach emails, professional messages, social posts, technical
+  writing, sports analytics, music criticism, policy, finance, medicine, and academic
+  work. Separates research, drafting, QA, provenance, and final style. Do NOT use a
+  humanizer alone when claims, recipient relevance, or domain knowledge matter.
   Slash commands: /rdw (single task), /rdw-batch (YAML batch).
 version: 0.3.0
 ---
@@ -16,6 +18,8 @@ version: 0.3.0
 - User wants **accurate, domain-specific** copy, not generic fluent AI prose
 - Task needs local research packets, concept/jargon banks, or QA before styling
 - User mentions: player writeups, stat interpretation, album blurbs, feature docs, policy memos
+- User asks for a resume, cover letter, application answer, outreach email, professional
+  message, social post, or another artifact whose claims or recipient fit affect outcomes
 - User already has a humanizer skill but writing keeps sounding shallow or wrong
 
 ## When NOT to use
@@ -30,6 +34,9 @@ Run planner + researcher prompts. **Use your tools** (web, files, APIs) to gathe
 ## Current limitations
 
 - `rdw task plan` and `rdw batch plan` validate inputs and emit deterministic prompt bundles.
+- `rdw validate-artifact` checks a content-and-evidence request and emits a
+  content-bound receipt. Passing means eligible for human review, never permission
+  to send, submit, publish, or represent the user.
 - `rdw task execute --fixture` can run the checked-in deterministic vertical-slice fixture through receipt validation and lifecycle completion.
 - `rdw batch execute --fixture-map` can run a bounded serial fixture batch with
   immutable attempts, retry limits, event replay, pause/cancel controls, and
@@ -49,6 +56,8 @@ Details: `docs/LIMITATIONS.md`
 5. **Domain copywriter** — `prompts/domain-copywriter.md` → `outputs/drafts/`
 6. **Domain QA** — `prompts/domain-qa.md` → must pass before step 7
 7. **Humanizer/blader** — `prompts/humanizer-blader.md` → `outputs/final/`
+8. **Artifact receipt** — for externally consumed work, run `rdw validate-artifact`
+   and keep human approval as the final boundary
 
 Orchestration: `prompts/pipeline-orchestrator.md`  
 Batch: `prompts/batch-runner.md`
@@ -76,6 +85,10 @@ Pass one sentence. Router infers the rest (`config/router-inference.yaml`):
 ```
 
 → domain `basketball`, entity `LIS leaderboard`, `ranking_explanation`, fantasy/analytics audience, depth `standard`. Agent shows the contract and proceeds.
+
+`/rdw draft a concise outreach email to the hiring manager` routes to the
+`career` pack and `outreach_email` artifact profile. Research the recipient and
+role, bind candidate proof to source evidence, then validate the final content.
 
 Overrides optional: `domain=`, `entity=`, `output-type=`, `audience=`, `depth=`, `packet-id=`.
 

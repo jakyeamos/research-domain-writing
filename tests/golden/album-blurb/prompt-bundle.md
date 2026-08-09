@@ -13,6 +13,9 @@ entity_type: album
 entity_name: requested subject
 topic: 'album_review_blurb: short album blurb about production'
 output_type: album_review_blurb
+artifact_type: album_review_blurb
+channel: document
+intent: inform
 output_format: markdown
 audience: general music readers
 research_needed: true
@@ -38,6 +41,8 @@ local_knowledge_paths:
 qa_checklist_path: domains/music/qa-checklist.md
 writing_template: domains/music/writing-templates.md
 style_profile_path: config/style-profile.yaml
+artifact_profile_path: config/artifacts.yaml
+human_approval_required: true
 warnings: []
 ```
 
@@ -76,6 +81,9 @@ entity_type: string
 entity_name: string
 topic: string
 output_type: string
+artifact_type: string  # normally the resolved output_type
+channel: string
+intent: string
 audience: string
 research_needed: boolean
 research_depth: light | standard | deep
@@ -92,6 +100,8 @@ local_knowledge_paths: []
 qa_checklist_path: string
 writing_template: string
 style_profile_path: config/style-profile.yaml
+artifact_profile_path: config/artifacts.yaml
+human_approval_required: true
 warnings: []
 ```
 
@@ -100,7 +110,7 @@ warnings: []
 1. **Start from** `config/router-inference.yaml` defaults.
 2. **Parse user text** for domain signals (jargon, surface names like "LIS leaderboard", product names).
 3. **Apply** `domain_inference` keyword lists → pick domain with most signals; if tie, prefer basketball only when sports/stat cues present.
-4. **Apply** `output_type_inference` and `entity_inference` patterns (e.g. "leaderboard" → `ranking_explanation`, entity `LIS leaderboard` if named).
+4. **Apply** `output_type_inference` and `entity_inference` patterns (e.g. "leaderboard" -> `ranking_explanation`, "outreach email" -> `outreach_email`). Mirror the resolved output as `artifact_type`, then infer channel and intent.
 5. **Apply** `audience_inference` match lists.
 6. **Apply** `depth_inference`: deep triggers win; light triggers win; else `standard`.
 7. **Explicit overrides** from `key=value` or user saying "domain is X" → replace inferred field; set `mode: mixed`.
@@ -139,6 +149,8 @@ inference:
 - Prefer reusing `knowledge/<domain>/*.yaml` when packet id matches entity (e.g. `basketball-lis-leaderboard` if exists).
 - Flag `warnings` when `inference.confidence` is low.
 - Never block the run solely because parameters were omitted.
+- For externally consumed artifacts, preserve `human_approval_required: true`;
+  no routing or receipt state authorizes sending, submission, or publication.
 
 
 ## Pipeline Orchestrator
@@ -154,7 +166,7 @@ Run the full research-domain-writing pipeline for one task.
 
 ## Load order
 
-1. `config/domains.yaml`, `config/router-inference.yaml`, `config/style-profile.yaml`, `config/output-formats.yaml`
+1. `config/domains.yaml`, `config/router-inference.yaml`, `config/style-profile.yaml`, `config/output-formats.yaml`, `config/artifacts.yaml`
 2. `prompts/domain-router.md` → router output (**infer** domain, entity, output_type, audience, depth from user text if omitted)
 3. Present inferred contract to user; proceed without requiring `key=value` args
 3. If research needed: `prompts/research-planner.md` → `prompts/researcher.md`
@@ -163,6 +175,9 @@ Run the full research-domain-writing pipeline for one task.
 6. `prompts/domain-qa.md` — if fail with blockers, loop copywriter once
 7. `prompts/humanizer-blader.md`
 8. Save artifacts per `config/output-formats.yaml`
+9. For externally consumed writing, create an artifact request with evidence and
+   claim bindings, run `rdw validate-artifact`, and stop on a blocked receipt.
+   A passing receipt advances only to human review.
 
 ## Artifact map
 
@@ -173,6 +188,7 @@ Run the full research-domain-writing pipeline for one task.
 | Draft | `outputs/drafts/<output_id>.md` |
 | QA | `outputs/qa/<output_id>-qa.yaml` |
 | Final | `outputs/final/<output_id>.md` |
+| Artifact receipt | next to the consuming artifact or in its governed run directory |
 
 ## Principle
 

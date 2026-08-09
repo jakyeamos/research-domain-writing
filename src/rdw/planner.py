@@ -167,6 +167,9 @@ def infer_contract(task: TaskRequest, *, root: Path | None = None) -> YamlMappin
         "entity_name": entity_name,
         "topic": _topic(request, output_type),
         "output_type": output_type,
+        "artifact_type": output_type,
+        "channel": _artifact_channel(output_type),
+        "intent": _artifact_intent(output_type),
         "output_format": output_format,
         "audience": audience,
         "research_needed": True,
@@ -183,6 +186,8 @@ def infer_contract(task: TaskRequest, *, root: Path | None = None) -> YamlMappin
         "qa_checklist_path": f"domains/{domain}/qa-checklist.md",
         "writing_template": f"domains/{domain}/writing-templates.md",
         "style_profile_path": "config/style-profile.yaml",
+        "artifact_profile_path": "config/artifacts.yaml",
+        "human_approval_required": True,
         "warnings": warnings,
     }
 
@@ -228,6 +233,28 @@ def _resolve_run_id(run_id: str) -> str:
 
 def _topic(request: str, output_type: str) -> str:
     return f"{output_type}: {request[:120]}"
+
+
+def _artifact_channel(output_type: str) -> str:
+    return {
+        "outreach_email": "email",
+        "professional_message": "professional_dm",
+        "resume_bullet": "resume",
+        "cover_letter": "application_document",
+        "application_answer": "application_form",
+        "social_post": "social",
+    }.get(output_type, "document")
+
+
+def _artifact_intent(output_type: str) -> str:
+    return {
+        "outreach_email": "start_conversation",
+        "professional_message": "start_conversation",
+        "resume_bullet": "demonstrate_impact",
+        "cover_letter": "demonstrate_role_fit",
+        "application_answer": "answer_application_prompt",
+        "social_post": "publish_insight",
+    }.get(output_type, "inform")
 
 
 def _has_overrides(task: TaskRequest) -> bool:
