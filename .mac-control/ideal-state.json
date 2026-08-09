@@ -1,0 +1,9 @@
+{
+  "schema": "mac-control-task-manifest/v1",
+  "repository_id": "repo-6eb021f0e94cc705",
+  "repository_name": "research-domain-writing",
+  "applicability": "not_applicable",
+  "applicability_reason": "No repository-owned macOS application or Mac Control-specific task surface is present; this repository exposes browser, service, library, data, CLI, or test-fixture behavior covered by its direct interface.",
+  "criteria": {},
+  "tasks": []
+}
