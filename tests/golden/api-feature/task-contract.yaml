@@ -6,6 +6,9 @@ entity_type: feature
 entity_name: backend engineers
 topic: 'feature_explainer: explain the API feature for backend engineers'
 output_type: feature_explainer
+artifact_type: feature_explainer
+channel: document
+intent: inform
 output_format: markdown
 audience: backend engineers and technical implementers
 research_needed: true
@@ -31,4 +34,6 @@ local_knowledge_paths:
 qa_checklist_path: domains/technical/qa-checklist.md
 writing_template: domains/technical/writing-templates.md
 style_profile_path: config/style-profile.yaml
+artifact_profile_path: config/artifacts.yaml
+human_approval_required: true
 warnings: []

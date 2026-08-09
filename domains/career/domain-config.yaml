@@ -1,0 +1,49 @@
+domain_id: career
+display_name: Career and Professional Writing
+version: 1
+
+entity_types: [role, company, recipient, experience, application]
+
+required_context_fields:
+  - entity_name
+  - entity_type
+  - audience
+
+optional_context_fields:
+  - recipient_role
+  - relationship
+  - channel
+  - role_requirements
+  - candidate_evidence
+  - character_budget
+
+forbidden_generic_phrases:
+  - "I'm passionate about"
+  - "perfect fit"
+  - "pick your brain"
+  - "Dear Sir or Madam"
+
+common_misuse_patterns:
+  - personalization that only swaps the recipient name or company
+  - candidate claims without profile or accomplishment evidence
+  - recipient claims without a public source
+  - asking for a referral before establishing relevance
+  - treating a quality receipt as permission to send or submit
+
+research_packet:
+  storage_path: knowledge/career
+
+writing_output_types:
+  - outreach_email
+  - professional_message
+  - resume_bullet
+  - cover_letter
+  - application_answer
+  - social_post
+
+qa:
+  checklist: qa-checklist.md
+
+writing:
+  templates: writing-templates.md
+  research_basis: research-basis.md

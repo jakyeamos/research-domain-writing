@@ -7,6 +7,7 @@ from pathlib import Path
 
 from rdw import __version__
 from rdw.adapters import get_adapter, list_adapters
+from rdw.artifact_validation import validate_artifact_file, validate_artifact_text
 from rdw.batch_execution import execute_batch, request_batch_cancel, request_batch_pause
 from rdw.domain import create_domain
 from rdw.execution import execute_fixture
@@ -69,7 +70,10 @@ def _build_parser() -> argparse.ArgumentParser:
     status.set_defaults(func=_status)
 
     schema = subcommands.add_parser("schema", help="Export public JSON Schemas")
-    schema.add_argument("target", choices=["packet", "batch", "task-contract"])
+    schema.add_argument(
+        "target",
+        choices=["packet", "batch", "task-contract", "artifact-request", "artifact-receipt"],
+    )
     schema.add_argument("--format", default="jsonschema", choices=["jsonschema"])
     schema.add_argument("-o", "--output", type=Path)
     schema.set_defaults(func=_schema)
@@ -112,6 +116,16 @@ def _build_parser() -> argparse.ArgumentParser:
     validate_batch.add_argument("--root", type=Path, default=Path.cwd())
     validate_batch.add_argument("--json", dest="json_output", action="store_true")
     validate_batch.set_defaults(func=_validate_batch)
+
+    validate_artifact = subcommands.add_parser(
+        "validate-artifact",
+        help="Validate a writing artifact request and emit a content-bound quality receipt",
+    )
+    validate_artifact.add_argument("path", help="YAML/JSON request path, or - for stdin")
+    validate_artifact.add_argument("--root", type=Path, default=Path.cwd())
+    validate_artifact.add_argument("--receipt", type=Path)
+    validate_artifact.add_argument("--json", dest="json_output", action="store_true")
+    validate_artifact.set_defaults(func=_validate_artifact)
 
     new_domain = subcommands.add_parser("new-domain", help="Scaffold a new domain pack")
     new_domain.add_argument("domain_id")
@@ -304,6 +318,28 @@ def _validate_claim_ledger(args: argparse.Namespace) -> int:
 def _validate_batch(args: argparse.Namespace) -> int:
     result = validate_batch_file(args.path, root=args.root)
     return _print_validation(result, f"OK: {args.path}", json_output=bool(args.json_output))
+
+
+def _validate_artifact(args: argparse.Namespace) -> int:
+    receipt = (
+        validate_artifact_text(sys.stdin.read(), root=args.root)
+        if args.path == "-"
+        else validate_artifact_file(Path(args.path), root=args.root)
+    )
+    payload = json.dumps(receipt, indent=2) + "\n"
+    if args.receipt:
+        atomic_write_text(args.receipt, payload)
+    if args.json_output:
+        print(payload, end="")
+    else:
+        print(f"{str(receipt['status']).upper()}: {receipt['artifact_id']}")
+        reasons = receipt.get("reasons")
+        if isinstance(reasons, list):
+            for reason in reasons:
+                print(f"- {reason}")
+        if args.receipt:
+            print(f"Receipt: {args.receipt}")
+    return 0 if receipt["ok"] is True else 1
 
 
 def _new_domain(args: argparse.Namespace) -> int:

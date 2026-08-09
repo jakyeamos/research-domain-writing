@@ -20,6 +20,8 @@ The `rdw` CLI is a deterministic planning and validation harness:
 - `rdw validate-packet --mature` applies the opt-in basketball acceptance gates.
 - `rdw validate-claim-ledger` validates QA issue counts and packet fact traceability.
 - `rdw validate-batch` validates batch YAML.
+- `rdw validate-artifact` validates a caller-supplied artifact request and emits
+  a content-bound quality receipt. It does not research or draft the content.
 - `rdw task plan` writes a task contract, prompt bundle, and initial status file.
 - `rdw batch plan` expands a batch into per-task planned folders and logs.
 - `rdw install` installs slash command and skill templates.
@@ -31,11 +33,15 @@ The `rdw` CLI is a deterministic planning and validation harness:
   It owns a filesystem lease, immutable fixture attempts, bounded retry/backoff,
   event IDs, cooperative pause/cancel controls, and explicit unknown-attempt
   recovery. It does not call an LLM, browse, or execute real research.
-- `rdw schema` exports JSON Schemas for packets, batches, and task contracts.
+- `rdw schema` exports JSON Schemas for packets, batches, task contracts,
+  artifact requests, and artifact receipts.
 - `rdw adapter` exposes optional provider-neutral runtime stubs plus the local
   `fixture` adapter used by the single-task vertical-slice prototype.
 
 The CLI does not call an LLM, browse the web, conduct autonomous research, or write final copy.
+An artifact receipt is deterministic QA evidence only. Even
+`approved_for_human_review` does not authorize sending, submission, publication,
+or a factual claim that the supplied evidence does not actually support.
 
 ## Batch
 
@@ -59,6 +65,7 @@ Each planned task starts at status `planned`. The agent or a future adapter is r
 | Track task progress | `rdw task mark research-done <run-dir>` |
 | Resume a batch | `rdw batch resume <run-dir>` |
 | Editor/CI schema validation | `rdw schema packet --format jsonschema` |
+| Consequential writing gate | `rdw validate-artifact <request> --receipt <receipt> --json` |
 | Agent slash command | `rdw install --target all` |
 
 ## Future upgrades

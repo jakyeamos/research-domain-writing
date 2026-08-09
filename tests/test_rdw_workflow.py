@@ -113,6 +113,8 @@ def test_schema_export_packet_batch_and_contract() -> None:
     packet_schema = json.loads(export_schema("packet"))
     batch_schema = json.loads(export_schema("batch"))
     contract_schema = json.loads(export_schema("task-contract"))
+    artifact_request_schema = json.loads(export_schema("artifact-request"))
+    artifact_receipt_schema = json.loads(export_schema("artifact-receipt"))
 
     assert packet_schema["required"] == [
         "id",
@@ -126,6 +128,14 @@ def test_schema_export_packet_batch_and_contract() -> None:
     ]
     assert batch_schema["required"] == ["batch_id", "tasks"]
     assert "task_id" in contract_schema["required"]
+    assert (
+        artifact_request_schema["properties"]["schema_version"]["const"]
+        == "rdw-artifact-request/v1"
+    )
+    assert artifact_receipt_schema["properties"]["status"]["enum"] == [
+        "approved_for_human_review",
+        "blocked",
+    ]
 
 
 def test_cli_schema_command(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:

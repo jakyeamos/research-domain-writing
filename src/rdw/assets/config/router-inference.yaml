@@ -17,8 +17,28 @@ audience_inference:
     audience: backend engineers and technical implementers
   - match: [executive, roadmap, stakeholder]
     audience: product and engineering leads
+  - match: [recruiter, talent, hiring manager, application, outreach]
+    audience: professional recipient evaluating relevance and credibility
 
 output_type_inference:
+  - match: [outreach email, networking email, cold email, recruiter email, hiring manager email]
+    output_type: outreach_email
+    entity_type: recipient
+  - match: [linkedin message, linkedin dm, connection request, professional message]
+    output_type: professional_message
+    entity_type: recipient
+  - match: [resume bullet, cv bullet, accomplishment bullet]
+    output_type: resume_bullet
+    entity_type: experience
+  - match: [cover letter]
+    output_type: cover_letter
+    entity_type: role
+  - match: [application answer, application question, why this company, why this role]
+    output_type: application_answer
+    entity_type: application
+  - match: [social post, linkedin post]
+    output_type: social_post
+    entity_type: topic
   - match: [leaderboard, ranking, rankings, top 10, top 20, ladder, board]
     output_type: ranking_explanation
     entity_type: ranking
@@ -61,6 +81,8 @@ domain_inference:
     keywords: [album, artist, song, track, genre, production, review]
   technical:
     keywords: [api, feature, product, deploy, architecture, sdk, latency, idempotency, release]
+  career:
+    keywords: [resume, cv, cover letter, application, applicant, recruiter, hiring manager, outreach, networking, linkedin message, job search]
 
 depth_inference:
   deep: [controversial, lawsuit, medical, diagnosis, invest, fiduciary, definitive ranking, best ever]
@@ -79,3 +101,13 @@ examples:
       research_depth: standard
       topic: UI copy for ranked list — headers, blurbs, methodology
       inference_confidence: medium-high
+  - user: "draft a concise outreach email to the hiring manager for this role"
+    inferred:
+      domain: career
+      entity_type: recipient
+      entity_name: requested subject
+      output_type: outreach_email
+      audience: professional recipient evaluating relevance and credibility
+      research_depth: standard
+      topic: researched, evidence-bound first-touch outreach
+      inference_confidence: high
