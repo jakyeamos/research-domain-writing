@@ -10,6 +10,7 @@ from typing import cast
 
 import pytest
 
+from rdw import __version__
 from rdw.artifact_validation import validate_artifact_request
 from rdw.cli import main
 from rdw.planner import TaskRequest, infer_contract, plan_batch, plan_task
@@ -17,6 +18,14 @@ from rdw.validation import validate_batch_file, validate_packet_file
 from rdw.yaml_io import YamlValue
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_cli_version_matches_package_metadata(capsys: pytest.CaptureFixture[str]) -> None:
+    with pytest.raises(SystemExit) as exc_info:
+        main(["--version"])
+
+    assert exc_info.value.code == 0
+    assert capsys.readouterr().out.strip() == f"rdw {__version__}"
 
 
 def _outreach_artifact_request() -> dict[str, YamlValue]:

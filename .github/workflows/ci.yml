@@ -65,13 +65,14 @@ jobs:
           /tmp/rdw-wheel-smoke/bin/pip install dist/*.whl
           ASSET_ROOT=$(/tmp/rdw-wheel-smoke/bin/python -c 'from importlib.resources import files; print(files("rdw.assets"))')
           WHEEL_ROOT=/tmp/rdw-wheel-root
+          /tmp/rdw-wheel-smoke/bin/rdw --version
           /tmp/rdw-wheel-smoke/bin/rdw doctor --json
           /tmp/rdw-wheel-smoke/bin/rdw validate-packet "$ASSET_ROOT/knowledge/basketball/demo-guard-2026-demo.yaml" --strict --root "$WHEEL_ROOT" --json
           /tmp/rdw-wheel-smoke/bin/rdw validate-batch "$ASSET_ROOT/examples/batch-tasks.yaml" --root "$WHEEL_ROOT" --json
           /tmp/rdw-wheel-smoke/bin/rdw task plan --request "explain idempotency keys" --out /tmp/rdw-wheel-task --root "$WHEEL_ROOT" --json
           /tmp/rdw-wheel-smoke/bin/rdw batch plan "$ASSET_ROOT/examples/batch-tasks.yaml" --out /tmp/rdw-wheel-batch --root "$WHEEL_ROOT" --json
           /tmp/rdw-wheel-smoke/bin/rdw batch status /tmp/rdw-wheel-batch --json
-          /tmp/rdw-wheel-smoke/bin/rdw schema task-contract -o /tmp/rdw-wheel-task-contract.schema.json
+          /tmp/rdw-wheel-smoke/bin/rdw schema task-contract --format jsonschema -o /tmp/rdw-wheel-task-contract.schema.json
           /tmp/rdw-wheel-smoke/bin/rdw task mark research-done /tmp/rdw-wheel-task --json
           /tmp/rdw-wheel-smoke/bin/rdw task mark draft-done /tmp/rdw-wheel-task --json
           /tmp/rdw-wheel-smoke/bin/rdw task mark qa-passed /tmp/rdw-wheel-task --json

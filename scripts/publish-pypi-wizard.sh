@@ -55,7 +55,9 @@ stage() {
   _clear
   _STAGE_INDEX=$((_STAGE_INDEX + 1))
   local remaining=$((TOTAL_MINUTES - _MINUTES_ELAPSED))
-  (( remaining < 0 )) && remaining=0
+  if (( remaining < 0 )); then
+    remaining=0
+  fi
   _MINUTES_ELAPSED=$((_MINUTES_ELAPSED + ${2:-0}))
   printf '\n%s%s> Stage %s/%s * %s%s  %s(~%s min left)%s\n' \
     "$BOLD" "$BLUE" "$_STAGE_INDEX" "$TOTAL_STAGES" "$1" "$RESET" "$DIM" "$remaining" "$RESET"
@@ -112,7 +114,9 @@ ask() {
     printf '  %s%s%s ' "$BOLD" "$prompt" "$RESET"
   fi
   read -r input || true
-  [[ -z "$input" && -n "$current" ]] && input="$current"
+  if [[ -z "$input" && -n "$current" ]]; then
+    input="$current"
+  fi
   printf -v "$key" '%s' "$input"
 }
 
@@ -127,7 +131,9 @@ ask_secret() {
   fi
   read -rs input || true
   printf '\n'
-  [[ -z "$input" && -n "$current" ]] && input="$current"
+  if [[ -z "$input" && -n "$current" ]]; then
+    input="$current"
+  fi
   printf -v "$key" '%s' "$input"
 }
 
@@ -176,8 +182,12 @@ set_var() {
 finish() {
   _clear
   printf '\n%s%s  OK Setup complete%s\n' "$BOLD" "$GREEN" "$RESET"
-  (( ${#WRITTEN_ENV[@]} ))    && note "wrote ${#WRITTEN_ENV[@]} value(s) to $ENV_FILE: ${WRITTEN_ENV[*]}"
-  (( ${#WRITTEN_SECRET[@]} )) && note "set ${#WRITTEN_SECRET[@]} GitHub secret(s): ${WRITTEN_SECRET[*]}"
+  if (( ${#WRITTEN_ENV[@]} )); then
+    note "wrote ${#WRITTEN_ENV[@]} value(s) to $ENV_FILE: ${WRITTEN_ENV[*]}"
+  fi
+  if (( ${#WRITTEN_SECRET[@]} )); then
+    note "set ${#WRITTEN_SECRET[@]} GitHub secret(s): ${WRITTEN_SECRET[*]}"
+  fi
   if (( ${#SKIPPED[@]} )); then
     printf '\n'; warn "still to do by hand:"
     for s in "${SKIPPED[@]}"; do note "  - $s"; done
@@ -218,6 +228,10 @@ if [[ ! -f pyproject.toml || ! -d src/rdw ]]; then
   exit 1
 fi
 PROJECT_VERSION="$(python3 -c 'import tomllib; from pathlib import Path; print(tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))["project"]["version"])')"
+if [[ -z "$PROJECT_VERSION" ]]; then
+  warn "could not read project.version from pyproject.toml"
+  exit 1
+fi
 
 banner "RDW PyPI publish"
 

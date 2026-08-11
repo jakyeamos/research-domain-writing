@@ -2,22 +2,29 @@
 
 Research Domain Writing (RDW) is an agent-first harness for research-grounded writing. It validates structured research packets, plans repeatable writing runs, emits exact prompt bundles, and gives externally consumed artifacts content-bound quality receipts.
 
-The `rdw` CLI in v0.2 is not an LLM runner. It does not browse, call model APIs, or draft autonomously. Your agent performs the research and writing by following the emitted prompts.
+The `rdw` CLI is not an LLM runner. It does not browse, call model APIs, or draft autonomously. Your agent performs the research and writing by following the emitted prompts.
+
+## Release status
+
+This source checkout targets `v0.2.2`. PyPI currently publishes `v0.1.0`; the
+`v0.2.2` command surface documented below is available from this checkout and
+is not a claim that `v0.2.2` is already published. See the [PyPI project
+page](https://pypi.org/project/research-domain-writing/) for the registry state.
 
 ## Install
 
-From PyPI:
+From the published PyPI release (`v0.1.0`):
 
 ```bash
 pip install research-domain-writing
 rdw doctor
 ```
 
-Package page: [research-domain-writing on PyPI](https://pypi.org/project/research-domain-writing/).
-
 From a source checkout:
 
 ```bash
+uv sync --locked
+uv run rdw --version
 uv run rdw doctor
 ```
 
@@ -35,9 +42,10 @@ For source checkouts, the compatibility wrapper still works:
 
 ## First Run Paths
 
-### 1. Check the install
+### 1. Confirm the install
 
 ```bash
+rdw --version
 rdw doctor
 ```
 
@@ -57,9 +65,21 @@ This writes:
 - `.rdw-runs/lis-leaderboard/prompt-bundle.md`
 - `.rdw-runs/lis-leaderboard/status.json`
 
-Give the prompt bundle to your agent. The agent is responsible for research, drafting, QA, and final output.
+### 3. Execute the plan with your agent
 
-### 3. Validate an externally consumed artifact
+`rdw task plan` is the handoff point: open `prompt-bundle.md` in your agent and
+follow its research → packet → draft → QA → humanizer sequence. The agent does
+the work; the CLI does not execute model calls or write final copy. Record
+progress in the planned run when each stage is complete:
+
+```bash
+rdw task mark research-done .rdw-runs/lis-leaderboard
+rdw status .rdw-runs/lis-leaderboard
+```
+
+Use `draft-done`, `qa-passed`, `qa-failed`, and `final-done` as the agent advances.
+
+### 4. Validate an externally consumed artifact
 
 Use the artifact request contract for resumes, application materials, outreach,
 professional messages, social posts, and other consequential writing:
@@ -75,7 +95,7 @@ human-approval boundary. The receipt hashes both the contract and the content.
 it never authorizes sending, submission, or publication. Export the portable
 schemas with `rdw schema artifact-request` and `rdw schema artifact-receipt`.
 
-### 4. Execute the deterministic vertical-slice fixture
+### 5. Execute the deterministic vertical-slice fixture
 
 The repository includes a fixture-backed runtime for proving the handoff and
 lifecycle boundary without calling a model API:
@@ -91,13 +111,25 @@ final artifact under the run directory, validates the packet and QA gate, and
 advances the existing lifecycle. Use the QA-failed fixture with `--resume` to
 exercise an auditable retry.
 
-### 5. Plan a batch
+### 6. Plan and track a batch
 
 ```bash
 rdw batch plan examples/batch-tasks.yaml --out .rdw-runs/demo-batch
+rdw batch status .rdw-runs/demo-batch
+rdw batch resume .rdw-runs/demo-batch
+rdw schema task-contract --format jsonschema
 ```
 
-This validates the batch file, expands each task into a deterministic task folder, and writes `summary.yaml` plus `batch-log.jsonl` with `planned` statuses.
+This validates the batch file, expands each task into a deterministic task
+folder, and writes `summary.yaml` plus `batch-log.jsonl` with `planned` statuses.
+`batch resume` lists the next prompt bundles for the agent; it is not an
+autonomous batch executor.
+
+### JSON and automation
+
+The `v0.2.2` baseline does not expose a general `rdw --json` output mode. For
+machine-readable contract schemas, use `rdw schema packet|batch|task-contract
+--format jsonschema`; planning also writes JSON and YAML run artifacts.
 
 For deterministic integration checks, a serial fixture-backed executor can run
 the planned tasks without a model, browser, provider SDK, or database. Create a
@@ -131,7 +163,7 @@ directories, completed tasks survive partial failure or cancellation, and an
 unknown attempt requires explicit reconciliation. `rdw batch resume` remains a
 read-only next-task view.
 
-### 5. Inspect and advance a run
+### 7. Inspect and advance a run
 
 Lifecycle state is explicit and ordered:
 
@@ -148,16 +180,22 @@ marking commands.
 ## Core Commands
 
 ```bash
+rdw --version
 rdw doctor
 rdw validate-packet knowledge/basketball/demo-guard-2026-demo.yaml --strict
 rdw validate-batch examples/batch-tasks.yaml
 rdw new-domain finance "Finance Writing"
 rdw task plan --request "explain idempotency keys" --domain technical --out .rdw-runs/idempotency
+rdw status .rdw-runs/idempotency
+rdw task mark research-done .rdw-runs/idempotency
 rdw batch plan examples/batch-tasks.yaml --out .rdw-runs/demo-batch
 rdw task execute .rdw-runs/demo-task --fixture examples/fixtures/basketball-vertical-slice.yaml --root .
 rdw batch execute .rdw-runs/demo-batch --fixture-map path/to/fixture-map.yaml --root .
 rdw batch pause .rdw-runs/demo-batch
 rdw batch cancel .rdw-runs/demo-batch
+rdw batch status .rdw-runs/demo-batch
+rdw batch resume .rdw-runs/demo-batch
+rdw schema task-contract --format jsonschema
 rdw install --target claude
 rdw install --target cursor
 rdw install --target agents
@@ -172,11 +210,12 @@ rdw batch status .rdw-runs/demo-batch --json
 Existing unrelated real directories and managed command files are protected by
 default; use `--backup` or `--force` explicitly when replacing them.
 
-Legacy scripts remain as thin wrappers:
+Legacy scripts remain secondary compatibility wrappers; prefer the equivalent `rdw` command:
 
 ```bash
 python scripts/validate-packet.py knowledge/basketball/demo-guard-2026-demo.yaml
 ./scripts/new-domain.sh finance "Finance Writing"
+./install/install.sh
 ```
 
 ## What RDW Provides
@@ -299,8 +338,10 @@ Before release or a serious PR:
 ```bash
 uv sync --locked
 uv lock --check
-python3 scripts/sync-package-assets.py --check
+uv run python scripts/sync-package-assets.py --check
 shellcheck scripts/*.sh
+uv run rdw --version
+uv run rdw doctor
 uv run ruff check .
 uv run ruff format --check .
 uv run basedpyright src tests scripts
@@ -313,6 +354,7 @@ Wheel smoke:
 ```bash
 python -m venv /tmp/rdw-wheel-smoke
 /tmp/rdw-wheel-smoke/bin/pip install dist/*.whl
+/tmp/rdw-wheel-smoke/bin/rdw --version
 /tmp/rdw-wheel-smoke/bin/rdw doctor --json
 ```
 
