@@ -66,6 +66,14 @@ Batch: `prompts/batch-runner.md`
 
 **Humanizer/blader never adds facts.** If QA fails or packet is thin, return to research/copywriter.
 
+## Completion
+
+Complete only when the final artifact is supported by the current evidence
+packet, domain QA passes before style work, any required artifact receipt is
+content-bound and valid, and unsupported claims or stale evidence are removed or
+explicitly disclosed. Externally consumed work remains pending human approval;
+a valid receipt is not permission to send, submit, or publish.
+
 ## Slash commands
 
 After `rdw install --target all` or source checkout `./install/install.sh`:
