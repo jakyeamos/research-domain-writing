@@ -1,9 +1,11 @@
 # RDW Modernization Progress
 
-- Updated: 2026-07-19
+- Updated: 2026-08-11
 - Baseline: `main` / `9860d38` / `v0.2.0`
 - Branch: `codex/rdw-gpt56-modernization`
-- Current phase: M6 complete; bounded batch executor slice complete; release-ready pending review/merge
+- Current phase: M6 implementation and local verification complete; ADR-003
+  diff-QA and lane/acceptance hardening implemented; maintainer review and
+  release decisions remain separate
 - Implementation phase: batch executor ticket #10 complete
 - Application-code changes: M0–M6 plus the serial batch executor slice complete;
   merge/tag/publish remain separate release decisions
@@ -38,6 +40,16 @@
   attempts, bounded retry/backoff, event-ID replay projection, cooperative
   pause/cancel, partial-success counts, and explicit unknown-attempt recovery.
   Focused executor coverage is now 9 tests; the full suite is 61 tests.
+- Added explicit full vs lightweight lane routing, run-local lightweight
+  research-card prompts, and agent-facing lane contracts. Added a fully
+  redacted career outreach acceptance fixture with receipt assertions and a
+  mandatory human-review boundary.
+- Added content-bound claim-binding validation so supplied bindings must be
+  well-formed, reference known evidence, and appear in the submitted body.
+- Implemented the ADR-003 deterministic diff-QA slice: approved hash-pinned
+  baselines, packet and draft-ledger normalization, stable DQA diagnostics,
+  report validation, CLI/schema surfaces, lifecycle promotion hard stops, and
+  batch review fields.
 
 ## Current findings
 
@@ -56,12 +68,22 @@
 - The executor remains intentionally fixture-backed. Provider adapters, live
   research execution, parallel workers, cost accounting, hosted queues, and
   packet auto-merge remain outside this slice.
+- Diff-QA is now implemented for structured packet and explicit draft-ledger
+  representations. It intentionally does not extract claims from Markdown or
+  prove that an untruthful ledger mirrors every sentence; missing or malformed
+  ledgers are indeterminate and remain blocked.
+- The fixture executor now validates a diff-QA report and requires a passing
+  status for successful promotion. External artifact receipts and human
+  approval remain separate gates; `final-done` is still not permission for
+  send, submit, upload, or publish.
 
 ## Next step
 
-The implementation and local adversarial checks for the bounded batch slice are
-complete. A maintainer can now review this branch and decide whether to merge
-it. Tagging and publishing remain separate explicitly authorized release
+The implementation and local adversarial checks for the bounded batch slice,
+lightweight lane, ADR-003 diff-QA gate, and current acceptance fixtures are
+complete. A maintainer can review this branch and decide whether to merge it;
+the actual fresh provider slash-command session remains a release-boundary
+check. Tagging and publishing remain separate explicitly authorized release
 actions.
 
 ## Blockers and boundaries

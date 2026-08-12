@@ -65,8 +65,8 @@ uv run rdw batch status /tmp/rdw-batch-smoke
 uv run rdw batch resume /tmp/rdw-batch-smoke
 uv run rdw schema task-contract --format jsonschema -o /tmp/rdw-task-contract.schema.json
 uv run rdw task mark draft-done /tmp/rdw-task-smoke
-uv run rdw task mark qa-passed /tmp/rdw-task-smoke
-uv run rdw task mark final-done /tmp/rdw-task-smoke
+# qa-passed/final-done intentionally require a passing diff-QA report. Exercise
+# those gated transitions through the deterministic fixture slice below.
 
 # Deterministic one-task adapter vertical slice
 uv run rdw task plan --request "Explain why true shooting on high usage is the key read on Demo Guard in the 2026 synthetic sample" --domain basketball --entity "Demo Guard" --output-type stat_interpretation --audience "analytics-literate fans" --packet-id basketball-player-demo-guard-2026 --task-id basketball-example-demo-guard-stat-interpretation --out /tmp/rdw-fixture-task
@@ -93,8 +93,10 @@ WHEEL_ROOT=/tmp/rdw-wheel-root
 /tmp/rdw-wheel-smoke/bin/rdw schema task-contract --format jsonschema -o /tmp/rdw-wheel-task-contract.schema.json
 /tmp/rdw-wheel-smoke/bin/rdw task mark research-done /tmp/rdw-wheel-task --json
 /tmp/rdw-wheel-smoke/bin/rdw task mark draft-done /tmp/rdw-wheel-task --json
-/tmp/rdw-wheel-smoke/bin/rdw task mark qa-passed /tmp/rdw-wheel-task --json
-/tmp/rdw-wheel-smoke/bin/rdw task mark final-done /tmp/rdw-wheel-task --json
+# qa-passed/final-done intentionally require a passing diff-QA report. Exercise
+# those gated transitions through the packaged fixture slice below.
+/tmp/rdw-wheel-smoke/bin/rdw task plan --request "Explain why true shooting on high usage is the key read on Demo Guard in the 2026 synthetic sample" --domain basketball --entity "Demo Guard" --output-type stat_interpretation --audience "analytics-literate fans" --packet-id basketball-player-demo-guard-2026 --task-id basketball-example-demo-guard-stat-interpretation --out /tmp/rdw-wheel-fixture-task --root /tmp/rdw-wheel-root --json
+/tmp/rdw-wheel-smoke/bin/rdw task execute /tmp/rdw-wheel-fixture-task --fixture "$ASSET_ROOT/examples/fixtures/basketball-vertical-slice.yaml" --root "$ASSET_ROOT" --json
 /tmp/rdw-wheel-smoke/bin/rdw install --target all --home /tmp/rdw-wheel-home
 ```
 

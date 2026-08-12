@@ -67,8 +67,19 @@ This writes:
 
 ### 3. Execute the plan with your agent
 
+Give the prompt bundle to your agent. The planner selects the full lane or the
+lightweight research-card lane from `research_depth`; the agent remains
+responsible for research, drafting, QA, and final output.
+
+The task contract also records the required diff-QA mode and local
+baseline/report paths. Full-lane contracts use packet mode; lightweight
+contracts use explicit draft-claim-ledger mode. The agent runs that
+deterministic gate after domain or compact QA and before the humanizer;
+`qa-passed` and `final-done` reject a missing, invalid, failed, or indeterminate
+report.
+
 `rdw task plan` is the handoff point: open `prompt-bundle.md` in your agent and
-follow its research → packet → draft → QA → humanizer sequence. The agent does
+follow its research → packet → draft → QA → diff-QA → humanizer sequence. The agent does
 the work; the CLI does not execute model calls or write final copy. Record
 progress in the planned run when each stage is complete:
 
@@ -106,10 +117,10 @@ rdw task execute .rdw-runs/demo-task \
   --root .
 ```
 
-The fixture stages a research packet, knowledge packet, draft, QA result, and
-final artifact under the run directory, validates the packet and QA gate, and
-advances the existing lifecycle. Use the QA-failed fixture with `--resume` to
-exercise an auditable retry.
+The fixture stages a research packet, knowledge packet, draft, QA result,
+diff-QA report, and final artifact under the run directory, validates the
+packet, QA, and diff-QA gates, and advances the existing lifecycle. Use the
+QA-failed fixture with `--resume` to exercise an auditable retry.
 
 ### 6. Plan and track a batch
 
@@ -168,7 +179,7 @@ read-only next-task view.
 Lifecycle state is explicit and ordered:
 
 ```text
-planned -> research-done -> draft-done -> qa-passed -> final-done
+planned -> research-done -> draft-done -> diff-QA -> qa-passed -> final-done
                                       \-> qa-failed -> research-done or draft-done
 ```
 
@@ -202,6 +213,7 @@ rdw install --target agents
 rdw validate-packet knowledge/basketball/demo-guard-2026-demo.yaml --strict --json
 rdw validate-packet examples/acceptance/basketball/packets/ranking-usage-ts-change.yaml --mature --json
 rdw validate-claim-ledger examples/acceptance/basketball/packets/ranking-usage-ts-change.yaml examples/acceptance/basketball/qa/ranking-usage-ts-change.yaml --mature --json
+rdw diff-qa <approved-baseline.yaml> <candidate-packet.yaml> --root <task-or-repo-root> --output outputs/qa/<output-id>-diff.yaml
 rdw status .rdw-runs/lis-leaderboard --json
 rdw batch status .rdw-runs/demo-batch --json
 ```
@@ -252,6 +264,12 @@ RDW separates knowledge work from style work:
 
 Packets live in `knowledge/<domain>/*.yaml` and must include source notes, confidence, timestamps, and domain-specific extension data when required.
 
+For short, lower-stakes tasks, the lightweight lane uses a run-local research
+card, compact QA, deterministic diff-QA, and the same style-only humanizer. It
+does not create a reusable packet. `minimal` means reuse supplied evidence
+only; missing evidence escalates to the full lane. Draft mode requires an
+explicit claim-ledger sidecar; RDW never infers a ledger from Markdown.
+
 See [docs/LIMITATIONS.md](docs/LIMITATIONS.md) for current boundaries.
 
 ## Validation
@@ -280,10 +298,15 @@ deterministic and do not browse or call a provider.
 - supported output formats
 
 `rdw validate-artifact` checks the selected profile in `config/artifacts.yaml`,
-including required evidence kinds, claim bindings, content/evidence overlap,
-channel length, blocked filler, CTA and proof-link requirements, and the
-mandatory human-review boundary. The career pack contains the current outreach,
+including required evidence kinds, well-formed claim bindings to known
+evidence, content/evidence overlap, channel length, blocked filler, CTA and
+proof-link requirements, and the mandatory human-review boundary. The career pack contains the current outreach,
 resume, cover-letter, application-answer, and professional-message guidance.
+
+`rdw diff-qa` checks the approved baseline manifest, structured packet or draft
+claim ledger, stable evidence links, uncertainty, and rule regressions. It is
+local and deterministic; a passing report is still only an internal gate for
+human review and never authorizes send, upload, submission, or publication.
 
 ## Examples
 
