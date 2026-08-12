@@ -13,6 +13,7 @@ output_format: markdown
 audience: backend engineers and technical implementers
 research_needed: true
 research_depth: standard
+execution_lane: full
 packet_id: technical-feature-backend-engineers
 inference:
   mode: inferred
@@ -35,5 +36,9 @@ qa_checklist_path: domains/technical/qa-checklist.md
 writing_template: domains/technical/writing-templates.md
 style_profile_path: config/style-profile.yaml
 artifact_profile_path: config/artifacts.yaml
+diff_qa_required: true
+diff_qa_mode: packet
+diff_qa_baseline_path: outputs/qa/technical-backend-engineers-feature-explainer-baseline.yaml
+diff_qa_path: outputs/qa/technical-backend-engineers-feature-explainer-diff.yaml
 human_approval_required: true
 warnings: []

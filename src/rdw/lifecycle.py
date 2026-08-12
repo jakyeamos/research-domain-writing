@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
+from rdw.diff_qa import validate_diff_qa
 from rdw.io import append_jsonl, atomic_write_text
 from rdw.yaml_io import YamlMapping, YamlValue, dump_yaml, load_yaml_mapping
 
@@ -38,6 +39,9 @@ class TaskStatusView:
     next_step: str | None
     reason: str | None
     executor_state: str | None
+    diff_qa_status: str | None = None
+    diff_qa_needs_review: bool = False
+    diff_qa_codes: tuple[str, ...] = ()
 
     def as_dict(self) -> dict[str, object]:
         return {
@@ -49,6 +53,9 @@ class TaskStatusView:
             "next_step": self.next_step,
             "reason": self.reason,
             "executor_state": self.executor_state,
+            "diff_qa_status": self.diff_qa_status,
+            "diff_qa_needs_review": self.diff_qa_needs_review,
+            "diff_qa_codes": list(self.diff_qa_codes),
         }
 
 
@@ -118,6 +125,11 @@ def mark_task_status(run_dir: Path, status: str, *, reason: str | None = None) -
         )
     if normalized == "qa-failed" and not reason:
         raise ValueError("qa-failed requires --reason")
+    diff_qa = None
+    if normalized in {"qa-passed", "final-done"}:
+        diff_qa = _require_passing_diff_qa(run_dir)
+    else:
+        diff_qa = _read_diff_qa(run_dir)
     now = _now_iso()
     task_id = str(data.get("task_id") or _task_id_from_contract(run_dir))
     history = data.get("history")
@@ -127,6 +139,8 @@ def mark_task_status(run_dir: Path, status: str, *, reason: str | None = None) -
     data["status"] = normalized
     data["updated_at"] = now
     data["history"] = events
+    if diff_qa is not None:
+        data["diff_qa"] = diff_qa
     if reason:
         data["reason"] = reason
     elif normalized != "qa-failed":
@@ -154,6 +168,9 @@ def load_task_status_view(run_dir: Path) -> TaskStatusView:
         next_step=_optional_string(data.get("next_step")),
         reason=_optional_string(data.get("reason")),
         executor_state=_executor_state(data.get("executor")),
+        diff_qa_status=_diff_qa_status(data.get("diff_qa")),
+        diff_qa_needs_review=_diff_qa_needs_review(data.get("diff_qa")),
+        diff_qa_codes=_diff_qa_codes(data.get("diff_qa")),
     )
 
 
@@ -264,7 +281,7 @@ def _refresh_batch_counts(
             completed += 1
         if status == "qa-failed":
             failed += 1
-        if needs_review_for(status):
+        if needs_review_for(status) or _task_diff_needs_review(task_dir):
             needs_review += 1
     summary["completed"] = completed
     summary["needs_review"] = needs_review
@@ -302,6 +319,8 @@ def _refresh_executor_counts(
             row["executor_state"] = executor_state
         if executor_state == "succeeded":
             completed += 1
+            if _task_diff_needs_review(task_dir):
+                needs_review += 1
         elif executor_state == "needs-review":
             needs_review += 1
         elif executor_state == "failed":
@@ -342,6 +361,18 @@ def _sync_batch_task(batch_root: Path, task_id: str, status: str, *, reason: str
         "needs_review": needs_review_for(status),
         "missing_info": [reason] if reason else [],
     }
+    diff_qa = _read_diff_qa(batch_root / "tasks" / task_id)
+    if diff_qa is not None:
+        event["diff_qa_status"] = _diff_qa_status(diff_qa)
+        event["diff_qa_needs_review"] = _diff_qa_needs_review(diff_qa)
+        event["diff_qa_codes"] = list(_diff_qa_codes(diff_qa))
+        for row in task_rows:
+            if str(row.get("task_id")) == task_id:
+                row["diff_qa_status"] = _diff_qa_status(diff_qa)
+                row["diff_qa_needs_review"] = _diff_qa_needs_review(diff_qa)
+                row["diff_qa_codes"] = list(_diff_qa_codes(diff_qa))
+                break
+        atomic_write_text(summary_path, dump_yaml(summary))
     append_jsonl(log_path, event)
 
 
@@ -392,10 +423,10 @@ def _normalize_status(status: str) -> str:
 
 def _next_step_for(status: str) -> str:
     steps = {
-        "planned": "Run research using prompt-bundle.md and save a knowledge packet.",
-        "research-done": "Draft domain copy using the knowledge packet and writing templates.",
-        "draft-done": "Run domain QA against the draft and packet.",
-        "qa-passed": "Run humanizer/blader for final copy (no new facts).",
+        "planned": "Run the selected lane using prompt-bundle.md and save its evidence artifact.",
+        "research-done": "Draft domain copy using the lane's evidence artifact and writing templates.",
+        "draft-done": "Run lane QA and deterministic diff-QA against the approved baseline.",
+        "qa-passed": "Run humanizer/blader for final copy (no new facts); preserve diff-QA status.",
         "qa-failed": "Return to research or copywriter; fix blockers before humanizer.",
         "final-done": "Task complete. Review output artifacts if flagged.",
     }
@@ -426,3 +457,112 @@ def _int_value(value: YamlValue | None, default: int) -> int:
     if isinstance(value, str) and value.isdigit():
         return int(value)
     return default
+
+
+def _require_passing_diff_qa(run_dir: Path) -> YamlMapping:
+    contract = _task_contract(run_dir)
+    if contract.get("diff_qa_required") is False:
+        return {}
+    report = _read_diff_qa(run_dir)
+    if report is None:
+        raise ValueError(
+            "diff-QA report is required before qa-passed or final-done; "
+            "run `rdw diff-qa` and save the report in the task's diff_qa_path"
+        )
+    validation = validate_diff_qa(report)
+    if not validation.ok:
+        raise ValueError("diff-QA report is invalid: " + "; ".join(validation.errors))
+    expected_mode = contract.get("diff_qa_mode")
+    comparison = report.get("comparison")
+    actual_mode = comparison.get("mode") if isinstance(comparison, dict) else None
+    if isinstance(expected_mode, str) and expected_mode and actual_mode != expected_mode:
+        raise ValueError(
+            f"diff-QA mode {actual_mode or 'unknown'} does not match task contract "
+            f"({expected_mode})"
+        )
+    summary = report.get("summary")
+    if not isinstance(summary, dict) or summary.get("status") != "pass":
+        codes = ", ".join(_diff_qa_codes(report)) or "none"
+        status = _diff_qa_status(report) or "unknown"
+        raise ValueError(f"diff-QA status {status} blocks promotion (codes: {codes})")
+    return report
+
+
+def _task_contract(run_dir: Path) -> YamlMapping:
+    path = run_dir / "task-contract.yaml"
+    if not path.exists():
+        return {}
+    try:
+        return load_yaml_mapping(path)
+    except ValueError:
+        return {}
+
+
+def _read_diff_qa(run_dir: Path) -> YamlMapping | None:
+    path = _diff_qa_path(run_dir)
+    if path is None:
+        return None
+    try:
+        return load_yaml_mapping(path)
+    except ValueError:
+        return None
+
+
+def _diff_qa_path(run_dir: Path) -> Path | None:
+    contract = _task_contract(run_dir)
+    configured = contract.get("diff_qa_path")
+    if isinstance(configured, str) and configured:
+        candidate = _safe_run_path(run_dir, configured)
+        if candidate is not None and candidate.is_file():
+            return candidate
+    qa_dir = run_dir / "outputs" / "qa"
+    candidates = sorted(qa_dir.glob("*-diff.yaml")) if qa_dir.is_dir() else []
+    return candidates[0] if len(candidates) == 1 else None
+
+
+def _safe_run_path(run_dir: Path, value: str) -> Path | None:
+    path = Path(value)
+    if path.is_absolute() or not path.parts or ".." in path.parts:
+        return None
+    resolved = (run_dir / path).resolve()
+    if not resolved.is_relative_to(run_dir.resolve()):
+        return None
+    return resolved
+
+
+def _diff_qa_status(value: YamlValue | None) -> str | None:
+    if not isinstance(value, dict):
+        return None
+    summary = value.get("summary")
+    if not isinstance(summary, dict):
+        return None
+    status = summary.get("status")
+    return status if isinstance(status, str) else None
+
+
+def _diff_qa_needs_review(value: YamlValue | None) -> bool:
+    if not isinstance(value, dict):
+        return False
+    summary = value.get("summary")
+    return isinstance(summary, dict) and summary.get("needs_human_review") is True
+
+
+def _diff_qa_codes(value: YamlValue | None) -> tuple[str, ...]:
+    if not isinstance(value, dict):
+        return ()
+    issues = value.get("issues")
+    if not isinstance(issues, list):
+        return ()
+    return tuple(
+        sorted(
+            {
+                str(issue.get("code"))
+                for issue in issues
+                if isinstance(issue, dict) and isinstance(issue.get("code"), str)
+            }
+        )
+    )
+
+
+def _task_diff_needs_review(run_dir: Path) -> bool:
+    return _diff_qa_needs_review(_read_diff_qa(run_dir))

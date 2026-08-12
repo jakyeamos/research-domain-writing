@@ -25,3 +25,33 @@ TASK_CONTRACT_REQUIRED_FIELDS: tuple[str, ...] = (
     "research_depth",
     "packet_id",
 )
+
+DIFF_BASELINE_REQUIRED_FIELDS: tuple[str, ...] = (
+    "schema_version",
+    "kind",
+    "baseline_id",
+    "artifact_kind",
+    "artifact_path",
+    "content_sha256",
+    "qa_status",
+    "approved",
+    "approved_by",
+    "approved_at",
+)
+
+DRAFT_CLAIM_LEDGER_REQUIRED_FIELDS: tuple[str, ...] = (
+    "schema_version",
+    "kind",
+    "output_id",
+    "draft_path",
+    "claims",
+)
+
+DIFF_QA_REQUIRED_FIELDS: tuple[str, ...] = (
+    "schema_version",
+    "kind",
+    "output_id",
+    "comparison",
+    "summary",
+    "issues",
+)

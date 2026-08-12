@@ -66,7 +66,7 @@ def test_fixture_execution_completes_vertical_slice(tmp_path: Path) -> None:
 
     assert result.adapter_status == "succeeded"
     assert result.workflow_status == "final-done"
-    assert len(result.promoted_paths) == 5
+    assert len(result.promoted_paths) == 6
     assert (run_dir / "outputs" / "research" / "basketball-player-demo-guard-2026.yaml").is_file()
     assert (
         run_dir
@@ -79,6 +79,9 @@ def test_fixture_execution_completes_vertical_slice(tmp_path: Path) -> None:
     ).is_file()
     assert (
         run_dir / "outputs" / "qa" / "basketball-example-demo-guard-stat-interpretation-qa.yaml"
+    ).is_file()
+    assert (
+        run_dir / "outputs" / "qa" / "basketball-example-demo-guard-stat-interpretation-diff.yaml"
     ).is_file()
     assert (
         run_dir / "outputs" / "final" / "basketball-example-demo-guard-stat-interpretation.md"
@@ -107,7 +110,7 @@ def test_fixture_execution_completes_source_grounded_acceptance_slice(tmp_path: 
 
     assert result.adapter_status == "succeeded"
     assert result.workflow_status == "final-done"
-    assert len(result.promoted_paths) == 5
+    assert len(result.promoted_paths) == 6
     assert (
         run_dir / "outputs" / "final" / "basketball-acceptance-ranking-methodology.md"
     ).is_file()
@@ -131,10 +134,7 @@ def test_fixture_execution_records_qa_uncertainty_and_resumes(tmp_path: Path) ->
     assert first.workflow_status == "qa-failed"
     assert first.needs_review
     assert not (run_dir / "outputs" / "final").exists()
-    assert (
-        load_task_status_view(run_dir).reason
-        == "The draft needs a grounding review before final styling."
-    )
+    assert load_task_status_view(run_dir).reason == "diff-QA status fail requires review (DQA-003)."
 
     with pytest.raises(ValueError, match="requires --resume"):
         execute_fixture(run_dir, SUCCESS_FIXTURE, root=ROOT)

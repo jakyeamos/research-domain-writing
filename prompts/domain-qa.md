@@ -32,6 +32,14 @@ claim_ledger:
     fact_ids: [fact-id]
 ```
 
+When the resolved contract uses draft-mode deterministic diff-QA, also write
+the separate contracted sidecar `draft_claim_ledger` with stable `claim_id`,
+`text`, `fact_ids`, and `source_ids` for every factual or recipient-specific
+claim. Packet-mode full-lane diff-QA compares the candidate to the approved
+packet and does not require this sidecar. The ordinary `claim_ledger` above
+remains the domain-QA artifact; the draft sidecar is the machine-comparable
+representation and must not be replaced by Markdown extraction.
+
 ## Checks
 
 1. Extract factual claims from draft → verify each in knowledge/research packet
@@ -52,6 +60,8 @@ claim_ledger:
 - `blocking_issue_count` must equal blocker + major issue count
 - A mature basketball claim ledger must contain no unknown or source-unmapped fact IDs
 - Style issues alone are minor — defer to humanizer
+- Diff-QA is a separate gate after this artifact: run `prompts/diff-qa.md` and
+  stop on `fail` or `indeterminate` before humanizer
 
 ## Revised draft
 

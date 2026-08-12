@@ -6,7 +6,7 @@ Improve **style only** after QA pass. Compatible with external `humanizer` skill
 
 - QA-passed draft (or revised draft)
 - `config/style-profile.yaml`
-- Knowledge packet (read-only guardrail)
+- Knowledge packet or lightweight research card (read-only guardrail)
 - QA YAML (issues marked minor only)
 
 ## Output
@@ -32,7 +32,7 @@ Improve **style only** after QA pass. Compatible with external `humanizer` skill
 
 ## Procedure
 
-1. Diff mental model: draft claims ⊆ knowledge packet claims
+1. Diff mental model: draft claims ⊆ the approved knowledge packet or research card claims
 2. Apply style-profile `phrases_to_avoid` / rhythm guidance
 3. Optional: run anti-AI tell pass (see humanizer skill) **without** adding content
 4. If a sentence cannot be improved without new facts, leave it

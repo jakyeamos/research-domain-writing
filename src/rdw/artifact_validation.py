@@ -122,19 +122,38 @@ def validate_artifact_request(request: YamlMapping, *, root: Path | None = None)
     )
 
     bindings = [_mapping(item) for item in _sequence(request.get("claim_bindings"))]
-    valid_bindings = [
-        item
-        for item in bindings
-        if _text(item.get("claim"))
-        and _sequence(item.get("evidence_ids"))
-        and all(_text(value) in evidence_ids for value in _sequence(item.get("evidence_ids")))
+    malformed_bindings = [
+        index
+        for index, item in enumerate(bindings)
+        if not _is_valid_claim_binding(item, evidence_ids)
     ]
+    _check(
+        checks,
+        "claim_bindings_well_formed",
+        not malformed_bindings,
+        "claim binding(s) are malformed or reference unknown evidence: "
+        + ", ".join(str(index) for index in malformed_bindings),
+    )
+    valid_bindings = [item for item in bindings if _is_valid_claim_binding(item, evidence_ids)]
     minimum_bindings = _integer(profile.get("minimum_claim_bindings"), 0)
     _check(
         checks,
         "claim_bindings",
         len(valid_bindings) >= minimum_bindings,
         f"at least {minimum_bindings} claim binding(s) to known evidence are required",
+    )
+
+    unrepresented_bindings = [
+        index
+        for index, item in enumerate(valid_bindings)
+        if not _evidence_is_represented(_text(item.get("claim")), body)
+    ]
+    _check(
+        checks,
+        "claim_bindings_in_content",
+        not unrepresented_bindings,
+        "claim binding(s) are not represented in content: "
+        + ", ".join(str(index) for index in unrepresented_bindings),
     )
 
     if body and required_kinds:
@@ -237,6 +256,15 @@ def _evidence_is_represented(evidence_text: str, body: str) -> bool:
     evidence_tokens = _significant_tokens(evidence_text)
     body_tokens = _significant_tokens(body)
     return bool(evidence_tokens & body_tokens)
+
+
+def _is_valid_claim_binding(item: YamlMapping, evidence_ids: set[str]) -> bool:
+    evidence_values = _sequence(item.get("evidence_ids"))
+    return (
+        bool(_text(item.get("claim")))
+        and bool(evidence_values)
+        and all(_text(value) in evidence_ids for value in evidence_values)
+    )
 
 
 def _significant_tokens(value: str) -> set[str]:

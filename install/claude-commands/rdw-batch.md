@@ -36,7 +36,7 @@ Default batch file: `__RDW_ROOT__/examples/batch-tasks.yaml` if no path is given
 <process>
 1. Run `rdw batch plan <batch-file>` when the CLI is available; otherwise read the batch YAML directly.
 2. Read `prompts/batch-runner.md`.
-3. Execute each planned task through the full RDW pipeline.
+3. Execute each planned task through the lane named in its prompt bundle.
 4. Update task status/log artifacts and summarize completed vs needs_review.
 
 For a fixture-only verification run, provide a fixture map to

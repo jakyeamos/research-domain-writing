@@ -13,6 +13,7 @@ output_format: markdown
 audience: general music readers
 research_needed: true
 research_depth: standard
+execution_lane: full
 packet_id: music-album-requested-subject
 inference:
   mode: inferred
@@ -35,5 +36,9 @@ qa_checklist_path: domains/music/qa-checklist.md
 writing_template: domains/music/writing-templates.md
 style_profile_path: config/style-profile.yaml
 artifact_profile_path: config/artifacts.yaml
+diff_qa_required: true
+diff_qa_mode: packet
+diff_qa_baseline_path: outputs/qa/music-requested-subject-album-review-blurb-baseline.yaml
+diff_qa_path: outputs/qa/music-requested-subject-album-review-blurb-diff.yaml
 human_approval_required: true
 warnings: []
