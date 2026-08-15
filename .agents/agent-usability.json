@@ -1,0 +1,32 @@
+{
+  "schema": "agent-usability/v1",
+  "reviewed_at": "2026-08-11",
+  "applicability": "applicable",
+  "tools": [
+    {
+      "id": "rdw",
+      "kind": "agent-writing-cli",
+      "documentation": [
+        ".agents/context/README.md"
+      ],
+      "skills": [
+        "research-domain-writing"
+      ],
+      "behavior_evidence": [
+        {
+          "path": "docs/evidence/agent-usability-2026-08-11.json",
+          "status": "passed",
+          "observed_at": "2026-08-11"
+        }
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "id": "research-domain-writing",
+      "family": "research-writing",
+      "source": "hosted",
+      "contract_path": "SKILL.md"
+    }
+  ]
+}

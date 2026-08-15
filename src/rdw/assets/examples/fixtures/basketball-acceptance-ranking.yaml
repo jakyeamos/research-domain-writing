@@ -11,4 +11,5 @@ artifacts:
   knowledge_packet: examples/acceptance/basketball/pipeline/leaderboard-methodology/knowledge-packet.md
   draft: examples/acceptance/basketball/pipeline/leaderboard-methodology/draft.md
   qa: examples/acceptance/basketball/pipeline/leaderboard-methodology/qa.yaml
+  diff_qa: examples/fixtures/basketball-acceptance-ranking-diff.yaml
   final: examples/acceptance/basketball/pipeline/leaderboard-methodology/final.md

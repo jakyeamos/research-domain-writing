@@ -4,6 +4,9 @@ import json
 
 from rdw.contracts import (
     BATCH_REQUIRED_FIELDS,
+    DIFF_BASELINE_REQUIRED_FIELDS,
+    DIFF_QA_REQUIRED_FIELDS,
+    DRAFT_CLAIM_LEDGER_REQUIRED_FIELDS,
     PACKET_REQUIRED_FIELDS,
     TASK_CONTRACT_REQUIRED_FIELDS,
 )
@@ -14,6 +17,9 @@ SCHEMA_TARGETS = (
     "task-contract",
     "artifact-request",
     "artifact-receipt",
+    "diff-baseline",
+    "draft-claim-ledger",
+    "diff-qa",
 )
 SCHEMA_FORMATS = ("jsonschema",)
 
@@ -35,6 +41,9 @@ def export_schema(target: str, *, format: str = "jsonschema") -> str:
         "task-contract": _task_contract_schema,
         "artifact-request": _artifact_request_schema,
         "artifact-receipt": _artifact_receipt_schema,
+        "diff-baseline": _diff_baseline_schema,
+        "draft-claim-ledger": _draft_claim_ledger_schema,
+        "diff-qa": _diff_qa_schema,
     }
     return json.dumps(builders[normalized_target](), indent=2) + "\n"
 
@@ -177,7 +186,12 @@ def _task_contract_schema() -> dict[str, object]:
                 "type": "string",
                 "enum": ["deep", "standard", "light", "minimal"],
             },
+            "execution_lane": {
+                "type": "string",
+                "enum": ["full", "lightweight"],
+            },
             "packet_id": {"type": "string", "minLength": 1},
+            "research_card_path": {"type": "string"},
             "local_knowledge_paths": {
                 "type": "array",
                 "items": {"type": "string"},
@@ -186,6 +200,10 @@ def _task_contract_schema() -> dict[str, object]:
             "writing_template": {"type": "string"},
             "style_profile_path": {"type": "string"},
             "artifact_profile_path": {"type": "string"},
+            "diff_qa_required": {"type": "boolean"},
+            "diff_qa_mode": {"enum": ["packet", "draft"]},
+            "diff_qa_baseline_path": {"type": "string"},
+            "diff_qa_path": {"type": "string"},
             "human_approval_required": {"type": "boolean"},
             "warnings": {"type": "array", "items": {"type": "string"}},
             "inference": {"type": "object"},
@@ -301,5 +319,149 @@ def _artifact_receipt_schema() -> dict[str, object]:
             "human_approval_required": {"const": True},
             "checks": {"type": "array"},
             "reasons": {"type": "array", "items": {"type": "string"}},
+        },
+    }
+
+
+def _diff_baseline_schema() -> dict[str, object]:
+    return {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://rdw.dev/schemas/diff-baseline.json",
+        "title": "RDW Approved Diff-QA Baseline",
+        "type": "object",
+        "additionalProperties": True,
+        "required": list(DIFF_BASELINE_REQUIRED_FIELDS),
+        "properties": {
+            "schema_version": {"const": 1},
+            "kind": {"const": "diff_baseline"},
+            "baseline_id": {"type": "string", "minLength": 1},
+            "artifact_kind": {"enum": ["packet", "draft"]},
+            "artifact_path": {"type": "string", "minLength": 1},
+            "content_sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+            "packet_id": {"type": "string", "minLength": 1},
+            "packet_revision_id": {"type": "string", "minLength": 1},
+            "claim_ledger_path": {"type": "string", "minLength": 1},
+            "qa_status": {"const": "pass"},
+            "approved": {"const": True},
+            "approved_by": {"const": "human"},
+            "approved_at": {"type": "string", "format": "date-time"},
+        },
+    }
+
+
+def _draft_claim_ledger_schema() -> dict[str, object]:
+    claim = {
+        "type": "object",
+        "additionalProperties": True,
+        "required": ["claim_id", "text", "fact_ids", "source_ids"],
+        "properties": {
+            "claim_id": {"type": "string", "minLength": 1},
+            "text": {"type": "string", "minLength": 1},
+            "fact_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+            "source_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+            "uncertainty": {"type": "string"},
+            "required": {"type": "boolean"},
+        },
+    }
+    rule = {
+        "type": "object",
+        "additionalProperties": True,
+        "required": ["rule_id", "status"],
+        "properties": {
+            "rule_id": {"type": "string", "minLength": 1},
+            "status": {"enum": ["pass", "fail", "unknown"]},
+            "evidence": {"type": "string"},
+        },
+    }
+    return {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://rdw.dev/schemas/draft-claim-ledger.json",
+        "title": "RDW Draft Claim Ledger",
+        "type": "object",
+        "additionalProperties": True,
+        "required": list(DRAFT_CLAIM_LEDGER_REQUIRED_FIELDS),
+        "properties": {
+            "schema_version": {"const": 1},
+            "kind": {"const": "draft_claim_ledger"},
+            "output_id": {"type": "string", "minLength": 1},
+            "draft_path": {"type": "string", "minLength": 1},
+            "claims": {"type": "array", "items": claim},
+            "rules": {"type": "array", "items": rule},
+        },
+    }
+
+
+def _diff_qa_schema() -> dict[str, object]:
+    issue = {
+        "type": "object",
+        "additionalProperties": True,
+        "required": ["id", "code", "severity", "category", "subject_type", "description"],
+        "properties": {
+            "id": {"type": "string", "minLength": 1},
+            "code": {"pattern": "^DQA-00[1-9]$|^DQA-010$"},
+            "severity": {"enum": ["blocker", "major", "minor"]},
+            "category": {"type": "string", "minLength": 1},
+            "subject_type": {"type": "string", "minLength": 1},
+            "subject_id": {"type": ["string", "null"]},
+            "description": {"type": "string", "minLength": 1},
+            "suggested_fix": {"type": "string"},
+        },
+    }
+    counts = {
+        "type": "object",
+        "required": [
+            "claims_added",
+            "claims_removed",
+            "claims_changed",
+            "source_links_removed",
+            "uncertainty_removed",
+            "rules_regressed",
+        ],
+        "properties": {
+            field: {"type": "integer", "minimum": 0}
+            for field in (
+                "claims_added",
+                "claims_removed",
+                "claims_changed",
+                "source_links_removed",
+                "uncertainty_removed",
+                "rules_regressed",
+            )
+        },
+    }
+    return {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://rdw.dev/schemas/diff-qa.json",
+        "title": "RDW Evidence-aware Diff QA Report",
+        "type": "object",
+        "additionalProperties": True,
+        "required": list(DIFF_QA_REQUIRED_FIELDS),
+        "properties": {
+            "schema_version": {"const": 1},
+            "kind": {"const": "diff_qa"},
+            "output_id": {"type": "string", "minLength": 1},
+            "comparison": {"type": "object"},
+            "summary": {
+                "type": "object",
+                "required": [
+                    "status",
+                    "pass",
+                    "needs_human_review",
+                    "blocking_issue_count",
+                    "major_issue_count",
+                    "minor_issue_count",
+                    "counts",
+                ],
+                "properties": {
+                    "status": {"enum": ["pass", "fail", "indeterminate"]},
+                    "pass": {"type": "boolean"},
+                    "needs_human_review": {"type": "boolean"},
+                    "blocking_issue_count": {"type": "integer", "minimum": 0},
+                    "major_issue_count": {"type": "integer", "minimum": 0},
+                    "minor_issue_count": {"type": "integer", "minimum": 0},
+                    "counts": counts,
+                },
+            },
+            "issues": {"type": "array", "items": issue},
         },
     }

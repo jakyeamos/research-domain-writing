@@ -25,6 +25,7 @@ FIXTURE_ARTIFACT_KINDS = (
     "knowledge_packet",
     "draft",
     "qa",
+    "diff_qa",
     "final",
 )
 
@@ -155,6 +156,7 @@ def _canonical_artifact_path(kind: str, *, task_id: str, packet_id: str, output_
         "knowledge_packet": f"outputs/research/{task_id}-knowledge.md",
         "draft": f"outputs/drafts/{output_id}.md",
         "qa": f"outputs/qa/{output_id}-qa.yaml",
+        "diff_qa": f"outputs/qa/{output_id}-diff.yaml",
         "final": f"outputs/final/{output_id}.md",
     }
     try:

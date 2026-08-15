@@ -12,4 +12,5 @@ artifacts:
   knowledge_packet: examples/basketball-example/knowledge-packet.md
   draft: examples/basketball-example/draft.md
   qa: examples/basketball-example/qa-output.yaml
+  diff_qa: examples/fixtures/basketball-vertical-slice-diff.yaml
   final: examples/basketball-example/final.md

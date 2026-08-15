@@ -10,12 +10,23 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_PATH = ROOT / "build" / "pre-cr-python.lcov"
 COVERAGE_FILES = [
+    ROOT / "src" / "rdw" / "adapters" / "fixture.py",
     ROOT / "src" / "rdw" / "artifact_validation.py",
     ROOT / "src" / "rdw" / "cli.py",
+    ROOT / "src" / "rdw" / "contracts.py",
+    ROOT / "src" / "rdw" / "diff_qa.py",
+    ROOT / "src" / "rdw" / "diff_qa_compare.py",
+    ROOT / "src" / "rdw" / "diff_qa_normalize.py",
+    ROOT / "src" / "rdw" / "diff_qa_reporting.py",
+    ROOT / "src" / "rdw" / "diff_qa_support.py",
+    ROOT / "src" / "rdw" / "diff_qa_validation.py",
     ROOT / "src" / "rdw" / "domain.py",
+    ROOT / "src" / "rdw" / "execution.py",
     ROOT / "src" / "rdw" / "install.py",
+    ROOT / "src" / "rdw" / "lifecycle.py",
     ROOT / "src" / "rdw" / "planner.py",
     ROOT / "src" / "rdw" / "resources.py",
+    ROOT / "src" / "rdw" / "schema_export.py",
     ROOT / "src" / "rdw" / "validation.py",
     ROOT / "src" / "rdw" / "yaml_io.py",
 ]

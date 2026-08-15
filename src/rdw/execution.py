@@ -9,6 +9,7 @@ from pathlib import Path
 
 from rdw.adapters import get_adapter
 from rdw.adapters.base import AdapterArtifact, AdapterOutcome, AdapterReceipt, AdapterRequest
+from rdw.diff_qa import validate_diff_qa
 from rdw.io import atomic_write_text
 from rdw.lifecycle import load_task_status_view, mark_task_status
 from rdw.validation import validate_packet_file
@@ -16,9 +17,11 @@ from rdw.yaml_io import YamlMapping, load_yaml_mapping
 
 FIXTURE_STAGES = ("research", "draft", "qa", "final")
 REQUIRED_SUCCESS_ARTIFACTS = frozenset(
-    {"research_packet", "knowledge_packet", "draft", "qa", "final"}
+    {"research_packet", "knowledge_packet", "draft", "qa", "diff_qa", "final"}
 )
-REQUIRED_INCOMPLETE_ARTIFACTS = frozenset({"research_packet", "knowledge_packet", "draft", "qa"})
+REQUIRED_INCOMPLETE_ARTIFACTS = frozenset(
+    {"research_packet", "knowledge_packet", "draft", "qa", "diff_qa"}
+)
 ALLOWED_ARTIFACT_KINDS = REQUIRED_SUCCESS_ARTIFACTS
 
 
@@ -217,10 +220,21 @@ def _validate_receipt(
     if receipt.status in {"succeeded", "incomplete"}:
         _validate_packet(receipt, artifacts_by_kind["research_packet"], root=root)
         qa_pass = _validate_qa(receipt, artifacts_by_kind["qa"])
+        diff_status = _validate_diff_qa(
+            receipt,
+            artifacts_by_kind["diff_qa"],
+            contract=contract,
+            packet_artifact=artifacts_by_kind["research_packet"],
+            draft_artifact=artifacts_by_kind["draft"],
+        )
         if receipt.status == "succeeded" and not qa_pass:
             raise ValueError("successful fixture QA artifact does not pass")
         if receipt.status == "incomplete" and qa_pass:
             raise ValueError("incomplete fixture QA artifact must fail or remain uncertain")
+        if receipt.status == "succeeded" and diff_status != "pass":
+            raise ValueError("successful fixture diff-QA artifact does not pass")
+        if receipt.status == "incomplete" and diff_status == "pass":
+            raise ValueError("incomplete fixture diff-QA artifact must fail or remain uncertain")
     return artifacts
 
 
@@ -247,6 +261,41 @@ def _validate_qa(receipt: AdapterReceipt, artifact: AdapterArtifact) -> bool:
     if not isinstance(value, bool):
         raise ValueError("fixture QA artifact must expose boolean pass")
     return value
+
+
+def _validate_diff_qa(
+    receipt: AdapterReceipt,
+    artifact: AdapterArtifact,
+    *,
+    contract: YamlMapping,
+    packet_artifact: AdapterArtifact,
+    draft_artifact: AdapterArtifact,
+) -> str:
+    diff_path = _safe_attempt_path(receipt.attempt_dir, artifact.path)
+    report = load_yaml_mapping(diff_path)
+    result = validate_diff_qa(report)
+    if not result.ok:
+        raise ValueError("fixture diff-QA artifact is invalid: " + "; ".join(result.errors))
+    comparison = report.get("comparison")
+    if not isinstance(comparison, dict):
+        raise ValueError("fixture diff-QA comparison is missing")
+    mode = comparison.get("mode")
+    expected_mode = contract.get("diff_qa_mode")
+    if isinstance(expected_mode, str) and expected_mode and mode != expected_mode:
+        raise ValueError(
+            f"fixture diff-QA mode {mode or 'unknown'} does not match task contract "
+            f"({expected_mode})"
+        )
+    candidate = comparison.get("candidate")
+    if not isinstance(candidate, dict):
+        raise ValueError("fixture diff-QA candidate descriptor is missing")
+    expected_artifact = draft_artifact if mode == "draft" else packet_artifact
+    if candidate.get("sha256") != expected_artifact.sha256:
+        raise ValueError("fixture diff-QA candidate hash does not match the promoted artifact")
+    summary = report.get("summary")
+    if not isinstance(summary, dict) or not isinstance(summary.get("status"), str):
+        raise ValueError("fixture diff-QA summary status is missing")
+    return str(summary["status"])
 
 
 def _promote_artifacts(
@@ -291,6 +340,23 @@ def _qa_failure_reason(
     artifacts: tuple[AdapterArtifact, ...],
     missing_info: tuple[str, ...],
 ) -> str:
+    diff_artifact = next((artifact for artifact in artifacts if artifact.kind == "diff_qa"), None)
+    if diff_artifact is not None:
+        diff = load_yaml_mapping(_safe_run_path_for_read(run_dir, diff_artifact.path))
+        summary = diff.get("summary")
+        if isinstance(summary, dict) and summary.get("status") != "pass":
+            codes = []
+            issues = diff.get("issues")
+            if isinstance(issues, list):
+                codes = sorted(
+                    {
+                        str(issue.get("code"))
+                        for issue in issues
+                        if isinstance(issue, dict) and isinstance(issue.get("code"), str)
+                    }
+                )
+            suffix = f" ({', '.join(codes)})" if codes else ""
+            return f"diff-QA status {summary.get('status', 'unknown')} requires review{suffix}."
     qa_artifact = next((artifact for artifact in artifacts if artifact.kind == "qa"), None)
     if qa_artifact is not None:
         qa = load_yaml_mapping(_safe_run_path_for_read(run_dir, qa_artifact.path))

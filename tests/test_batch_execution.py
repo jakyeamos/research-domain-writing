@@ -34,7 +34,7 @@ def _write_batch(tmp_path: Path, task_ids: tuple[str, ...]) -> tuple[Path, Path]
                 "    domain: basketball",
                 "    entity_name: Demo Guard",
                 "    output_type: player_summary",
-                "    research_depth: light",
+                "    research_depth: standard",
                 "    packet_id: basketball-player-demo-guard-2026",
             ]
         )
@@ -81,6 +81,7 @@ artifacts:
   knowledge_packet: examples/basketball-example/knowledge-packet.md
   draft: examples/basketball-example/draft.md
   qa: examples/basketball-example/qa-output.yaml
+  diff_qa: examples/fixtures/basketball-vertical-slice-diff.yaml
   final: examples/basketball-example/final.md
 """
     elif outcome == "incomplete":
@@ -96,6 +97,7 @@ artifacts:
   knowledge_packet: examples/basketball-example/knowledge-packet.md
   draft: examples/basketball-example/draft.md
   qa: examples/fixtures/basketball-vertical-slice-qa-failed-output.yaml
+  diff_qa: examples/fixtures/basketball-vertical-slice-qa-failed-diff.yaml
 """
     else:
         content = """fixture_version: 1

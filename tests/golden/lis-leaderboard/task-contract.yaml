@@ -13,6 +13,7 @@ output_format: markdown
 audience: fantasy and analytics users who know basic stats
 research_needed: true
 research_depth: standard
+execution_lane: full
 packet_id: basketball-ranking-lis-leaderboard
 inference:
   mode: inferred
@@ -35,5 +36,9 @@ qa_checklist_path: domains/basketball/qa-checklist.md
 writing_template: domains/basketball/writing-templates.md
 style_profile_path: config/style-profile.yaml
 artifact_profile_path: config/artifacts.yaml
+diff_qa_required: true
+diff_qa_mode: packet
+diff_qa_baseline_path: outputs/qa/basketball-lis-leaderboard-ranking-explanation-baseline.yaml
+diff_qa_path: outputs/qa/basketball-lis-leaderboard-ranking-explanation-diff.yaml
 human_approval_required: true
 warnings: []

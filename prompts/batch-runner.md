@@ -31,8 +31,8 @@ fixtures:
   task-id: examples/fixtures/task-outcome.yaml
 ```
 
-For real writing work, execute each planned task by running the full pipeline in
-this agent session. Update task status and append log lines as work moves beyond
+For real writing work, execute each planned task by following the lane named in
+its prompt bundle. Update task status and append log lines as work moves beyond
 `planned`.
 
 ## Inputs
@@ -63,14 +63,28 @@ tasks:
 | 3 | light | Minimal new research; reuse packets aggressively |
 | 4 | minimal | Write only from existing packet; explicit thin-evidence warnings |
 
-## Per-task pipeline
+## Per-task lanes
+
+Full lane (`standard` or `deep`):
 
 1. Router → Planner
-2. If packet exists and tier ≥ 3: skip research unless planner flags gaps
-3. Researcher (if needed)
-4. Knowledge packet builder
-5. Copywriter → QA → (loop rev1 if blockers) → Humanizer
-6. Save final + append/update batch log
+2. If a packet exists, reuse it only when the planner confirms it is current
+   and its required fields cover the task; otherwise research the declared gaps
+3. Researcher (if needed) → Knowledge packet builder
+4. Copywriter → QA → deterministic diff-QA → (loop rev1 if blockers) → Humanizer
+5. Save final + append/update batch log
+
+Lightweight lane:
+
+1. Router → Planner → run-local research card
+2. Grounded copywriter → compact QA
+3. Deterministic diff-QA; missing ledgers or baselines remain review-required
+4. Humanizer only after QA and diff-QA pass
+5. Save final, artifact receipt when required, and append/update batch log
+
+The planner maps `light` and `minimal` to the lightweight lane. Do not send
+those tiers through the full-lane planner or treat them as a lower-cost full
+research pass.
 
 ## Batch outputs
 
@@ -87,7 +101,7 @@ tasks:
 Each line in batch-log:
 
 ```json
-{"task_id","domain","status","confidence_level","needs_review","missing_info":[]}
+{"task_id","domain","status","confidence_level","needs_review","diff_qa_status","diff_qa_codes":[],"missing_info":[]}
 ```
 
 Executor events additionally carry an `event_id`, `event_type`, executor state,

@@ -13,7 +13,7 @@ disable-model-invocation: true
 
 1. Run `rdw batch plan <batch-yaml>` when the CLI is available; otherwise read the batch YAML (user path or `examples/batch-tasks.yaml`).
 2. Read `prompts/batch-runner.md`.
-3. For each planned task, run the full RDW pipeline.
+3. For each planned task, follow the lane named in its prompt bundle.
 4. Update status/log artifacts and summarize completed vs needs_review.
 
 For fixture-only verification, use `rdw batch execute <run-dir>

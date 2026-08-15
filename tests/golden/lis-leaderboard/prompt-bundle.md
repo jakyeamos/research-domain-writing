@@ -20,6 +20,7 @@ output_format: markdown
 audience: fantasy and analytics users who know basic stats
 research_needed: true
 research_depth: standard
+execution_lane: full
 packet_id: basketball-ranking-lis-leaderboard
 inference:
   mode: inferred
@@ -42,6 +43,10 @@ qa_checklist_path: domains/basketball/qa-checklist.md
 writing_template: domains/basketball/writing-templates.md
 style_profile_path: config/style-profile.yaml
 artifact_profile_path: config/artifacts.yaml
+diff_qa_required: true
+diff_qa_mode: packet
+diff_qa_baseline_path: outputs/qa/basketball-lis-leaderboard-ranking-explanation-baseline.yaml
+diff_qa_path: outputs/qa/basketball-lis-leaderboard-ranking-explanation-diff.yaml
 human_approval_required: true
 warnings: []
 ```
@@ -50,7 +55,7 @@ warnings: []
 
 1. Read `SKILL.md` and the prompts listed below.
 2. Confirm or adjust the task contract if the user objects.
-3. Run research, knowledge packet, draft, QA, and humanizer in order.
+3. Run research, knowledge packet, draft, QA, deterministic diff-QA, and humanizer in order.
 4. Save artifacts in the `output_format` from the contract above, using the output paths in `config/output-formats.yaml`.
 
 ## Router Prompt
@@ -86,7 +91,7 @@ channel: string
 intent: string
 audience: string
 research_needed: boolean
-research_depth: light | standard | deep
+research_depth: light | standard | deep | minimal
 
 # Transparency
 inference:
@@ -113,6 +118,8 @@ warnings: []
 4. **Apply** `output_type_inference` and `entity_inference` patterns (e.g. "leaderboard" -> `ranking_explanation`, "outreach email" -> `outreach_email`). Mirror the resolved output as `artifact_type`, then infer channel and intent.
 5. **Apply** `audience_inference` match lists.
 6. **Apply** `depth_inference`: deep triggers win; light triggers win; else `standard`.
+   An explicit `minimal` override is preserved for the planner and maps to the
+   lightweight lane with no new research.
 7. **Explicit overrides** from `key=value` or user saying "domain is X" → replace inferred field; set `mode: mixed`.
 8. **Entity naming**: preserve user’s proper nouns (LIS, product names) verbatim in `entity_name`.
 9. **Topic**: short phrase for what the writing must accomplish (e.g. "improve leaderboard UI copy").
@@ -151,6 +158,8 @@ inference:
 - Never block the run solely because parameters were omitted.
 - For externally consumed artifacts, preserve `human_approval_required: true`;
   no routing or receipt state authorizes sending, submission, or publication.
+- The planner maps `light` and `minimal` to the lightweight research-card
+  lane; `standard` and `deep` use the full pipeline.
 
 
 ## Pipeline Orchestrator
@@ -169,13 +178,15 @@ Run the full research-domain-writing pipeline for one task.
 1. `config/domains.yaml`, `config/router-inference.yaml`, `config/style-profile.yaml`, `config/output-formats.yaml`, `config/artifacts.yaml`
 2. `prompts/domain-router.md` → router output (**infer** domain, entity, output_type, audience, depth from user text if omitted)
 3. Present inferred contract to user; proceed without requiring `key=value` args
-3. If research needed: `prompts/research-planner.md` → `prompts/researcher.md`
-4. `prompts/knowledge-packet-builder.md`
-5. `prompts/domain-copywriter.md`
-6. `prompts/domain-qa.md` — if fail with blockers, loop copywriter once
-7. `prompts/humanizer-blader.md`
-8. Save artifacts per `config/output-formats.yaml`
-9. For externally consumed writing, create an artifact request with evidence and
+4. If research needed: `prompts/research-planner.md` → `prompts/researcher.md`
+5. `prompts/knowledge-packet-builder.md`
+6. `prompts/domain-copywriter.md`
+7. `prompts/domain-qa.md` — if fail with blockers, loop copywriter once
+8. `prompts/diff-qa.md` — compare the structured candidate to the approved
+   baseline in the contract's packet mode; stop on `fail` or `indeterminate`
+9. `prompts/humanizer-blader.md` — style only after diff-QA passes
+10. Save artifacts per `config/output-formats.yaml`
+11. For externally consumed writing, create an artifact request with evidence and
    claim bindings, run `rdw validate-artifact`, and stop on a blocked receipt.
    A passing receipt advances only to human review.
 
@@ -187,7 +198,9 @@ Run the full research-domain-writing pipeline for one task.
 | Knowledge packet | `outputs/research/<task_id>-knowledge.md` |
 | Draft | `outputs/drafts/<output_id>.md` |
 | QA | `outputs/qa/<output_id>-qa.yaml` |
+| Diff-QA | `outputs/qa/<output_id>-diff.yaml` |
 | Final | `outputs/final/<output_id>.md` |
+| Approved baseline / draft ledger | Contract-configured local paths |
 | Artifact receipt | next to the consuming artifact or in its governed run directory |
 
 ## Principle
@@ -204,8 +217,10 @@ Domain (optional): <domain>
 Entity: <name>
 Output type: <type>
 Audience: <audience>
-Research depth: light|standard|deep
+Research depth: standard|deep
 Existing packet (optional): <packet_id>
 ```
 
-Then execute orchestrator steps in order without skipping QA before humanizer.
+Then execute orchestrator steps in order without skipping domain QA or
+diff-QA before humanizer. A missing baseline or draft claim ledger is a hard
+stop, not an invitation to infer approval.

@@ -74,6 +74,7 @@ def test_cli_doctor_passes(capsys: pytest.CaptureFixture[str]) -> None:
     output = capsys.readouterr().out
     assert re.search(r"rdw \d+\.\d+\.\d+", output)
     assert "OK pipeline orchestrator" in output
+    assert "OK lightweight orchestrator" in output
 
 
 def test_sample_packet_validates_strict() -> None:
@@ -233,6 +234,28 @@ def test_artifact_receipt_blocks_generic_or_unbound_outreach() -> None:
         if cast("dict[str, YamlValue]", item)["status"] == "fail"
     }
     assert {"claim_bindings", "evidence_in_content", "blocked_phrases"} <= check_ids
+
+
+def test_artifact_receipt_blocks_claim_binding_missing_from_body() -> None:
+    request = _outreach_artifact_request()
+    request["content"] = {
+        "subject": "Backend AI role at Example AI",
+        "body": (
+            "Hi Taylor,\n\nExample AI's focus on reliable AI infrastructure caught my attention. "
+            "I would value your perspective on the team. https://jakye.netlify.app/\n\n"
+            "Thanks,\nJakye"
+        ),
+    }
+
+    receipt = validate_artifact_request(request, root=ROOT)
+
+    assert receipt["ok"] is False
+    failed_ids = {
+        str(cast("dict[str, YamlValue]", item)["id"])
+        for item in cast("list[YamlValue]", receipt["checks"])
+        if cast("dict[str, YamlValue]", item)["status"] == "fail"
+    }
+    assert "claim_bindings_in_content" in failed_ids
 
 
 def test_cli_validate_artifact_emits_machine_readable_receipt(

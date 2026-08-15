@@ -1,9 +1,12 @@
 # RDW Modernization Execution Plan
 
-- Status: M6 complete; bounded batch executor slice implemented
+- Status: M6 implementation and local verification complete; ADR-003 diff-QA
+  and lane/acceptance hardening implemented; maintainer review and release
+  decision pending
 - Baseline: `main` / `9860d38` / `v0.2.0`
 - Owner: one lead implementation agent; specialist review passes are bounded and read-heavy
-- Application-code implementation: M0–M6 plus ticket #10 batch executor slice complete
+- Application-code implementation: M0–M6 plus ticket #10, the full/lightweight
+  lanes, acceptance hardening, and the ADR-003 diff-QA gate
 
 ## Chosen strategy
 
@@ -61,13 +64,18 @@ budget on re-establishing behavior instead of improving the real risks.
 | M3 | Safe lifecycle state and batch projections | M1, M2 | complete |
 | M4 | Atomic installer and fresh-consumer parity | M1, M2, M3 | complete |
 | M5 | Release/CI hardening and cleanup | M1–M4 | complete |
-| M6 | Adversarial review, cutover, and rollback-ready release | M5 | complete; release pending |
+| M6 | Adversarial review, cutover, and rollback-ready release | M5 | local implementation and verification complete; review/release pending |
 
 The first post-ADR-004 implementation slice is ticket #10. It adds a serial,
 filesystem-first fixture executor without adding providers, browsing, a
 database, parallel workers, packet auto-merge, or batch rollback. Its proof
 surface is `tests/test_batch_execution.py` plus the existing lifecycle,
 package, wheel, and full-suite checks.
+
+The modernization also closes the accepted ADR-003 slice in place. Its proof
+surface is the diff-QA validator/CLI, packet and draft-ledger fixtures, schema
+exports, lifecycle hard stop, and the final quality ladder. It adds no provider,
+network, model, database, or external-action capability.
 
 ## M0 — Establish the protected modernization baseline
 

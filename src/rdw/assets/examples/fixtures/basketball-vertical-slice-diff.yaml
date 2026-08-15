@@ -1,0 +1,29 @@
+schema_version: 1
+kind: diff_qa
+output_id: basketball-example-demo-guard-stat-interpretation
+comparison:
+  mode: packet
+  baseline:
+    artifact_kind: packet
+    path: knowledge/basketball/demo-guard-2026-demo.yaml
+    sha256: sha256:e7b20acb6fb33bffb7360d76bf37b60ce141f8612c6f68483d661b4d87459c62
+    baseline_id: baseline-demo-guard-2026
+  candidate:
+    artifact_kind: packet
+    path: knowledge/basketball/demo-guard-2026-demo.yaml
+    sha256: sha256:e7b20acb6fb33bffb7360d76bf37b60ce141f8612c6f68483d661b4d87459c62
+summary:
+  status: pass
+  pass: true
+  needs_human_review: false
+  blocking_issue_count: 0
+  major_issue_count: 0
+  minor_issue_count: 0
+  counts:
+    claims_added: 0
+    claims_removed: 0
+    claims_changed: 0
+    source_links_removed: 0
+    uncertainty_removed: 0
+    rules_regressed: 0
+issues: []

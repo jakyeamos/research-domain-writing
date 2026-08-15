@@ -14,9 +14,54 @@ from rdw.lifecycle import (
     mark_task_status,
 )
 from rdw.planner import TaskRequest, plan_batch, plan_task
-from rdw.schema_export import export_schema
+from rdw.schema_export import SCHEMA_TARGETS, export_schema
+from rdw.yaml_io import dump_yaml, load_yaml_mapping
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def _write_passing_diff_qa(run_dir: Path) -> None:
+    contract = load_yaml_mapping(run_dir / "task-contract.yaml")
+    relative = str(contract["diff_qa_path"])
+    mode = str(contract.get("diff_qa_mode") or "packet")
+    report = {
+        "schema_version": 1,
+        "kind": "diff_qa",
+        "output_id": str(contract["task_id"]),
+        "comparison": {
+            "mode": mode,
+            "baseline": {
+                "artifact_kind": mode,
+                "path": "baseline.yaml",
+                "sha256": "sha256:" + "0" * 64,
+            },
+            "candidate": {
+                "artifact_kind": mode,
+                "path": "candidate.yaml",
+                "sha256": "sha256:" + "0" * 64,
+            },
+        },
+        "summary": {
+            "status": "pass",
+            "pass": True,
+            "needs_human_review": False,
+            "blocking_issue_count": 0,
+            "major_issue_count": 0,
+            "minor_issue_count": 0,
+            "counts": {
+                "claims_added": 0,
+                "claims_removed": 0,
+                "claims_changed": 0,
+                "source_links_removed": 0,
+                "uncertainty_removed": 0,
+                "rules_regressed": 0,
+            },
+        },
+        "issues": [],
+    }
+    destination = run_dir / relative
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(dump_yaml(report), encoding="utf-8")
 
 
 def test_task_status_and_mark(tmp_path: Path) -> None:
@@ -63,6 +108,7 @@ def test_batch_status_and_resume(tmp_path: Path) -> None:
     first_task = batch_dir / "tasks" / "batch-demo-guard-summary"
     mark_task_status(first_task, "research-done")
     mark_task_status(first_task, "draft-done")
+    _write_passing_diff_qa(first_task)
     mark_task_status(first_task, "qa-passed")
     mark_task_status(first_task, "final-done")
 
@@ -115,6 +161,9 @@ def test_schema_export_packet_batch_and_contract() -> None:
     contract_schema = json.loads(export_schema("task-contract"))
     artifact_request_schema = json.loads(export_schema("artifact-request"))
     artifact_receipt_schema = json.loads(export_schema("artifact-receipt"))
+    diff_baseline_schema = json.loads(export_schema("diff-baseline"))
+    draft_claim_ledger_schema = json.loads(export_schema("draft-claim-ledger"))
+    diff_qa_schema = json.loads(export_schema("diff-qa"))
 
     assert packet_schema["required"] == [
         "id",
@@ -136,6 +185,23 @@ def test_schema_export_packet_batch_and_contract() -> None:
         "approved_for_human_review",
         "blocked",
     ]
+    assert diff_baseline_schema["required"]
+    assert draft_claim_ledger_schema["properties"]["claims"]["type"] == "array"
+    assert diff_qa_schema["properties"]["summary"]["properties"]["status"]["enum"] == [
+        "pass",
+        "fail",
+        "indeterminate",
+    ]
+    for target in SCHEMA_TARGETS:
+        exported = json.loads(export_schema(target.replace("-", "_")))
+        assert exported["type"] == "object"
+
+
+def test_schema_export_rejects_unknown_target_and_format() -> None:
+    with pytest.raises(ValueError, match="unknown schema target"):
+        export_schema("missing")
+    with pytest.raises(ValueError, match="unsupported schema format"):
+        export_schema("packet", format="yaml")
 
 
 def test_cli_schema_command(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:

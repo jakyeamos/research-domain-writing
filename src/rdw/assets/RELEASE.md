@@ -61,17 +61,16 @@ uv run rdw task plan --request "improve the copy on my LIS leaderboard" --out /t
 uv run rdw status /tmp/rdw-task-smoke
 uv run rdw task mark research-done /tmp/rdw-task-smoke
 uv run rdw batch plan examples/batch-tasks.yaml --out /tmp/rdw-batch-smoke
-uv run rdw task mark research-done /tmp/rdw-task-smoke
+uv run rdw batch status /tmp/rdw-batch-smoke
+uv run rdw batch resume /tmp/rdw-batch-smoke
+uv run rdw schema task-contract --format jsonschema -o /tmp/rdw-task-contract.schema.json
 uv run rdw task mark draft-done /tmp/rdw-task-smoke
-uv run rdw task mark qa-passed /tmp/rdw-task-smoke
-uv run rdw task mark final-done /tmp/rdw-task-smoke
+# qa-passed/final-done intentionally require a passing diff-QA report. Exercise
+# those gated transitions through the deterministic fixture slice below.
 
 # Deterministic one-task adapter vertical slice
 uv run rdw task plan --request "Explain why true shooting on high usage is the key read on Demo Guard in the 2026 synthetic sample" --domain basketball --entity "Demo Guard" --output-type stat_interpretation --audience "analytics-literate fans" --packet-id basketball-player-demo-guard-2026 --task-id basketball-example-demo-guard-stat-interpretation --out /tmp/rdw-fixture-task
 uv run rdw task execute /tmp/rdw-fixture-task --fixture examples/fixtures/basketball-vertical-slice.yaml --root .
-uv run rdw batch status /tmp/rdw-batch-smoke
-uv run rdw batch resume /tmp/rdw-batch-smoke
-uv run rdw schema task-contract --format jsonschema -o /tmp/rdw-task-contract.schema.json
 ```
 
 Execution is agent-owned: do not substitute an undocumented `rdw task execute`
@@ -83,18 +82,21 @@ command for the prompt-bundle handoff described in `README.md`.
 python -m venv /tmp/rdw-wheel-smoke
 /tmp/rdw-wheel-smoke/bin/pip install dist/*.whl
 ASSET_ROOT=$(/tmp/rdw-wheel-smoke/bin/python -c 'from importlib.resources import files; print(files("rdw.assets"))')
+WHEEL_ROOT=/tmp/rdw-wheel-root
 /tmp/rdw-wheel-smoke/bin/rdw --version
 /tmp/rdw-wheel-smoke/bin/rdw doctor --json
-/tmp/rdw-wheel-smoke/bin/rdw validate-packet "$ASSET_ROOT/knowledge/basketball/demo-guard-2026-demo.yaml" --strict --root /tmp/rdw-wheel-root --json
-/tmp/rdw-wheel-smoke/bin/rdw validate-batch "$ASSET_ROOT/examples/batch-tasks.yaml" --root /tmp/rdw-wheel-root --json
-/tmp/rdw-wheel-smoke/bin/rdw task plan --request "explain idempotency keys" --out /tmp/rdw-wheel-task --root /tmp/rdw-wheel-root --json
-/tmp/rdw-wheel-smoke/bin/rdw batch plan "$ASSET_ROOT/examples/batch-tasks.yaml" --out /tmp/rdw-wheel-batch --root /tmp/rdw-wheel-root --json
-/tmp/rdw-wheel-smoke/bin/rdw task mark research-done /tmp/rdw-wheel-task --json
-/tmp/rdw-wheel-smoke/bin/rdw task mark draft-done /tmp/rdw-wheel-task --json
-/tmp/rdw-wheel-smoke/bin/rdw task mark qa-passed /tmp/rdw-wheel-task --json
-/tmp/rdw-wheel-smoke/bin/rdw task mark final-done /tmp/rdw-wheel-task --json
+/tmp/rdw-wheel-smoke/bin/rdw validate-packet "$ASSET_ROOT/knowledge/basketball/demo-guard-2026-demo.yaml" --strict --root "$WHEEL_ROOT" --json
+/tmp/rdw-wheel-smoke/bin/rdw validate-batch "$ASSET_ROOT/examples/batch-tasks.yaml" --root "$WHEEL_ROOT" --json
+/tmp/rdw-wheel-smoke/bin/rdw task plan --request "explain idempotency keys" --out /tmp/rdw-wheel-task --root "$WHEEL_ROOT" --json
+/tmp/rdw-wheel-smoke/bin/rdw batch plan "$ASSET_ROOT/examples/batch-tasks.yaml" --out /tmp/rdw-wheel-batch --root "$WHEEL_ROOT" --json
 /tmp/rdw-wheel-smoke/bin/rdw batch status /tmp/rdw-wheel-batch --json
 /tmp/rdw-wheel-smoke/bin/rdw schema task-contract --format jsonschema -o /tmp/rdw-wheel-task-contract.schema.json
+/tmp/rdw-wheel-smoke/bin/rdw task mark research-done /tmp/rdw-wheel-task --json
+/tmp/rdw-wheel-smoke/bin/rdw task mark draft-done /tmp/rdw-wheel-task --json
+# qa-passed/final-done intentionally require a passing diff-QA report. Exercise
+# those gated transitions through the packaged fixture slice below.
+/tmp/rdw-wheel-smoke/bin/rdw task plan --request "Explain why true shooting on high usage is the key read on Demo Guard in the 2026 synthetic sample" --domain basketball --entity "Demo Guard" --output-type stat_interpretation --audience "analytics-literate fans" --packet-id basketball-player-demo-guard-2026 --task-id basketball-example-demo-guard-stat-interpretation --out /tmp/rdw-wheel-fixture-task --root /tmp/rdw-wheel-root --json
+/tmp/rdw-wheel-smoke/bin/rdw task execute /tmp/rdw-wheel-fixture-task --fixture "$ASSET_ROOT/examples/fixtures/basketball-vertical-slice.yaml" --root "$ASSET_ROOT" --json
 /tmp/rdw-wheel-smoke/bin/rdw install --target all --home /tmp/rdw-wheel-home
 ```
 

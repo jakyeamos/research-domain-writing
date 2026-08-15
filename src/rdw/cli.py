@@ -9,6 +9,7 @@ from rdw import __version__
 from rdw.adapters import get_adapter, list_adapters
 from rdw.artifact_validation import validate_artifact_file, validate_artifact_text
 from rdw.batch_execution import execute_batch, request_batch_cancel, request_batch_pause
+from rdw.diff_qa import run_diff_qa, write_diff_qa_report
 from rdw.domain import create_domain
 from rdw.execution import execute_fixture
 from rdw.install import INSTALL_TARGETS, install
@@ -72,7 +73,16 @@ def _build_parser() -> argparse.ArgumentParser:
     schema = subcommands.add_parser("schema", help="Export public JSON Schemas")
     schema.add_argument(
         "target",
-        choices=["packet", "batch", "task-contract", "artifact-request", "artifact-receipt"],
+        choices=[
+            "packet",
+            "batch",
+            "task-contract",
+            "artifact-request",
+            "artifact-receipt",
+            "diff-baseline",
+            "draft-claim-ledger",
+            "diff-qa",
+        ],
     )
     schema.add_argument("--format", default="jsonschema", choices=["jsonschema"])
     schema.add_argument("-o", "--output", type=Path)
@@ -110,6 +120,18 @@ def _build_parser() -> argparse.ArgumentParser:
     validate_claims.add_argument("--root", type=Path, default=Path.cwd())
     validate_claims.add_argument("--json", dest="json_output", action="store_true")
     validate_claims.set_defaults(func=_validate_claim_ledger)
+
+    diff_qa = subcommands.add_parser(
+        "diff-qa", help="Compare a structured candidate with an approved local baseline"
+    )
+    diff_qa.add_argument("baseline_manifest", type=Path)
+    diff_qa.add_argument("candidate", type=Path)
+    diff_qa.add_argument("--candidate-ledger", type=Path)
+    diff_qa.add_argument("--output-id")
+    diff_qa.add_argument("--output", type=Path)
+    diff_qa.add_argument("--root", type=Path, default=Path.cwd())
+    diff_qa.add_argument("--json", dest="json_output", action="store_true")
+    diff_qa.set_defaults(func=_diff_qa)
 
     validate_batch = subcommands.add_parser("validate-batch", help="Validate a batch task file")
     validate_batch.add_argument("path", type=Path)
@@ -228,6 +250,10 @@ def _doctor(args: argparse.Namespace) -> int:
     required = [
         ("SKILL.md", asset_path("SKILL.md")),
         ("pipeline orchestrator", asset_path("prompts", "pipeline-orchestrator.md")),
+        ("lightweight orchestrator", asset_path("prompts", "lightweight-orchestrator.md")),
+        ("lightweight research card", asset_path("prompts", "lightweight-research-card.md")),
+        ("lightweight copywriter", asset_path("prompts", "lightweight-copywriter.md")),
+        ("lightweight QA", asset_path("prompts", "lightweight-qa.md")),
         ("domain registry", asset_path("config", "domains.yaml")),
         ("install templates", asset_path("install", "claude-commands", "rdw.md")),
     ]
@@ -313,6 +339,35 @@ def _validate_claim_ledger(args: argparse.Namespace) -> int:
     )
     success = f"OK: {args.packet} + {args.ledger}"
     return _print_validation(result, success, json_output=bool(args.json_output))
+
+
+def _diff_qa(args: argparse.Namespace) -> int:
+    report = run_diff_qa(
+        args.baseline_manifest,
+        args.candidate,
+        root=args.root,
+        candidate_ledger_path=args.candidate_ledger,
+        output_id=args.output_id,
+    )
+    if args.output:
+        write_diff_qa_report(report, args.output)
+    summary = report.get("summary")
+    if args.json_output:
+        _emit_json(report)
+    else:
+        status = summary.get("status") if isinstance(summary, dict) else "unknown"
+        print(f"diff_qa: {status}")
+        if args.output:
+            print(f"Report: {args.output}")
+        issues = report.get("issues")
+        if isinstance(issues, list):
+            for issue in issues:
+                if isinstance(issue, dict):
+                    print(
+                        f"- {issue.get('code', 'DQA-010')}: "
+                        f"{issue.get('description', 'review required')}"
+                    )
+    return 0 if isinstance(summary, dict) and summary.get("status") == "pass" else 1
 
 
 def _validate_batch(args: argparse.Namespace) -> int:
