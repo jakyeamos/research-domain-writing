@@ -7,10 +7,14 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from rdw.config import default_output_format, output_formats
-from rdw.resources import read_asset_text
+from rdw.io import atomic_write_text
+from rdw.lifecycle import needs_review_for
+from rdw.resources import asset_path, read_asset_text
 from rdw.router import route_request
 from rdw.validation import normalize_depth, validate_batch_file
 from rdw.yaml_io import YamlMapping, YamlValue, dump_yaml, load_yaml_mapping
+
+LIGHTWEIGHT_DEPTHS = frozenset({"light", "minimal"})
 
 
 @dataclass(frozen=True)
@@ -51,15 +55,15 @@ def plan_task(
     if no_overwrite and contract_path.exists():
         raise ValueError(f"refusing to overwrite existing plan: {contract_path} (use --force)")
     output_dir.mkdir(parents=True, exist_ok=True)
-    contract_path.write_text(dump_yaml(contract), encoding="utf-8")
-    (output_dir / "prompt-bundle.md").write_text(prompt_bundle, encoding="utf-8")
+    atomic_write_text(contract_path, dump_yaml(contract))
+    atomic_write_text(output_dir / "prompt-bundle.md", prompt_bundle)
     status = {
         "task_id": task_id,
         "status": "planned",
         "created_at": datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "next_step": "Give prompt-bundle.md to an agent and run the RDW pipeline.",
     }
-    (output_dir / "status.json").write_text(json.dumps(status, indent=2) + "\n", encoding="utf-8")
+    atomic_write_text(output_dir / "status.json", json.dumps(status, indent=2) + "\n")
     return PlannedTask(
         task_id=task_id,
         contract=contract,
@@ -68,7 +72,7 @@ def plan_task(
     )
 
 
-def plan_batch(batch_path: Path, output_dir: Path, *, root: Path | None = None) -> None:
+def plan_batch(batch_path: Path, output_dir: Path, *, root: Path | None = None) -> YamlMapping:
     result = validate_batch_file(batch_path, root=root)
     if not result.ok:
         raise ValueError("\n".join(result.errors))
@@ -121,7 +125,7 @@ def plan_batch(batch_path: Path, output_dir: Path, *, root: Path | None = None) 
                     "domain": planned.contract["domain"],
                     "status": "planned",
                     "confidence_level": "unknown",
-                    "needs_review": True,
+                    "needs_review": needs_review_for("planned"),
                     "missing_info": [],
                 },
                 sort_keys=True,
@@ -136,15 +140,16 @@ def plan_batch(batch_path: Path, output_dir: Path, *, root: Path | None = None) 
         "failed": 0,
         "tasks": task_rows,
     }
-    (output_dir / "summary.yaml").write_text(dump_yaml(summary), encoding="utf-8")
-    (output_dir / "batch-log.jsonl").write_text("\n".join(log_lines) + "\n", encoding="utf-8")
+    atomic_write_text(output_dir / "summary.yaml", dump_yaml(summary))
+    atomic_write_text(output_dir / "batch-log.jsonl", "\n".join(log_lines) + "\n")
+    return summary
 
 
 def infer_contract(task: TaskRequest, *, root: Path | None = None) -> YamlMapping:
     request = task.request.strip()
     routed = route_request(request, root=root)
     domain = task.domain or routed.domain
-    output_type = routed.output_type
+    output_type = task.output_type or routed.output_type
     entity_type = routed.entity_type
     entity_name = task.entity or routed.entity_name
     depth = normalize_depth(task.depth or "") or routed.depth
@@ -152,9 +157,17 @@ def infer_contract(task: TaskRequest, *, root: Path | None = None) -> YamlMappin
     task_id = task.task_id or _slugify(f"{domain}-{entity_name}-{output_type}")
     packet_id = task.packet_id or _default_packet_id(domain, entity_type, entity_name)
     output_format = task.output_format or default_output_format(root)
-    warnings: list[YamlValue] = []
+    execution_lane = "lightweight" if depth in LIGHTWEIGHT_DEPTHS else "full"
+    diff_qa_mode = "draft" if execution_lane == "lightweight" else "packet"
+    research_needed = depth != "minimal"
+    warnings: list[YamlValue] = list(routed.warnings)
     if output_format not in output_formats(root):
         warnings.append(f"unknown output_format: {output_format}")
+    if depth == "minimal" and not _packet_exists(domain, packet_id, root):
+        warnings.append(
+            "minimal depth requires an existing packet or supplied evidence; "
+            "re-plan at light or full depth if evidence is missing"
+        )
     return {
         "task_id": task_id,
         "task": request,
@@ -163,31 +176,70 @@ def infer_contract(task: TaskRequest, *, root: Path | None = None) -> YamlMappin
         "entity_type": entity_type,
         "entity_name": entity_name,
         "topic": _topic(request, output_type),
-        "output_type": task.output_type or output_type,
+        "output_type": output_type,
+        "artifact_type": output_type,
+        "channel": _artifact_channel(output_type),
+        "intent": _artifact_intent(output_type),
         "output_format": output_format,
         "audience": audience,
-        "research_needed": True,
+        "research_needed": research_needed,
         "research_depth": depth,
+        "execution_lane": execution_lane,
+        **(
+            {"research_card_path": f"outputs/research/{task_id}-research-card.yaml"}
+            if execution_lane == "lightweight"
+            else {}
+        ),
         "packet_id": packet_id,
         "inference": {
             "mode": "mixed" if _has_overrides(task) else "inferred",
-            "confidence": "medium",
+            "confidence": routed.confidence,
             "fields_inferred": _fields_inferred(task),
             "fields_explicit": _fields_explicit(task),
             "rationale": "Contract generated by rdw's deterministic router; agent may refine before writing.",
         },
-        "local_knowledge_paths": [f"knowledge/{domain}/{packet_id}.yaml"],
+        "local_knowledge_paths": (
+            [] if execution_lane == "lightweight" else [f"knowledge/{domain}/{packet_id}.yaml"]
+        ),
         "qa_checklist_path": f"domains/{domain}/qa-checklist.md",
         "writing_template": f"domains/{domain}/writing-templates.md",
         "style_profile_path": "config/style-profile.yaml",
+        "artifact_profile_path": "config/artifacts.yaml",
+        "diff_qa_required": True,
+        "diff_qa_mode": diff_qa_mode,
+        "diff_qa_baseline_path": f"outputs/qa/{task_id}-baseline.yaml",
+        "diff_qa_path": f"outputs/qa/{task_id}-diff.yaml",
+        "human_approval_required": True,
         "warnings": warnings,
     }
 
 
+def _lightweight_contract(contract: YamlMapping) -> bool:
+    lane = contract.get("execution_lane")
+    if lane == "lightweight":
+        return True
+    depth = normalize_depth(str(contract.get("research_depth") or ""))
+    return depth in LIGHTWEIGHT_DEPTHS
+
+
 def render_prompt_bundle(contract: YamlMapping) -> str:
     contract_yaml = dump_yaml(contract).rstrip()
-    orchestrator = read_asset_text("prompts", "pipeline-orchestrator.md")
+    lightweight = _lightweight_contract(contract)
+    orchestrator_name = "lightweight-orchestrator.md" if lightweight else "pipeline-orchestrator.md"
+    orchestrator = read_asset_text("prompts", orchestrator_name)
     router = read_asset_text("prompts", "domain-router.md")
+    if lightweight:
+        execution_order = (
+            "3. Run the lightweight research card, grounded draft, compact QA, "
+            "deterministic diff-QA, and humanizer in order.\n"
+        )
+        heading = "## Lightweight Orchestrator"
+    else:
+        execution_order = (
+            "3. Run research, knowledge packet, draft, QA, deterministic diff-QA, "
+            "and humanizer in order.\n"
+        )
+        heading = "## Pipeline Orchestrator"
     return (
         "# RDW Agent Prompt Bundle\n\n"
         "This bundle does not call an LLM by itself. Give it to an agent with repo/file/web tools.\n\n"
@@ -198,12 +250,12 @@ def render_prompt_bundle(contract: YamlMapping) -> str:
         "## Execution Order\n\n"
         "1. Read `SKILL.md` and the prompts listed below.\n"
         "2. Confirm or adjust the task contract if the user objects.\n"
-        "3. Run research, knowledge packet, draft, QA, and humanizer in order.\n"
+        f"{execution_order}"
         "4. Save artifacts in the `output_format` from the contract above, "
         "using the output paths in `config/output-formats.yaml`.\n\n"
         "## Router Prompt\n\n"
         f"{router}\n\n"
-        "## Pipeline Orchestrator\n\n"
+        f"{heading}\n\n"
         f"{orchestrator}\n"
     )
 
@@ -227,9 +279,40 @@ def _topic(request: str, output_type: str) -> str:
     return f"{output_type}: {request[:120]}"
 
 
+def _artifact_channel(output_type: str) -> str:
+    return {
+        "outreach_email": "email",
+        "professional_message": "professional_dm",
+        "resume_bullet": "resume",
+        "cover_letter": "application_document",
+        "application_answer": "application_form",
+        "social_post": "social",
+    }.get(output_type, "document")
+
+
+def _artifact_intent(output_type: str) -> str:
+    return {
+        "outreach_email": "start_conversation",
+        "professional_message": "start_conversation",
+        "resume_bullet": "demonstrate_impact",
+        "cover_letter": "demonstrate_role_fit",
+        "application_answer": "answer_application_prompt",
+        "social_post": "publish_insight",
+    }.get(output_type, "inform")
+
+
 def _has_overrides(task: TaskRequest) -> bool:
     return any(
-        [task.domain, task.entity, task.output_type, task.audience, task.depth, task.packet_id]
+        [
+            task.domain,
+            task.entity,
+            task.output_type,
+            task.audience,
+            task.depth,
+            task.packet_id,
+            task.task_id,
+            task.output_format,
+        ]
     )
 
 
@@ -242,6 +325,8 @@ def _fields_explicit(task: TaskRequest) -> list[YamlValue]:
         ("audience", task.audience),
         ("research_depth", task.depth),
         ("packet_id", task.packet_id),
+        ("task_id", task.task_id),
+        ("output_format", task.output_format),
     ):
         if value:
             fields.append(name)
@@ -249,7 +334,16 @@ def _fields_explicit(task: TaskRequest) -> list[YamlValue]:
 
 
 def _fields_inferred(task: TaskRequest) -> list[YamlValue]:
-    all_fields = {"domain", "entity_name", "output_type", "audience", "research_depth", "packet_id"}
+    all_fields = {
+        "domain",
+        "entity_name",
+        "output_type",
+        "audience",
+        "research_depth",
+        "packet_id",
+        "task_id",
+        "output_format",
+    }
     inferred: list[YamlValue] = []
     for field in sorted(all_fields - set(str(field) for field in _fields_explicit(task))):
         inferred.append(field)
@@ -260,6 +354,12 @@ def _pack_exists(domain: str, root: Path | None) -> bool:
     if root and (root / "domains" / domain).exists():
         return True
     return domain in {"general", "basketball", "music", "technical"}
+
+
+def _packet_exists(domain: str, packet_id: str, root: Path | None) -> bool:
+    if root is not None:
+        return (root / "knowledge" / domain / f"{packet_id}.yaml").is_file()
+    return asset_path("knowledge", domain, f"{packet_id}.yaml").is_file()
 
 
 def _optional_string(value: YamlValue | None) -> str | None:

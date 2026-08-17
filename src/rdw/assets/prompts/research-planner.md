@@ -15,7 +15,7 @@ Decide what research is required before any domain copy is written.
 existing_knowledge_summary: string
 gaps: []                    # {field, priority, why}
 sources_to_check: []        # human-readable list
-research_depth: light | standard | deep
+research_depth: standard | deep
 can_write_confidently_now: boolean
 partial_write_allowed: []   # sections writable with current packet
 must_not_claim: []          # claims blocked until researched
@@ -37,6 +37,9 @@ create_or_update: update | create
 
 | Depth | Minimum bar |
 |-------|-------------|
-| light | identity + 3 key facts + 1 source note |
 | standard | role/context + metrics/facts + source notes + open questions |
 | deep | above + cross-checks + misuse review + concept bank updates |
+
+This prompt is for the full lane. `light` and `minimal` are handled by the
+lightweight research-card lane: reuse supplied evidence or an existing packet
+according to that lane's contract, and do not run this planner.

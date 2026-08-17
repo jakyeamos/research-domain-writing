@@ -1,0 +1,21 @@
+handoff_version: 1
+output_id: basketball-acceptance-player-comparison
+stage: humanizer
+input_draft: pipeline/player-comparison/draft.md
+qa: pipeline/player-comparison/qa.yaml
+output_final: pipeline/player-comparison/final.md
+status: ready_for_human_graduation_review
+facts_added: false
+qualifiers_preserved: true
+source_packet_ids:
+  - basketball-player-nikola-jokic-profile-2026-07-15
+  - basketball-player-jayson-tatum-2023-24
+preserved_fact_ids:
+  - fact-jokic-001
+  - fact-jokic-002
+  - fact-tatum-001
+  - fact-tatum-002
+style_pass_notes:
+  - made the comparison boundary explicit in the opening
+  - grouped the shared dimensions before the non-claim
+  - preserved both sample-window and role-context qualifiers

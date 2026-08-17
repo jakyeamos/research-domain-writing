@@ -1,0 +1,52 @@
+schema_version: rdw-artifact-request/v1
+artifact_id: redacted-career-research-followup
+artifact_type: outreach_followup_email
+channel: email
+intent: continue_conversation
+
+audience:
+  recipient_role: research-program-contact
+  relationship: warm
+
+content:
+  subject: Research software follow-up
+  body: |
+    Hello [REDACTED],
+
+    Thank you for sharing that my software and data-systems experience may be relevant to your materials-science research workflows. A resume is available for review, and I would be glad to discuss possible research-software opportunities. Would you be open to a follow-up conversation?
+
+    Best,
+    [REDACTED]
+
+evidence:
+  - id: recipient-context
+    kind: recipient_relevance
+    text: The recipient described a need related to materials-science research workflows.
+    source: private sent-email source (redacted)
+  - id: candidate-proof
+    kind: candidate_proof
+    text: The sender offered a resume describing software and data-systems experience.
+    source: private sent-email source (redacted)
+
+claim_bindings:
+  - claim: My software and data-systems experience may be relevant to your materials-science research workflows.
+    evidence_ids:
+      - recipient-context
+      - candidate-proof
+
+constraints:
+  human_approval_required: true
+  max_words: 80
+  external_actions: []
+
+privacy:
+  redacted: true
+  source_scope: private_sent_email_only
+  removed_identifiers:
+    - person names
+    - organization names
+    - email addresses
+    - URLs
+    - dates
+    - attachment filenames
+    - quoted thread content

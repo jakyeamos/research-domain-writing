@@ -1,13 +1,19 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
 from rdw import __version__
 from rdw.adapters import get_adapter, list_adapters
+from rdw.artifact_validation import validate_artifact_file, validate_artifact_text
+from rdw.batch_execution import execute_batch, request_batch_cancel, request_batch_pause
+from rdw.diff_qa import run_diff_qa, write_diff_qa_report
 from rdw.domain import create_domain
+from rdw.execution import execute_fixture
 from rdw.install import INSTALL_TARGETS, install
+from rdw.io import atomic_write_text
 from rdw.lifecycle import (
     format_batch_resume,
     mark_task_status,
@@ -17,7 +23,12 @@ from rdw.lifecycle import (
 from rdw.planner import TaskRequest, plan_batch, plan_task
 from rdw.resources import asset_path
 from rdw.schema_export import export_schema
-from rdw.validation import validate_batch_file, validate_packet_file
+from rdw.validation import (
+    ValidationResult,
+    validate_batch_file,
+    validate_claim_ledger_file,
+    validate_packet_file,
+)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -25,9 +36,24 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         return int(args.func(args))
+    except OSError as exc:
+        if bool(getattr(args, "json_output", False)):
+            _emit_json({"ok": False, "category": "environment", "error": str(exc)})
+        else:
+            print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
     except ValueError as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
+        if bool(getattr(args, "json_output", False)):
+            _emit_json({"ok": False, "category": "validation", "error": str(exc)})
+        else:
+            print(f"ERROR: {exc}", file=sys.stderr)
         return 1
+    except Exception as exc:
+        if bool(getattr(args, "json_output", False)):
+            _emit_json({"ok": False, "category": "internal", "error": str(exc)})
+        else:
+            print(f"ERROR: internal failure: {exc}", file=sys.stderr)
+        return 3
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -36,14 +62,28 @@ def _build_parser() -> argparse.ArgumentParser:
     subcommands = parser.add_subparsers(dest="command", required=True)
 
     doctor = subcommands.add_parser("doctor", help="Check RDW installation health")
+    doctor.add_argument("--json", dest="json_output", action="store_true")
     doctor.set_defaults(func=_doctor)
 
     status = subcommands.add_parser("status", help="Show status for a planned task run")
     status.add_argument("run_dir", type=Path)
+    status.add_argument("--json", dest="json_output", action="store_true")
     status.set_defaults(func=_status)
 
     schema = subcommands.add_parser("schema", help="Export public JSON Schemas")
-    schema.add_argument("target", choices=["packet", "batch", "task-contract"])
+    schema.add_argument(
+        "target",
+        choices=[
+            "packet",
+            "batch",
+            "task-contract",
+            "artifact-request",
+            "artifact-receipt",
+            "diff-baseline",
+            "draft-claim-ledger",
+            "diff-qa",
+        ],
+    )
     schema.add_argument("--format", default="jsonschema", choices=["jsonschema"])
     schema.add_argument("-o", "--output", type=Path)
     schema.set_defaults(func=_schema)
@@ -61,14 +101,53 @@ def _build_parser() -> argparse.ArgumentParser:
     validate_packet = subcommands.add_parser("validate-packet", help="Validate a research packet")
     validate_packet.add_argument("path", type=Path)
     validate_packet.add_argument("--strict", action="store_true")
+    validate_packet.add_argument(
+        "--mature",
+        action="store_true",
+        help="Apply the mature basketball acceptance gates and strict source checks",
+    )
     validate_packet.add_argument("--root", type=Path, default=Path.cwd())
     validate_packet.add_argument("--allow-disabled-domain", action="store_true")
+    validate_packet.add_argument("--json", dest="json_output", action="store_true")
     validate_packet.set_defaults(func=_validate_packet)
+
+    validate_claims = subcommands.add_parser(
+        "validate-claim-ledger", help="Validate QA issues and packet claim traceability"
+    )
+    validate_claims.add_argument("packet", type=Path)
+    validate_claims.add_argument("ledger", type=Path)
+    validate_claims.add_argument("--mature", action="store_true")
+    validate_claims.add_argument("--root", type=Path, default=Path.cwd())
+    validate_claims.add_argument("--json", dest="json_output", action="store_true")
+    validate_claims.set_defaults(func=_validate_claim_ledger)
+
+    diff_qa = subcommands.add_parser(
+        "diff-qa", help="Compare a structured candidate with an approved local baseline"
+    )
+    diff_qa.add_argument("baseline_manifest", type=Path)
+    diff_qa.add_argument("candidate", type=Path)
+    diff_qa.add_argument("--candidate-ledger", type=Path)
+    diff_qa.add_argument("--output-id")
+    diff_qa.add_argument("--output", type=Path)
+    diff_qa.add_argument("--root", type=Path, default=Path.cwd())
+    diff_qa.add_argument("--json", dest="json_output", action="store_true")
+    diff_qa.set_defaults(func=_diff_qa)
 
     validate_batch = subcommands.add_parser("validate-batch", help="Validate a batch task file")
     validate_batch.add_argument("path", type=Path)
     validate_batch.add_argument("--root", type=Path, default=Path.cwd())
+    validate_batch.add_argument("--json", dest="json_output", action="store_true")
     validate_batch.set_defaults(func=_validate_batch)
+
+    validate_artifact = subcommands.add_parser(
+        "validate-artifact",
+        help="Validate a writing artifact request and emit a content-bound quality receipt",
+    )
+    validate_artifact.add_argument("path", help="YAML/JSON request path, or - for stdin")
+    validate_artifact.add_argument("--root", type=Path, default=Path.cwd())
+    validate_artifact.add_argument("--receipt", type=Path)
+    validate_artifact.add_argument("--json", dest="json_output", action="store_true")
+    validate_artifact.set_defaults(func=_validate_artifact)
 
     new_domain = subcommands.add_parser("new-domain", help="Scaffold a new domain pack")
     new_domain.add_argument("domain_id")
@@ -93,29 +172,67 @@ def _build_parser() -> argparse.ArgumentParser:
     task_plan.add_argument("--force", action="store_true")
     task_plan.add_argument("--no-overwrite", action="store_true")
     task_plan.add_argument("--run-id")
+    task_plan.add_argument("--json", dest="json_output", action="store_true")
     task_plan.set_defaults(func=_task_plan)
 
     task_mark = task_subcommands.add_parser("mark", help="Update task lifecycle status")
     task_mark.add_argument("status")
     task_mark.add_argument("run_dir", type=Path)
     task_mark.add_argument("--reason")
+    task_mark.add_argument("--json", dest="json_output", action="store_true")
     task_mark.set_defaults(func=_task_mark)
 
-    batch = subcommands.add_parser("batch", help="Batch planning commands")
+    task_execute = task_subcommands.add_parser(
+        "execute", help="Execute a deterministic fixture through the task lifecycle"
+    )
+    task_execute.add_argument("run_dir", type=Path)
+    task_execute.add_argument("--fixture", required=True, type=Path)
+    task_execute.add_argument("--root", type=Path, default=Path.cwd())
+    task_execute.add_argument("--resume", action="store_true")
+    task_execute.add_argument("--dry-run", action="store_true")
+    task_execute.add_argument("--json", dest="json_output", action="store_true")
+    task_execute.set_defaults(func=_task_execute)
+
+    batch = subcommands.add_parser("batch", help="Batch planning and execution commands")
     batch_subcommands = batch.add_subparsers(dest="batch_command", required=True)
     batch_plan = batch_subcommands.add_parser("plan", help="Plan a batch file")
     batch_plan.add_argument("path", type=Path)
     batch_plan.add_argument("--out", type=Path, default=None)
     batch_plan.add_argument("--root", type=Path, default=Path.cwd())
+    batch_plan.add_argument("--json", dest="json_output", action="store_true")
     batch_plan.set_defaults(func=_batch_plan)
 
     batch_status = batch_subcommands.add_parser("status", help="Show batch run status")
     batch_status.add_argument("batch_dir", type=Path)
+    batch_status.add_argument("--json", dest="json_output", action="store_true")
     batch_status.set_defaults(func=_batch_status)
 
     batch_resume = batch_subcommands.add_parser("resume", help="List next batch tasks to run")
     batch_resume.add_argument("batch_dir", type=Path)
+    batch_resume.add_argument("--json", dest="json_output", action="store_true")
     batch_resume.set_defaults(func=_batch_resume)
+
+    batch_execute = batch_subcommands.add_parser(
+        "execute", help="Execute a serial filesystem-first fixture batch"
+    )
+    batch_execute.add_argument("batch_dir", type=Path)
+    batch_execute.add_argument("--fixture-map", required=True, type=Path)
+    batch_execute.add_argument("--root", type=Path, default=Path.cwd())
+    batch_execute.add_argument("--resume", action="store_true")
+    batch_execute.add_argument("--reclaim-lease", action="store_true")
+    batch_execute.add_argument("--dry-run", action="store_true")
+    batch_execute.add_argument("--json", dest="json_output", action="store_true")
+    batch_execute.set_defaults(func=_batch_execute)
+
+    batch_pause = batch_subcommands.add_parser("pause", help="Request cooperative batch pause")
+    batch_pause.add_argument("batch_dir", type=Path)
+    batch_pause.add_argument("--json", dest="json_output", action="store_true")
+    batch_pause.set_defaults(func=_batch_pause)
+
+    batch_cancel = batch_subcommands.add_parser("cancel", help="Request cooperative batch cancel")
+    batch_cancel.add_argument("batch_dir", type=Path)
+    batch_cancel.add_argument("--json", dest="json_output", action="store_true")
+    batch_cancel.set_defaults(func=_batch_cancel)
 
     install_parser = subcommands.add_parser("install", help="Install slash commands and skills")
     install_parser.add_argument("--target", choices=sorted(INSTALL_TARGETS), default="all")
@@ -129,35 +246,58 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _doctor(_args: argparse.Namespace) -> int:
+def _doctor(args: argparse.Namespace) -> int:
     required = [
         ("SKILL.md", asset_path("SKILL.md")),
         ("pipeline orchestrator", asset_path("prompts", "pipeline-orchestrator.md")),
+        ("lightweight orchestrator", asset_path("prompts", "lightweight-orchestrator.md")),
+        ("lightweight research card", asset_path("prompts", "lightweight-research-card.md")),
+        ("lightweight copywriter", asset_path("prompts", "lightweight-copywriter.md")),
+        ("lightweight QA", asset_path("prompts", "lightweight-qa.md")),
         ("domain registry", asset_path("config", "domains.yaml")),
         ("install templates", asset_path("install", "claude-commands", "rdw.md")),
     ]
     failed = False
-    print(f"rdw {__version__}")
-    print(f"python {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
+    checks: dict[str, bool] = {}
     for label, path in required:
         exists = path.is_file()
-        print(f"{'OK' if exists else 'MISSING'} {label}")
+        checks[label] = exists
         failed = failed or not exists
     output_root = Path.cwd() / "outputs"
     writable = _writable(output_root)
-    print(f"{'OK' if writable else 'WARN'} writable outputs: {output_root}")
+    if args.json_output:
+        _emit_json(
+            {
+                "ok": not failed,
+                "version": __version__,
+                "python": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
+                "checks": checks,
+                "writable_outputs": writable,
+            }
+        )
+    else:
+        print(f"rdw {__version__}")
+        print(f"python {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
+        for label, exists in checks.items():
+            print(f"{'OK' if exists else 'MISSING'} {label}")
+        print(f"{'OK' if writable else 'WARN'} writable outputs: {output_root}")
     return 1 if failed else 0
 
 
 def _status(args: argparse.Namespace) -> int:
-    print(show_task_status(args.run_dir))
+    if args.json_output:
+        from rdw.lifecycle import load_task_status_view
+
+        _emit_json(load_task_status_view(args.run_dir).as_dict())
+    else:
+        print(show_task_status(args.run_dir))
     return 0
 
 
 def _schema(args: argparse.Namespace) -> int:
     payload = export_schema(args.target, format=args.format)
     if args.output:
-        args.output.write_text(payload, encoding="utf-8")
+        atomic_write_text(args.output, payload)
         print(f"Wrote {args.output}")
     else:
         print(payload, end="")
@@ -185,13 +325,76 @@ def _validate_packet(args: argparse.Namespace) -> int:
         strict=bool(args.strict),
         root=args.root,
         allow_disabled=bool(args.allow_disabled_domain),
+        mature=bool(args.mature),
     )
-    return _print_validation(result.errors, result.warnings, f"OK: {args.path}")
+    return _print_validation(result, f"OK: {args.path}", json_output=bool(args.json_output))
+
+
+def _validate_claim_ledger(args: argparse.Namespace) -> int:
+    result = validate_claim_ledger_file(
+        args.packet,
+        args.ledger,
+        root=args.root,
+        mature=bool(args.mature),
+    )
+    success = f"OK: {args.packet} + {args.ledger}"
+    return _print_validation(result, success, json_output=bool(args.json_output))
+
+
+def _diff_qa(args: argparse.Namespace) -> int:
+    report = run_diff_qa(
+        args.baseline_manifest,
+        args.candidate,
+        root=args.root,
+        candidate_ledger_path=args.candidate_ledger,
+        output_id=args.output_id,
+    )
+    if args.output:
+        write_diff_qa_report(report, args.output)
+    summary = report.get("summary")
+    if args.json_output:
+        _emit_json(report)
+    else:
+        status = summary.get("status") if isinstance(summary, dict) else "unknown"
+        print(f"diff_qa: {status}")
+        if args.output:
+            print(f"Report: {args.output}")
+        issues = report.get("issues")
+        if isinstance(issues, list):
+            for issue in issues:
+                if isinstance(issue, dict):
+                    print(
+                        f"- {issue.get('code', 'DQA-010')}: "
+                        f"{issue.get('description', 'review required')}"
+                    )
+    return 0 if isinstance(summary, dict) and summary.get("status") == "pass" else 1
 
 
 def _validate_batch(args: argparse.Namespace) -> int:
     result = validate_batch_file(args.path, root=args.root)
-    return _print_validation(result.errors, result.warnings, f"OK: {args.path}")
+    return _print_validation(result, f"OK: {args.path}", json_output=bool(args.json_output))
+
+
+def _validate_artifact(args: argparse.Namespace) -> int:
+    receipt = (
+        validate_artifact_text(sys.stdin.read(), root=args.root)
+        if args.path == "-"
+        else validate_artifact_file(Path(args.path), root=args.root)
+    )
+    payload = json.dumps(receipt, indent=2) + "\n"
+    if args.receipt:
+        atomic_write_text(args.receipt, payload)
+    if args.json_output:
+        print(payload, end="")
+    else:
+        print(f"{str(receipt['status']).upper()}: {receipt['artifact_id']}")
+        reasons = receipt.get("reasons")
+        if isinstance(reasons, list):
+            for reason in reasons:
+                print(f"- {reason}")
+        if args.receipt:
+            print(f"Receipt: {args.receipt}")
+    return 0 if receipt["ok"] is True else 1
 
 
 def _new_domain(args: argparse.Namespace) -> int:
@@ -223,34 +426,118 @@ def _task_plan(args: argparse.Namespace) -> int:
         no_overwrite=bool(args.no_overwrite),
         run_id=args.run_id,
     )
-    print(f"Planned {planned.task_id}")
-    print(f"Prompt bundle: {planned.output_dir / 'prompt-bundle.md'}")
+    if args.json_output:
+        _emit_json(
+            {
+                "ok": True,
+                "task_id": planned.task_id,
+                "output_dir": str(planned.output_dir),
+                "contract": planned.contract,
+            }
+        )
+    else:
+        print(f"Planned {planned.task_id}")
+        print(f"Prompt bundle: {planned.output_dir / 'prompt-bundle.md'}")
     return 0
 
 
 def _task_mark(args: argparse.Namespace) -> int:
     view = mark_task_status(args.run_dir, args.status, reason=args.reason)
-    print(f"Marked {view.task_id} -> {view.status}")
-    if view.reason:
-        print(f"reason: {view.reason}")
+    if args.json_output:
+        _emit_json(view.as_dict())
+    else:
+        print(f"Marked {view.task_id} -> {view.status}")
+        if view.reason:
+            print(f"reason: {view.reason}")
+    return 0
+
+
+def _task_execute(args: argparse.Namespace) -> int:
+    result = execute_fixture(
+        args.run_dir,
+        args.fixture,
+        root=args.root,
+        resume=bool(args.resume),
+        dry_run=bool(args.dry_run),
+    )
+    if args.json_output:
+        _emit_json(result.as_dict())
+    else:
+        print(f"Executed {result.task_id}: {result.adapter_status} -> {result.workflow_status}")
+        if result.receipt_path:
+            print(f"Receipt: {result.receipt_path}")
+        for path in result.promoted_paths:
+            print(f"Promoted: {path}")
     return 0
 
 
 def _batch_plan(args: argparse.Namespace) -> int:
     output_dir = args.out or (Path.cwd() / "outputs" / "batches" / args.path.stem)
-    plan_batch(args.path, output_dir, root=args.root)
-    print(f"Planned batch: {output_dir}")
-    print(f"Summary: {output_dir / 'summary.yaml'}")
+    summary = plan_batch(args.path, output_dir, root=args.root)
+    if args.json_output:
+        _emit_json({"ok": True, "batch_dir": str(output_dir), "summary": summary})
+    else:
+        print(f"Planned batch: {output_dir}")
+        print(f"Summary: {output_dir / 'summary.yaml'}")
     return 0
 
 
 def _batch_status(args: argparse.Namespace) -> int:
-    print(show_batch_status(args.batch_dir))
+    if args.json_output:
+        from rdw.lifecycle import load_batch_status_view
+
+        _emit_json(load_batch_status_view(args.batch_dir).as_dict())
+    else:
+        print(show_batch_status(args.batch_dir))
     return 0
 
 
 def _batch_resume(args: argparse.Namespace) -> int:
-    print(format_batch_resume(args.batch_dir))
+    if args.json_output:
+        from rdw.lifecycle import batch_resume
+
+        _emit_json({"tasks": batch_resume(args.batch_dir)})
+    else:
+        print(format_batch_resume(args.batch_dir))
+    return 0
+
+
+def _batch_execute(args: argparse.Namespace) -> int:
+    result = execute_batch(
+        args.batch_dir,
+        args.fixture_map,
+        root=args.root,
+        resume=bool(args.resume),
+        reclaim_lease=bool(args.reclaim_lease),
+        dry_run=bool(args.dry_run),
+    )
+    if args.json_output:
+        _emit_json({"ok": True, **result.as_dict()})
+    else:
+        print(f"Batch {result.batch_id}: {result.state}")
+        print(
+            f"completed={result.completed} needs_review={result.needs_review} "
+            f"failed={result.failed} cancelled={result.cancelled} "
+            f"attempts={result.total_attempts}"
+        )
+    return 0
+
+
+def _batch_pause(args: argparse.Namespace) -> int:
+    result = request_batch_pause(args.batch_dir)
+    if args.json_output:
+        _emit_json({"ok": True, **result.as_dict()})
+    else:
+        print(f"Batch {result.batch_id}: {result.state}")
+    return 0
+
+
+def _batch_cancel(args: argparse.Namespace) -> int:
+    result = request_batch_cancel(args.batch_dir)
+    if args.json_output:
+        _emit_json({"ok": True, **result.as_dict()})
+    else:
+        print(f"Batch {result.batch_id}: {result.state}")
     return 0
 
 
@@ -271,7 +558,12 @@ def _install(args: argparse.Namespace) -> int:
     return 0
 
 
-def _print_validation(errors: list[str], warnings: list[str], success: str) -> int:
+def _print_validation(result: ValidationResult, success: str, *, json_output: bool) -> int:
+    if json_output:
+        _emit_json(result.as_dict())
+        return 0 if result.ok else 1
+    errors = result.errors
+    warnings = result.warnings
     for warning in warnings:
         print(f"WARN: {warning}")
     if errors:
@@ -280,6 +572,10 @@ def _print_validation(errors: list[str], warnings: list[str], success: str) -> i
         return 1
     print(success)
     return 0
+
+
+def _emit_json(payload: object) -> None:
+    print(json.dumps(payload, indent=2, sort_keys=True, default=str))
 
 
 def _writable(path: Path) -> bool:

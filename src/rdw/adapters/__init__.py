@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from rdw.adapters.base import TaskAdapter
+from rdw.adapters.fixture import FixtureAdapter
 from rdw.adapters.stubs import AnthropicAdapter, LocalAdapter, OpenAIAdapter
 
 ADAPTERS: dict[str, TaskAdapter] = {
+    "fixture": FixtureAdapter(),
     "local": LocalAdapter(),
     "openai": OpenAIAdapter(),
     "anthropic": AnthropicAdapter(),

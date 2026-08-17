@@ -1,6 +1,6 @@
 # Research Domain Writing
 
-Research Domain Writing (RDW) is an agent-first harness for research-grounded writing. It validates structured research packets, plans repeatable writing runs, emits exact prompt bundles, and keeps outputs auditable.
+Research Domain Writing (RDW) is an agent-first harness for research-grounded writing. It validates structured research packets, plans repeatable writing runs, emits exact prompt bundles, and gives externally consumed artifacts content-bound quality receipts.
 
 The `rdw` CLI is not an LLM runner. It does not browse, call model APIs, or draft autonomously. Your agent performs the research and writing by following the emitted prompts.
 
@@ -67,8 +67,19 @@ This writes:
 
 ### 3. Execute the plan with your agent
 
+Give the prompt bundle to your agent. The planner selects the full lane or the
+lightweight research-card lane from `research_depth`; the agent remains
+responsible for research, drafting, QA, and final output.
+
+The task contract also records the required diff-QA mode and local
+baseline/report paths. Full-lane contracts use packet mode; lightweight
+contracts use explicit draft-claim-ledger mode. The agent runs that
+deterministic gate after domain or compact QA and before the humanizer;
+`qa-passed` and `final-done` reject a missing, invalid, failed, or indeterminate
+report.
+
 `rdw task plan` is the handoff point: open `prompt-bundle.md` in your agent and
-follow its research → packet → draft → QA → humanizer sequence. The agent does
+follow its research → packet → draft → QA → diff-QA → humanizer sequence. The agent does
 the work; the CLI does not execute model calls or write final copy. Record
 progress in the planned run when each stage is complete:
 
@@ -79,12 +90,45 @@ rdw status .rdw-runs/lis-leaderboard
 
 Use `draft-done`, `qa-passed`, `qa-failed`, and `final-done` as the agent advances.
 
-### 4. Plan and track a batch
+### 4. Validate an externally consumed artifact
+
+Use the artifact request contract for resumes, application materials, outreach,
+professional messages, social posts, and other consequential writing:
+
+```bash
+rdw validate-artifact path/to/artifact-request.yaml \
+  --receipt path/to/artifact-receipt.json --json
+```
+
+The request binds final content to evidence, claims, channel constraints, and a
+human-approval boundary. The receipt hashes both the contract and the content.
+`approved_for_human_review` means the artifact cleared deterministic RDW checks;
+it never authorizes sending, submission, or publication. Export the portable
+schemas with `rdw schema artifact-request` and `rdw schema artifact-receipt`.
+
+### 5. Execute the deterministic vertical-slice fixture
+
+The repository includes a fixture-backed runtime for proving the handoff and
+lifecycle boundary without calling a model API:
+
+```bash
+rdw task execute .rdw-runs/demo-task \
+  --fixture examples/fixtures/basketball-vertical-slice.yaml \
+  --root .
+```
+
+The fixture stages a research packet, knowledge packet, draft, QA result,
+diff-QA report, and final artifact under the run directory, validates the
+packet, QA, and diff-QA gates, and advances the existing lifecycle. Use the
+QA-failed fixture with `--resume` to exercise an auditable retry.
+
+### 6. Plan and track a batch
 
 ```bash
 rdw batch plan examples/batch-tasks.yaml --out .rdw-runs/demo-batch
 rdw batch status .rdw-runs/demo-batch
 rdw batch resume .rdw-runs/demo-batch
+rdw schema task-contract --format jsonschema
 ```
 
 This validates the batch file, expands each task into a deterministic task
@@ -98,6 +142,52 @@ The `v0.2.2` baseline does not expose a general `rdw --json` output mode. For
 machine-readable contract schemas, use `rdw schema packet|batch|task-contract
 --format jsonschema`; planning also writes JSON and YAML run artifacts.
 
+For deterministic integration checks, a serial fixture-backed executor can run
+the planned tasks without a model, browser, provider SDK, or database. Create a
+fixture map covering every task:
+
+```yaml
+batch_id: demo-batch-001
+execution:
+  max_concurrency: 1
+  max_attempts: 2
+  retry_backoff_seconds: [5, 30]
+  failure_policy: continue
+fixtures:
+  batch-demo-guard-summary: examples/fixtures/basketball-vertical-slice.yaml
+```
+
+Then run the additive executor controls:
+
+```bash
+rdw batch execute .rdw-runs/demo-batch \
+  --fixture-map path/to/fixture-map.yaml --root .
+rdw batch pause .rdw-runs/demo-batch
+rdw batch cancel .rdw-runs/demo-batch
+rdw batch execute .rdw-runs/demo-batch \
+  --fixture-map path/to/fixture-map.yaml --root . --resume
+```
+
+The executor is intentionally serial and filesystem-first. Receipts remain
+immutable, retries keep the task idempotency key but receive new attempt
+directories, completed tasks survive partial failure or cancellation, and an
+unknown attempt requires explicit reconciliation. `rdw batch resume` remains a
+read-only next-task view.
+
+### 7. Inspect and advance a run
+
+Lifecycle state is explicit and ordered:
+
+```text
+planned -> research-done -> draft-done -> diff-QA -> qa-passed -> final-done
+                                      \-> qa-failed -> research-done or draft-done
+```
+
+Use `--reason` when marking `qa-failed`. Invalid jumps are rejected without
+changing the run artifacts. Status and batch views are read-only; automation
+can use `--json` on doctor, validators, planners, status, resume, and task
+marking commands.
+
 ## Core Commands
 
 ```bash
@@ -110,13 +200,27 @@ rdw task plan --request "explain idempotency keys" --domain technical --out .rdw
 rdw status .rdw-runs/idempotency
 rdw task mark research-done .rdw-runs/idempotency
 rdw batch plan examples/batch-tasks.yaml --out .rdw-runs/demo-batch
+rdw task execute .rdw-runs/demo-task --fixture examples/fixtures/basketball-vertical-slice.yaml --root .
+rdw batch execute .rdw-runs/demo-batch --fixture-map path/to/fixture-map.yaml --root .
+rdw batch pause .rdw-runs/demo-batch
+rdw batch cancel .rdw-runs/demo-batch
 rdw batch status .rdw-runs/demo-batch
 rdw batch resume .rdw-runs/demo-batch
 rdw schema task-contract --format jsonschema
 rdw install --target claude
 rdw install --target cursor
 rdw install --target agents
+rdw validate-packet knowledge/basketball/demo-guard-2026-demo.yaml --strict --json
+rdw validate-packet examples/acceptance/basketball/packets/ranking-usage-ts-change.yaml --mature --json
+rdw validate-claim-ledger examples/acceptance/basketball/packets/ranking-usage-ts-change.yaml examples/acceptance/basketball/qa/ranking-usage-ts-change.yaml --mature --json
+rdw diff-qa <approved-baseline.yaml> <candidate-packet.yaml> --root <task-or-repo-root> --output outputs/qa/<output-id>-diff.yaml
+rdw status .rdw-runs/lis-leaderboard --json
+rdw batch status .rdw-runs/demo-batch --json
 ```
+
+`rdw install` stages packaged assets before replacing its managed install root.
+Existing unrelated real directories and managed command files are protected by
+default; use `--backup` or `--force` explicitly when replacing them.
 
 Legacy scripts remain secondary compatibility wrappers; prefer the equivalent `rdw` command:
 
@@ -160,6 +264,12 @@ RDW separates knowledge work from style work:
 
 Packets live in `knowledge/<domain>/*.yaml` and must include source notes, confidence, timestamps, and domain-specific extension data when required.
 
+For short, lower-stakes tasks, the lightweight lane uses a run-local research
+card, compact QA, deterministic diff-QA, and the same style-only humanizer. It
+does not create a reusable packet. `minimal` means reuse supplied evidence
+only; missing evidence escalates to the full lane. Draft mode requires an
+explicit claim-ledger sidecar; RDW never infers a ledger from Markdown.
+
 See [docs/LIMITATIONS.md](docs/LIMITATIONS.md) for current boundaries.
 
 ## Validation
@@ -173,12 +283,30 @@ See [docs/LIMITATIONS.md](docs/LIMITATIONS.md) for current boundaries.
 - `source_notes` shape and strict fact-id linkage
 - domain extension presence when strict mode requires it
 
+With `--mature`, the validator applies the opt-in basketball acceptance
+contract: source-grounded metric semantics, role and sample context, ranking
+metadata and freshness, confidence rules for small samples, and rejection of
+synthetic/demo provenance. `rdw validate-claim-ledger` checks QA issue counts
+and maps every accepted claim to a source-linked packet fact. These gates are
+deterministic and do not browse or call a provider.
+
 `rdw validate-batch` checks:
 
 - unique task IDs
 - supported depth values: `1`, `2`, `3`, `4`, `deep`, `standard`, `light`, `minimal`
 - packet references when supplied
 - supported output formats
+
+`rdw validate-artifact` checks the selected profile in `config/artifacts.yaml`,
+including required evidence kinds, well-formed claim bindings to known
+evidence, content/evidence overlap, channel length, blocked filler, CTA and
+proof-link requirements, and the mandatory human-review boundary. The career pack contains the current outreach,
+resume, cover-letter, application-answer, and professional-message guidance.
+
+`rdw diff-qa` checks the approved baseline manifest, structured packet or draft
+claim ledger, stable evidence links, uncertainty, and rule regressions. It is
+local and deterministic; a passing report is still only an internal gate for
+human review and never authorizes send, upload, submission, or publication.
 
 ## Examples
 
@@ -187,6 +315,8 @@ See [docs/LIMITATIONS.md](docs/LIMITATIONS.md) for current boundaries.
 | `examples/basketball-example/` | synthetic task, packet-derived knowledge, draft, QA, final |
 | `examples/music-example/` | thin-evidence music task, research packet, knowledge, draft, QA, final |
 | `examples/technical-example/` | technical feature task, research packet, knowledge, draft, QA, final |
+| `domains/career/` | sourced professional-writing structures and QA rules for consequential artifacts |
+| `examples/acceptance/basketball/` | source-grounded mature-pack packets, QA claim ledgers, and positive/negative gates |
 | `examples/batch-tasks.yaml` | deterministic batch planning input |
 
 The basketball example is explicitly fictional. It demonstrates schema and claim-boundary behavior, not real player analysis.
@@ -248,8 +378,24 @@ Wheel smoke:
 python -m venv /tmp/rdw-wheel-smoke
 /tmp/rdw-wheel-smoke/bin/pip install dist/*.whl
 /tmp/rdw-wheel-smoke/bin/rdw --version
-/tmp/rdw-wheel-smoke/bin/rdw doctor
+/tmp/rdw-wheel-smoke/bin/rdw doctor --json
 ```
+
+The wheel smoke should run the critical doctor, strict packet, batch
+validation/planning, schema export, lifecycle, and install commands against
+the wheel's packaged assets, not paths from the source checkout. See
+[RELEASE.md](RELEASE.md) for the complete sequence.
+
+Install surface smoke:
+
+```bash
+uv run python scripts/smoke-install.py
+```
+
+This invokes the public `rdw install` command in disposable homes for the
+Claude, Cursor, and agents targets and verifies each installed surface plus
+the managed packaged root. It also works against a wheel when run from its
+isolated environment.
 
 ## License
 

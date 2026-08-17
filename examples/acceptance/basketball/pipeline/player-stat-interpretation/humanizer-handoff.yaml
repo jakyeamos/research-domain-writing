@@ -1,0 +1,16 @@
+handoff_version: 1
+output_id: basketball-acceptance-player-stat-interpretation
+stage: humanizer
+input_draft: pipeline/player-stat-interpretation/draft.md
+qa: pipeline/player-stat-interpretation/qa.yaml
+output_final: pipeline/player-stat-interpretation/final.md
+status: ready_for_human_graduation_review
+facts_added: false
+qualifiers_preserved: true
+preserved_fact_ids:
+  - fact-tatum-001
+  - fact-tatum-002
+style_pass_notes:
+  - tightened the sample framing
+  - removed repeated wording around the metric limits
+  - preserved the role and missing-context qualifiers

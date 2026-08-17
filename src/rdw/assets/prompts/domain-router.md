@@ -24,9 +24,12 @@ entity_type: string
 entity_name: string
 topic: string
 output_type: string
+artifact_type: string  # normally the resolved output_type
+channel: string
+intent: string
 audience: string
 research_needed: boolean
-research_depth: light | standard | deep
+research_depth: light | standard | deep | minimal
 
 # Transparency
 inference:
@@ -40,6 +43,8 @@ local_knowledge_paths: []
 qa_checklist_path: string
 writing_template: string
 style_profile_path: config/style-profile.yaml
+artifact_profile_path: config/artifacts.yaml
+human_approval_required: true
 warnings: []
 ```
 
@@ -48,9 +53,11 @@ warnings: []
 1. **Start from** `config/router-inference.yaml` defaults.
 2. **Parse user text** for domain signals (jargon, surface names like "LIS leaderboard", product names).
 3. **Apply** `domain_inference` keyword lists → pick domain with most signals; if tie, prefer basketball only when sports/stat cues present.
-4. **Apply** `output_type_inference` and `entity_inference` patterns (e.g. "leaderboard" → `ranking_explanation`, entity `LIS leaderboard` if named).
+4. **Apply** `output_type_inference` and `entity_inference` patterns (e.g. "leaderboard" -> `ranking_explanation`, "outreach email" -> `outreach_email`). Mirror the resolved output as `artifact_type`, then infer channel and intent.
 5. **Apply** `audience_inference` match lists.
 6. **Apply** `depth_inference`: deep triggers win; light triggers win; else `standard`.
+   An explicit `minimal` override is preserved for the planner and maps to the
+   lightweight lane with no new research.
 7. **Explicit overrides** from `key=value` or user saying "domain is X" → replace inferred field; set `mode: mixed`.
 8. **Entity naming**: preserve user’s proper nouns (LIS, product names) verbatim in `entity_name`.
 9. **Topic**: short phrase for what the writing must accomplish (e.g. "improve leaderboard UI copy").
@@ -87,3 +94,7 @@ inference:
 - Prefer reusing `knowledge/<domain>/*.yaml` when packet id matches entity (e.g. `basketball-lis-leaderboard` if exists).
 - Flag `warnings` when `inference.confidence` is low.
 - Never block the run solely because parameters were omitted.
+- For externally consumed artifacts, preserve `human_approval_required: true`;
+  no routing or receipt state authorizes sending, submission, or publication.
+- The planner maps `light` and `minimal` to the lightweight research-card
+  lane; `standard` and `deep` use the full pipeline.

@@ -1,0 +1,16 @@
+fixture_version: 1
+name: basketball-demo-rejected
+task_id: basketball-example-demo-guard-stat-interpretation
+packet_id: basketball-player-demo-guard-2026
+output_id: basketball-example-demo-guard-stat-interpretation
+outcome: rejected
+requested_stages: [research, draft, qa, final]
+needs_review: true
+missing_info:
+  - "The fixture was rejected before execution by policy."
+failure:
+  category: unsupported
+  code: fixture_rejected
+  message: "This fixture represents an external runtime refusing the request."
+  retryable: false
+artifacts: {}

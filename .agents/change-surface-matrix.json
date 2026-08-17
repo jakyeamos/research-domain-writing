@@ -1,0 +1,24 @@
+{
+  "schema_version": "change-surface-matrix/v1",
+  "subject": {"kind": "repository", "id": "research-domain-writing"},
+  "owner": "repository-owner",
+  "last_reviewed": "2026-08-13",
+  "surfaces": [
+    {
+      "id": "matrix-maintenance",
+      "scope": "local",
+      "path": ".agents/change-surface-matrix.json",
+      "owner": "repository-owner",
+      "condition": "A material feature, functionality, behavior, CLI/API, workflow, data, integration, security/privacy, or quality/release change is added or changed.",
+      "operations": ["add", "change", "remove"],
+      "validation": [
+        "Update this matrix in the same change with affected surfaces, contracts, documentation, tests, evidence, owners, and projections.",
+        "For a purely internal refactor or isolated fix with no matrix impact, record a reviewed no-impact reason in the same change record; omission is not an implicit no-impact decision."
+      ],
+      "status": "applicable"
+    },
+    {"id": "writing-runtime", "scope": "local", "path": "src/, tests/, scripts/, and packaged assets", "owner": "repository-owner", "condition": "CLI, packet, batch, validation, or artifact behavior changes", "operations": ["add", "change", "remove"], "validation": ["uv run pytest -q", "uv run basedpyright src tests scripts", "uv build"], "status": "applicable"},
+    {"id": "installed-and-projected-surfaces", "scope": "external", "path": "installed rdw CLI and research-domain-writing skill projections", "owner": "distribution-owner", "condition": "public command, packaged asset, adapter, or skill contract changes", "operations": ["add", "change", "remove"], "validation": ["wheel smoke from README.md", "install surface smoke from README.md"], "status": "applicable"}
+  ],
+  "unresolved_surfaces": []
+}

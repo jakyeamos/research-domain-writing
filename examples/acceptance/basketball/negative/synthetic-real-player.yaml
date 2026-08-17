@@ -1,0 +1,44 @@
+id: basketball-negative-synthetic-real-player
+domain: basketball
+entity_type: player
+entity_name: Real Player With Synthetic Provenance
+topic: Invalid real-player packet with demo-only provenance
+time_period: 2025-26 regular season
+context: Negative fixture for production promotion of synthetic evidence.
+role_or_usage_context: The role is intentionally generic because the source is not real evidence.
+key_facts:
+  - id: fact-synthetic-001
+    text: This value exists only in the synthetic fixture and is not production evidence.
+relevant_metrics:
+  - name: points per game
+    value: unknown
+    unit: points per game
+    denominator: games played
+    season: 2025-26 regular season
+    sample: unknown
+    what_it_captures: Unknown.
+    what_it_misses: The packet contains no real source.
+    fact_ids: [fact-synthetic-001]
+domain_terms: [sample size]
+concepts_that_apply: [uncertainty]
+source_notes:
+  - source: Synthetic RDW demo data
+    accessed: 2026-07-15
+    note: Synthetic/demo provenance is intentionally prohibited in mature production packets.
+    fact_ids: [fact-synthetic-001]
+open_questions: ["What authoritative source supports this packet?"]
+uncertainties: [All values are synthetic.]
+confidence_level: low
+last_updated: 2026-07-15T12:00:00Z
+extensions:
+  player:
+    team: unknown
+    season: 2025-26
+    role: unknown
+    archetype: unknown
+    usage:
+      usg_pct: unknown
+      on_ball_pct: unknown
+    age: unknown
+    physical_profile: unknown
+    minutes_stability: unknown

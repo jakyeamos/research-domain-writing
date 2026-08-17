@@ -16,13 +16,15 @@ class RouteResult:
     entity_name: str
     audience: str
     depth: str
+    confidence: str = "medium"
+    warnings: tuple[str, ...] = ()
 
 
 def route_request(request: str, *, root: Path | None = None) -> RouteResult:
     config = load_config("router-inference.yaml", root)
     lower = request.strip().lower()
     defaults = _mapping(config.get("defaults"))
-    domain = _match_domain(lower, config)
+    domain, domain_warnings, confidence = _match_domain(lower, config)
     output_type, entity_type = _match_output(lower, config, defaults)
     entity_name, entity_domain = _match_entity(request, config, entity_type)
     if entity_domain:
@@ -36,6 +38,8 @@ def route_request(request: str, *, root: Path | None = None) -> RouteResult:
         entity_name=entity_name,
         audience=audience,
         depth=depth,
+        confidence=confidence,
+        warnings=tuple(domain_warnings),
     )
 
 
@@ -55,12 +59,25 @@ def _tokens(entry: YamlMapping) -> list[str]:
     return [str(token).lower() for token in _sequence(entry.get("match"))]
 
 
-def _match_domain(lower: str, config: YamlMapping) -> str:
+def _match_domain(lower: str, config: YamlMapping) -> tuple[str, list[str], str]:
+    scores: list[tuple[str, int]] = []
     for name, meta in _mapping(config.get("domain_inference")).items():
         keywords = [str(keyword).lower() for keyword in _sequence(_mapping(meta).get("keywords"))]
-        if any(keyword in lower for keyword in keywords):
-            return str(name)
-    return "general"
+        score = sum(1 for keyword in keywords if keyword and keyword in lower)
+        if score:
+            scores.append((str(name), score))
+    if not scores:
+        return "general", ["no domain signals matched; defaulted to general"], "low"
+    highest = max(score for _, score in scores)
+    winners = [name for name, score in scores if score == highest]
+    selected = winners[0]
+    if len(winners) == 1:
+        return selected, [], "medium"
+    return (
+        selected,
+        [f"ambiguous domain inference: {', '.join(winners)}; selected {selected} by config order"],
+        "low",
+    )
 
 
 def _match_output(lower: str, config: YamlMapping, defaults: YamlMapping) -> tuple[str, str]:

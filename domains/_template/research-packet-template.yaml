@@ -42,7 +42,17 @@ fields:
   relevant_metrics:
     type: list
     required: false
-    description: Named metrics with values and sample scope
+    description: Named metrics with values, semantics, source mapping, and sample scope
+    item_schema:
+      name: string
+      value: number | string | unknown
+      unit: string
+      denominator: string
+      season: string
+      sample: string
+      what_it_captures: string
+      what_it_misses: string
+      fact_ids: list
 
   domain_terms:
     type: list

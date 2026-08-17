@@ -14,7 +14,7 @@ def config_root(root: Path | None) -> Path | None:
 
 def load_config(name: str, root: Path | None) -> YamlMapping:
     local_root = config_root(root)
-    if local_root:
+    if local_root and (local_root / "config" / name).exists():
         return load_yaml_mapping(local_root / "config" / name)
     asset = asset_path("config", name)
     temp_path = Path(str(asset)) if isinstance(asset, Path) else None

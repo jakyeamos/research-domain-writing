@@ -1,0 +1,68 @@
+version: 1
+domain: basketball
+example_only: true
+positive_cases:
+  - id: leaderboard-methodology
+    packet: packets/ranking-usage-ts-change.yaml
+    research_missing: pipeline/leaderboard-methodology/missing.yaml
+    knowledge: pipeline/leaderboard-methodology/knowledge-packet.md
+    draft: pipeline/leaderboard-methodology/draft.md
+    qa: pipeline/leaderboard-methodology/qa.yaml
+    final: pipeline/leaderboard-methodology/final.md
+    humanizer_handoff: pipeline/leaderboard-methodology/humanizer-handoff.yaml
+    output_types: [ranking_explanation]
+  - id: player-stat-interpretation
+    packet: packets/player-jayson-tatum.yaml
+    research_missing: pipeline/player-stat-interpretation/missing.yaml
+    knowledge: pipeline/player-stat-interpretation/knowledge-packet.md
+    draft: pipeline/player-stat-interpretation/draft.md
+    qa: pipeline/player-stat-interpretation/qa.yaml
+    final: pipeline/player-stat-interpretation/final.md
+    humanizer_handoff: pipeline/player-stat-interpretation/humanizer-handoff.yaml
+    output_types: [player_summary, stat_interpretation]
+  - id: player-comparison
+    packet: packets/player-nikola-jokic.yaml
+    research_missing: pipeline/player-comparison/missing.yaml
+    knowledge: pipeline/player-comparison/knowledge-packet.md
+    draft: pipeline/player-comparison/draft.md
+    qa: pipeline/player-comparison/qa.yaml
+    final: pipeline/player-comparison/final.md
+    humanizer_handoff: pipeline/player-comparison/humanizer-handoff.yaml
+    comparison_packet: packets/player-jayson-tatum.yaml
+    output_types: [comparison_blurb]
+  - id: team-fit
+    packet: packets/team-denver-nuggets-fit.yaml
+    research_missing: pipeline/team-fit/missing.yaml
+    knowledge: pipeline/team-fit/knowledge-packet.md
+    draft: pipeline/team-fit/draft.md
+    qa: pipeline/team-fit/qa.yaml
+    final: pipeline/team-fit/final.md
+    humanizer_handoff: pipeline/team-fit/humanizer-handoff.yaml
+    output_types: [team_fit_notes]
+  - id: bounded-projection
+    packet: packets/player-nikola-jokic.yaml
+    research_missing: pipeline/bounded-projection/missing.yaml
+    knowledge: pipeline/bounded-projection/knowledge-packet.md
+    draft: pipeline/bounded-projection/draft.md
+    qa: pipeline/bounded-projection/qa.yaml
+    final: pipeline/bounded-projection/final.md
+    humanizer_handoff: pipeline/bounded-projection/humanizer-handoff.yaml
+    output_types: [future_projection]
+negative_cases:
+  - id: ranking-missing-context
+    packet: negative/ranking-missing-context.yaml
+  - id: invented-tracking
+    packet: negative/invented-tracking.yaml
+  - id: small-sample-high-confidence
+    packet: negative/small-sample-high-confidence.yaml
+  - id: synthetic-real-player
+    packet: negative/synthetic-real-player.yaml
+  - id: claim-ledger-unknown-fact
+    packet: packets/player-jayson-tatum.yaml
+    qa: qa/negative-unknown-fact.yaml
+  - id: unsupported-injury
+    packet: packets/player-jayson-tatum.yaml
+    qa: qa/negative-unsupported-injury.yaml
+  - id: forbidden-generic-praise
+    packet: packets/player-jayson-tatum.yaml
+    qa: qa/negative-forbidden-praise.yaml

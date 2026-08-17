@@ -1,0 +1,571 @@
+{
+  "baseline_reason": "initial occurrence-aware strict inventory for visible strict-policy adoption using the repository-locked type checker",
+  "baseline_ref": "e2788c5a26ed27db738e8d68304f1f7701836b0c",
+  "config_path": "pyrightconfig.strict.json",
+  "config_sha256": "3a6ad3cee84b5c801b838c0ba24b4058cb13e517dbe9ed3b6a9af3e5fde61450",
+  "coverage": {
+    "diagnostics_reported": 32,
+    "files_analyzed": 38,
+    "state": "complete"
+  },
+  "legacy": {
+    "occurrences": 32,
+    "state": "blocked"
+  },
+  "occurrences": [
+    {
+      "end": {
+        "character": 12,
+        "line": 38
+      },
+      "fingerprint": "02bcc9478b92b01123dd468d450c6d4c3d172304678d77c1a07758ba775744a8",
+      "group": "tests/test_basketball_acceptance.py\u0000reportUnknownVariableType\u0000Type of \"item\" is unknown",
+      "message": "Type of \"item\" is unknown",
+      "ordinal": 0,
+      "path": "tests/test_basketball_acceptance.py",
+      "rule": "reportUnknownVariableType",
+      "severity": "error",
+      "start": {
+        "character": 8,
+        "line": 38
+      }
+    },
+    {
+      "end": {
+        "character": 35,
+        "line": 51
+      },
+      "fingerprint": "08baae28387c0387c045fb1cf56cf6902fa69acc34b4f33400033525b31b49bd",
+      "group": "src/rdw/yaml_io.py\u0000reportUnknownArgumentType\u0000Argument type is unknown Argument corresponds to parameter \"value\" in function \"normalize_yaml\"",
+      "message": "Argument type is unknown Argument corresponds to parameter \"value\" in function \"normalize_yaml\"",
+      "ordinal": 1,
+      "path": "src/rdw/yaml_io.py",
+      "rule": "reportUnknownArgumentType",
+      "severity": "error",
+      "start": {
+        "character": 31,
+        "line": 51
+      }
+    },
+    {
+      "end": {
+        "character": 18,
+        "line": 41
+      },
+      "fingerprint": "0d1fb3b2bd989cc74c708900d17b7df5be22bad56d8e66dc9be7e2751bccd8bc",
+      "group": "tests/test_basketball_acceptance.py\u0000reportUnknownVariableType\u0000Type of \"linked_ids\" is partially unknown Type of \"linked_ids\" is \"Unknown | None\"",
+      "message": "Type of \"linked_ids\" is partially unknown Type of \"linked_ids\" is \"Unknown | None\"",
+      "ordinal": 0,
+      "path": "tests/test_basketball_acceptance.py",
+      "rule": "reportUnknownVariableType",
+      "severity": "error",
+      "start": {
+        "character": 8,
+        "line": 41
+      }
+    },
+    {
+      "end": {
+        "character": 44,
+        "line": 116
+      },
+      "fingerprint": "1a0741c5159b7b281e8ed5021339095215ce83cca35dd76246d487eb262e47e5",
+      "group": "src/rdw/batch_events.py\u0000reportUnknownArgumentType\u0000Argument type is unknown Argument corresponds to parameter \"object\" in function \"__new__\"",
+      "message": "Argument type is unknown Argument corresponds to parameter \"object\" in function \"__new__\"",
+      "ordinal": 0,
+      "path": "src/rdw/batch_events.py",
+      "rule": "reportUnknownArgumentType",
+      "severity": "error",
+      "start": {
+        "character": 41,
+        "line": 116
+      }
+    },
+    {
+      "end": {
+        "character": 75,
+        "line": 90
+      },
+      "fingerprint": "31b6cf160346ea4092f70f35c10e933367e5bb30a5de9ba460e5b5458a2c3a8c",
+      "group": "src/rdw/resources.py\u0000reportUnknownVariableType\u0000Return type, \"Unknown | Literal[False]\", is partially unknown",
+      "message": "Return type, \"Unknown | Literal[False]\", is partially unknown",
+      "ordinal": 0,
+      "path": "src/rdw/resources.py",
+      "rule": "reportUnknownVariableType",
+      "severity": "error",
+      "start": {
+        "character": 11,
+        "line": 90
+      }
+    },
+    {
+      "end": {
+        "character": 29,
+        "line": 41
+      },
+      "fingerprint": "347a19444d006012de41b989761fb13b45009620e055413a4ea4622db5dd6758",
+      "group": "tests/test_basketball_acceptance.py\u0000reportUnknownMemberType\u0000Type of \"get\" is partially unknown Type of \"get\" is \"Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]\"",
+      "message": "Type of \"get\" is partially unknown Type of \"get\" is \"Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]\"",
+      "ordinal": 0,
+      "path": "tests/test_basketball_acceptance.py",
+      "rule": "reportUnknownMemberType",
+      "severity": "error",
+      "start": {
+        "character": 21,
+        "line": 41
+      }
+    },
+    {
+      "end": {
+        "character": 55,
+        "line": 565
+      },
+      "fingerprint": "350b7f1a8aa5135a06d5a7785b4860fe2cc69f3b4f70a3cc34c835d63835f989",
+      "group": "src/rdw/batch_execution.py\u0000reportUnknownArgumentType\u0000Argument type is partially unknown Argument corresponds to parameter \"value\" in function \"optional_string\" Argument type is \"Unknown | None\"",
+      "message": "Argument type is partially unknown Argument corresponds to parameter \"value\" in function \"optional_string\" Argument type is \"Unknown | None\"",
+      "ordinal": 0,
+      "path": "src/rdw/batch_execution.py",
+      "rule": "reportUnknownArgumentType",
+      "severity": "error",
+      "start": {
+        "character": 32,
+        "line": 565
+      }
+    },
+    {
+      "end": {
+        "character": 19,
+        "line": 153
+      },
+      "fingerprint": "398fd23350419716bdd6ce76925a29052ad693be45f0562cfb64be606d748255",
+      "group": "src/rdw/batch_support.py\u0000reportUnknownArgumentType\u0000Argument type is unknown Argument corresponds to parameter \"object\" in function \"__new__\"",
+      "message": "Argument type is unknown Argument corresponds to parameter \"object\" in function \"__new__\"",
+      "ordinal": 0,
+      "path": "src/rdw/batch_support.py",
+      "rule": "reportUnknownArgumentType",
+      "severity": "error",
+      "start": {
+        "character": 16,
+        "line": 153
+      }
+    },
+    {
+      "end": {
+        "character": 30,
+        "line": 48
+      },
+      "fingerprint": "43c67c0ce4fa2f477e0c5adfd5c8d601aabca29d55229b0730669bdef069103e",
+      "group": "src/rdw/yaml_io.py\u0000reportUnknownArgumentType\u0000Argument type is unknown Argument corresponds to parameter \"object\" in function \"__new__\"",
+      "message": "Argument type is unknown Argument corresponds to parameter \"object\" in function \"__new__\"",
+      "ordinal": 0,
+      "path": "src/rdw/yaml_io.py",
+      "rule": "reportUnknownArgumentType",
+      "severity": "error",
+      "start": {
+        "character": 27,
+        "line": 48
+      }
+    },
+    {
+      "end": {
+        "character": 60,
+        "line": 116
+      },
+      "fingerprint": "469057c04eb10ad1706f64a333e226d867cfbcaf6d87f2a94215df7cded9ffa1",
+      "group": "src/rdw/batch_events.py\u0000reportUnknownVariableType\u0000Type of \"key\" is unknown",
+      "message": "Type of \"key\" is unknown",
+      "ordinal": 0,
+      "path": "src/rdw/batch_events.py",
+      "rule": "reportUnknownVariableType",
+      "severity": "error",
+      "start": {
+        "character": 57,
+        "line": 116
+      }
+    },
+    {
+      "end": {
+        "character": 21,
+        "line": 47
+      },
+      "fingerprint": "4c14654e15243bc09ad72570f3441ef4c113d7464b8bad97ae2e5798122950e9",
+      "group": "src/rdw/yaml_io.py\u0000reportUnknownVariableType\u0000Type of \"item\" is unknown",
+      "message": "Type of \"item\" is unknown",
+      "ordinal": 0,
+      "path": "src/rdw/yaml_io.py",
+      "rule": "reportUnknownVariableType",
+      "severity": "error",
+      "start": {
+        "character": 17,
+        "line": 47
+      }
+    },
+    {
+      "end": {
+        "character": 67,
+        "line": 116
+      },
+      "fingerprint": "4eeecf598f1e7d9d25ca350237a9fa9d20280e37b4951fc20342cd51e4d2688b",
+      "group": "src/rdw/batch_events.py\u0000reportUnknownVariableType\u0000Type of \"value\" is unknown",
+      "message": "Type of \"value\" is unknown",
+      "ordinal": 0,
+      "path": "src/rdw/batch_events.py",
+      "rule": "reportUnknownVariableType",
+      "severity": "error",
+      "start": {
+        "character": 62,
+        "line": 116
+      }
+    },
+    {
+      "end": {
+        "character": 13,
+        "line": 162
+      },
+      "fingerprint": "509f27ba811efecf28ad813428d80f96f904f2c869cbf16c0fe019ea9926f05e",
+      "group": "tests/test_basketball_acceptance.py\u0000reportUnnecessaryCast\u0000Unnecessary \"cast\" call; type is already \"dict[str, YamlValue]\"",
+      "message": "Unnecessary \"cast\" call; type is already \"dict[str, YamlValue]\"",
+      "ordinal": 0,
+      "path": "tests/test_basketball_acceptance.py",
+      "rule": "reportUnnecessaryCast",
+      "severity": "error",
+      "start": {
+        "character": 31,
+        "line": 154
+      }
+    },
+    {
+      "end": {
+        "character": 47,
+        "line": 567
+      },
+      "fingerprint": "554997489979003a21cd83df67978e663a13b458fb7b31a209bbf3bdedb6a526",
+      "group": "src/rdw/batch_execution.py\u0000reportUnknownArgumentType\u0000Argument type is partially unknown Argument corresponds to parameter \"value\" in function \"optional_string\" Argument type is \"Unknown | None\"",
+      "message": "Argument type is partially unknown Argument corresponds to parameter \"value\" in function \"optional_string\" Argument type is \"Unknown | None\"",
+      "ordinal": 1,
+      "path": "src/rdw/batch_execution.py",
+      "rule": "reportUnknownArgumentType",
+      "severity": "error",
+      "start": {
+        "character": 25,
+        "line": 567
+      }
+    },
+    {
+      "end": {
+        "character": 51,
+        "line": 43
+      },
+      "fingerprint": "55981f19819e398e30426108417921ed6a55845226d0a3d6281224fc6fa227b8",
+      "group": "tests/test_basketball_acceptance.py\u0000reportUnknownVariableType\u0000Type of \"linked_id\" is unknown",
+      "message": "Type of \"linked_id\" is unknown",
+      "ordinal": 0,
+      "path": "tests/test_basketball_acceptance.py",
+      "rule": "reportUnknownVariableType",
+      "severity": "error",
+      "start": {
+        "character": 42,
+        "line": 43
+      }
+    },
+    {
+      "end": {
+        "character": 13,
+        "line": 48
+      },
+      "fingerprint": "6175d7c0f8de888e880ff4bdf42feda66f2713921e36a32c3208bbac672ef604",
+      "group": "tests/test_batch_execution.py\u0000reportUnknownArgumentType\u0000Argument type is partially unknown Argument corresponds to parameter \"iterable\" in function \"join\" Argument type is \"list[Unknown | Literal['batch_id: batch-test-001', 'tasks:', '']]\"",
+      "message": "Argument type is partially unknown Argument corresponds to parameter \"iterable\" in function \"join\" Argument type is \"list[Unknown | Literal['batch_id: batch-test-001', 'tasks:', '']]\"",
+      "ordinal": 0,
+      "path": "tests/test_batch_execution.py",
+      "rule": "reportUnknownArgumentType",
+      "severity": "error",
+      "start": {
+        "character": 12,
+        "line": 43
+      }
+    },
+    {
+      "end": {
+        "character": 52,
+        "line": 569
+      },
+      "fingerprint": "88bcf560d39036c7f40d4e00469d1d8013e0b4773b0febcfb55f8118a908f9e7",
+      "group": "src/rdw/batch_execution.py\u0000reportUnknownArgumentType\u0000Argument type is partially unknown Argument corresponds to parameter \"value\" in function \"bool_value\" Argument type is \"Unknown | None\"",
+      "message": "Argument type is partially unknown Argument corresponds to parameter \"value\" in function \"bool_value\" Argument type is \"Unknown | None\"",
+      "ordinal": 0,
+      "path": "src/rdw/batch_execution.py",
+      "rule": "reportUnknownArgumentType",
+      "severity": "error",
+      "start": {
+        "character": 28,
+        "line": 569
+      }
+    },
+    {
+      "end": {
+        "character": 15,
+        "line": 47
+      },
+      "fingerprint": "8b173f563c11022016a13d356cd725a4e22533831f1754144bb68048d1edd1cf",
+      "group": "src/rdw/yaml_io.py\u0000reportUnknownVariableType\u0000Type of \"key\" is unknown",
+      "message": "Type of \"key\" is unknown",
+      "ordinal": 0,
+      "path": "src/rdw/yaml_io.py",
+      "rule": "reportUnknownVariableType",
+      "severity": "error",
+      "start": {
+        "character": 12,
+        "line": 47
+      }
+    },
+    {
+      "end": {
+        "character": 40,
+        "line": 182
+      },
+      "fingerprint": "8ceb0c4bc8d7a28cceec8e95d66b15df8ff63008b027328f66a2e41f5af0593f",
+      "group": "src/rdw/adapters/fixture.py\u0000reportUnnecessaryCast\u0000Unnecessary \"cast\" call; type is already \"AdapterOutcome\"",
+      "message": "Unnecessary \"cast\" call; type is already \"AdapterOutcome\"",
+      "ordinal": 0,
+      "path": "src/rdw/adapters/fixture.py",
+      "rule": "reportUnnecessaryCast",
+      "severity": "error",
+      "start": {
+        "character": 11,
+        "line": 182
+      }
+    },
+    {
+      "end": {
+        "character": 54,
+        "line": 48
+      },
+      "fingerprint": "93f96b1a36ad920cc74b6a177bd076e2636f13abb458f82a82101f7d6cee0763",
+      "group": "src/rdw/yaml_io.py\u0000reportUnknownArgumentType\u0000Argument type is unknown Argument corresponds to parameter \"value\" in function \"normalize_yaml\"",
+      "message": "Argument type is unknown Argument corresponds to parameter \"value\" in function \"normalize_yaml\"",
+      "ordinal": 0,
+      "path": "src/rdw/yaml_io.py",
+      "rule": "reportUnknownArgumentType",
+      "severity": "error",
+      "start": {
+        "character": 50,
+        "line": 48
+      }
+    },
+    {
+      "end": {
+        "character": 36,
+        "line": 567
+      },
+      "fingerprint": "c7502eea77ee060a045541b014941fd92d9a13c46d1da9098b1bae9a5dbe08b6",
+      "group": "src/rdw/batch_execution.py\u0000reportUnknownMemberType\u0000Type of \"get\" is partially unknown Type of \"get\" is \"Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]\"",
+      "message": "Type of \"get\" is partially unknown Type of \"get\" is \"Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]\"",
+      "ordinal": 1,
+      "path": "src/rdw/batch_execution.py",
+      "rule": "reportUnknownMemberType",
+      "severity": "error",
+      "start": {
+        "character": 25,
+        "line": 567
+      }
+    },
+    {
+      "end": {
+        "character": 43,
+        "line": 565
+      },
+      "fingerprint": "cae318e46211368f786b99e46c583eef1d7a86f09dec1e32a284cbe08a4cbd17",
+      "group": "src/rdw/batch_execution.py\u0000reportUnknownMemberType\u0000Type of \"get\" is partially unknown Type of \"get\" is \"Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]\"",
+      "message": "Type of \"get\" is partially unknown Type of \"get\" is \"Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]\"",
+      "ordinal": 0,
+      "path": "src/rdw/batch_execution.py",
+      "rule": "reportUnknownMemberType",
+      "severity": "error",
+      "start": {
+        "character": 32,
+        "line": 565
+      }
+    },
+    {
+      "end": {
+        "character": 55,
+        "line": 113
+      },
+      "fingerprint": "db4c889749275595566eb41f31fad316c8fda360749683bf889ac7dbb19f7a3a",
+      "group": "src/rdw/batch_support.py\u0000reportUnknownArgumentType\u0000Argument type is partially unknown Argument corresponds to parameter \"map\" in function \"__init__\" Argument type is \"dict[Unknown, Unknown]\"",
+      "message": "Argument type is partially unknown Argument corresponds to parameter \"map\" in function \"__init__\" Argument type is \"dict[Unknown, Unknown]\"",
+      "ordinal": 0,
+      "path": "src/rdw/batch_support.py",
+      "rule": "reportUnknownArgumentType",
+      "severity": "error",
+      "start": {
+        "character": 47,
+        "line": 113
+      }
+    },
+    {
+      "end": {
+        "character": 45,
+        "line": 51
+      },
+      "fingerprint": "e39d25fa511edbc670333e434821397c04de0765d41f25f1009099fcf30f8ab5",
+      "group": "src/rdw/yaml_io.py\u0000reportUnknownVariableType\u0000Type of \"item\" is unknown",
+      "message": "Type of \"item\" is unknown",
+      "ordinal": 1,
+      "path": "src/rdw/yaml_io.py",
+      "rule": "reportUnknownVariableType",
+      "severity": "error",
+      "start": {
+        "character": 41,
+        "line": 51
+      }
+    },
+    {
+      "end": {
+        "character": 39,
+        "line": 569
+      },
+      "fingerprint": "e3e605ef123b7f6ea096f0a9d4dca2f9eee610215ee480edd4b58c4509f3eb87",
+      "group": "src/rdw/batch_execution.py\u0000reportUnknownMemberType\u0000Type of \"get\" is partially unknown Type of \"get\" is \"Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]\"",
+      "message": "Type of \"get\" is partially unknown Type of \"get\" is \"Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]\"",
+      "ordinal": 2,
+      "path": "src/rdw/batch_execution.py",
+      "rule": "reportUnknownMemberType",
+      "severity": "error",
+      "start": {
+        "character": 28,
+        "line": 569
+      }
+    },
+    {
+      "end": {
+        "character": 35,
+        "line": 153
+      },
+      "fingerprint": "e60f94b9674dcd1046ad63d818588697aec355858b8b00d4ff2718511098de06",
+      "group": "src/rdw/batch_support.py\u0000reportUnknownVariableType\u0000Type of \"key\" is unknown",
+      "message": "Type of \"key\" is unknown",
+      "ordinal": 0,
+      "path": "src/rdw/batch_support.py",
+      "rule": "reportUnknownVariableType",
+      "severity": "error",
+      "start": {
+        "character": 32,
+        "line": 153
+      }
+    },
+    {
+      "end": {
+        "character": 42,
+        "line": 153
+      },
+      "fingerprint": "e9c2956cb806b8c55119d688b19122312b619db93f65c837fd7f0cf0fcd714c3",
+      "group": "src/rdw/batch_support.py\u0000reportUnknownVariableType\u0000Type of \"value\" is unknown",
+      "message": "Type of \"value\" is unknown",
+      "ordinal": 0,
+      "path": "src/rdw/batch_support.py",
+      "rule": "reportUnknownVariableType",
+      "severity": "error",
+      "start": {
+        "character": 37,
+        "line": 153
+      }
+    },
+    {
+      "end": {
+        "character": 17,
+        "line": 370
+      },
+      "fingerprint": "eb225f42e1e1fdf135477cfffa2129f0d33b1f6c902213f1a7e93378e02a5a3e",
+      "group": "src/rdw/lifecycle.py\u0000reportUnknownVariableType\u0000Return type, \"dict[Unknown, Unknown]\", is partially unknown",
+      "message": "Return type, \"dict[Unknown, Unknown]\", is partially unknown",
+      "ordinal": 0,
+      "path": "src/rdw/lifecycle.py",
+      "rule": "reportUnknownVariableType",
+      "severity": "error",
+      "start": {
+        "character": 11,
+        "line": 370
+      }
+    },
+    {
+      "end": {
+        "character": 20,
+        "line": 29
+      },
+      "fingerprint": "ed4ad8b3ee2eda5ff76afffbd5840b7087b6fc1a3ae7833baaed971b73804e37",
+      "group": "tests/test_batch_execution.py\u0000reportUnknownMemberType\u0000Type of \"extend\" is partially unknown Type of \"extend\" is \"(iterable: Iterable[Unknown], /) -> None\"",
+      "message": "Type of \"extend\" is partially unknown Type of \"extend\" is \"(iterable: Iterable[Unknown], /) -> None\"",
+      "ordinal": 0,
+      "path": "tests/test_batch_execution.py",
+      "rule": "reportUnknownMemberType",
+      "severity": "error",
+      "start": {
+        "character": 8,
+        "line": 29
+      }
+    },
+    {
+      "end": {
+        "character": 52,
+        "line": 90
+      },
+      "fingerprint": "edc3b0961f4a964fdb7c544612ffe5562e8af72f99a119b1858dca3cf23bef79",
+      "group": "src/rdw/resources.py\u0000reportUnknownMemberType\u0000Type of \"get\" is partially unknown Type of \"get\" is \"Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]\"",
+      "message": "Type of \"get\" is partially unknown Type of \"get\" is \"Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]\"",
+      "ordinal": 0,
+      "path": "src/rdw/resources.py",
+      "rule": "reportUnknownMemberType",
+      "severity": "error",
+      "start": {
+        "character": 41,
+        "line": 90
+      }
+    },
+    {
+      "end": {
+        "character": 24,
+        "line": 71
+      },
+      "fingerprint": "ef591532d2150b498eb6d51ec57a2b7ec3fb39cbe1f4a4d0a39a92a40dfac4bd",
+      "group": "src/rdw/batch_leases.py\u0000reportUnknownArgumentType\u0000Argument type is partially unknown Argument corresponds to parameter \"map\" in function \"__init__\" Argument type is \"dict[Unknown, Unknown]\"",
+      "message": "Argument type is partially unknown Argument corresponds to parameter \"map\" in function \"__init__\" Argument type is \"dict[Unknown, Unknown]\"",
+      "ordinal": 0,
+      "path": "src/rdw/batch_leases.py",
+      "rule": "reportUnknownArgumentType",
+      "severity": "error",
+      "start": {
+        "character": 16,
+        "line": 71
+      }
+    },
+    {
+      "end": {
+        "character": 27,
+        "line": 82
+      },
+      "fingerprint": "fe6c0cd80a991be30a4461f1589174e8c9d2ef69a4849d1c3cb8b38473343489",
+      "group": "src/rdw/batch_projection.py\u0000reportArgumentType\u0000Argument of type \"dict[str, str | YamlMapping]\" cannot be assigned to parameter \"value\" of type \"YamlValue\" in function \"__setitem__\" Type \"dict[str, str | YamlMapping]\" is not assignable to type \"YamlValue\" \"dict[str, str | YamlMapping]\" is not assignable to \"str\" \"dict[str, str | YamlMapping]\" is not assignable to \"int\" \"dict[str, str | YamlMapping]\" is not assignable to \"float\" \"dict[str, str | YamlMapping]\" is not assignable to \"bool\" \"dict[str, str | YamlMapping]\" is not assignable to \"None\" \"dict[str, str | YamlMapping]\" is not assignable to \"list[YamlValue]\" \"dict[str, str | YamlMapping]\" is not assignable to \"dict[str, YamlValue]\"",
+      "message": "Argument of type \"dict[str, str | YamlMapping]\" cannot be assigned to parameter \"value\" of type \"YamlValue\" in function \"__setitem__\" Type \"dict[str, str | YamlMapping]\" is not assignable to type \"YamlValue\" \"dict[str, str | YamlMapping]\" is not assignable to \"str\" \"dict[str, str | YamlMapping]\" is not assignable to \"int\" \"dict[str, str | YamlMapping]\" is not assignable to \"float\" \"dict[str, str | YamlMapping]\" is not assignable to \"bool\" \"dict[str, str | YamlMapping]\" is not assignable to \"None\" \"dict[str, str | YamlMapping]\" is not assignable to \"list[YamlValue]\" \"dict[str, str | YamlMapping]\" is not assignable to \"dict[str, YamlValue]\"",
+      "ordinal": 0,
+      "path": "src/rdw/batch_projection.py",
+      "rule": "reportArgumentType",
+      "severity": "error",
+      "start": {
+        "character": 8,
+        "line": 82
+      }
+    }
+  ],
+  "repository": "research-domain-writing",
+  "schema": "quality-runner-basedpyright-strict-baseline-v0.1",
+  "summary": {
+    "errors": 32,
+    "files_analyzed": 38,
+    "information": 0,
+    "warnings": 0
+  },
+  "tool": "basedpyright",
+  "tool_version": "1.39.8"
+}

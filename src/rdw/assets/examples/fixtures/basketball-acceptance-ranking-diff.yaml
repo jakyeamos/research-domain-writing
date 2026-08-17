@@ -1,0 +1,29 @@
+schema_version: 1
+kind: diff_qa
+output_id: basketball-acceptance-ranking-methodology
+comparison:
+  mode: packet
+  baseline:
+    artifact_kind: packet
+    path: examples/acceptance/basketball/packets/ranking-usage-ts-change.yaml
+    sha256: sha256:a17e0669e56bb5756d2ef061e86b6d705665cff0523ee8679fd2b6fb33d03d73
+    baseline_id: baseline-ranking-usage-ts-change
+  candidate:
+    artifact_kind: packet
+    path: examples/acceptance/basketball/packets/ranking-usage-ts-change.yaml
+    sha256: sha256:a17e0669e56bb5756d2ef061e86b6d705665cff0523ee8679fd2b6fb33d03d73
+summary:
+  status: pass
+  pass: true
+  needs_human_review: false
+  blocking_issue_count: 0
+  major_issue_count: 0
+  minor_issue_count: 0
+  counts:
+    claims_added: 0
+    claims_removed: 0
+    claims_changed: 0
+    source_links_removed: 0
+    uncertainty_removed: 0
+    rules_regressed: 0
+issues: []

@@ -1,0 +1,17 @@
+output_id: basketball-acceptance-negative-unsupported-injury
+pass: false
+confidence_score: 0.1
+needs_human_review: true
+issues:
+  - id: unsupported-injury
+    severity: blocker
+    category: hallucination
+    description: The draft asserts an injury and availability outcome absent from the packet.
+    suggested_fix: Remove the claim or research and map an injury fact before writing it.
+blocking_issue_count: 1
+draft: Jayson Tatum will miss the next month because of an injury.
+claim_ledger:
+  - claim_id: claim-injury-context
+    text: The packet identifies Jayson Tatum.
+    fact_ids: [fact-tatum-002]
+notes: Negative QA fixture for unsupported injury and availability claims.

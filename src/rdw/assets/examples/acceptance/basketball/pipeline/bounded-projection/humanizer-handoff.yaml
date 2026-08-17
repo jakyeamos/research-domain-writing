@@ -1,0 +1,16 @@
+handoff_version: 1
+output_id: basketball-acceptance-bounded-projection
+stage: humanizer
+input_draft: pipeline/bounded-projection/draft.md
+qa: pipeline/bounded-projection/qa.yaml
+output_final: pipeline/bounded-projection/final.md
+status: ready_for_human_graduation_review
+facts_added: false
+qualifiers_preserved: true
+preserved_fact_ids:
+  - fact-jokic-001
+  - fact-jokic-002
+style_pass_notes:
+  - made the non-forecast conclusion visible earlier
+  - tightened the ceiling, floor, dependency, and uncertainty lines
+  - preserved the missing-sample and missing-driver qualifiers

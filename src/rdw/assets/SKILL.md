@@ -1,10 +1,12 @@
 ---
 name: research-domain-writing
 description: |
-  Research-grounded domain writing pipeline. Use when producing jargon-heavy or
-  knowledge-heavy copy (sports analytics, music criticism, technical writing, policy,
-  finance, medicine, academic, etc.). Separates research, domain drafting, QA, and
-  final humanizer/blader style pass. Do NOT use humanizer alone for domain knowledge.
+  Research-grounded writing and artifact quality pipeline. Use for externally consumed
+  factual, persuasive, or voice-sensitive writing, including resumes, cover letters,
+  application answers, outreach emails, professional messages, social posts, technical
+  writing, sports analytics, music criticism, policy, finance, medicine, and academic
+  work. Separates research, drafting, QA, provenance, and final style. Do NOT use a
+  humanizer alone when claims, recipient relevance, or domain knowledge matter.
   Slash commands: /rdw (single task), /rdw-batch (YAML batch).
 version: 0.2.0
 ---
@@ -16,6 +18,8 @@ version: 0.2.0
 - User wants **accurate, domain-specific** copy, not generic fluent AI prose
 - Task needs local research packets, concept/jargon banks, or QA before styling
 - User mentions: player writeups, stat interpretation, album blurbs, feature docs, policy memos
+- User asks for a resume, cover letter, application answer, outreach email, professional
+  message, social post, or another artifact whose claims or recipient fit affect outcomes
 - User already has a humanizer skill but writing keeps sounding shallow or wrong
 
 ## When NOT to use
@@ -25,17 +29,42 @@ version: 0.2.0
 
 ## Research (you do this; skill structures it)
 
-Run planner + researcher prompts. **Use your tools** (web, files, APIs) to gather facts; save YAML under `knowledge/<domain>/`. The skill does not include a built-in crawler — that is by design.
+For the full lane, run planner + researcher prompts. **Use your tools** (web,
+files, APIs) to gather facts; save YAML under `knowledge/<domain>/`. For the
+lightweight lane, use the research-card prompt and keep the card run-local.
+The skill does not include a built-in crawler — that is by design.
 
 ## Current limitations
 
 - `rdw task plan` and `rdw batch plan` validate inputs and emit deterministic prompt bundles.
-- The CLI does not call an LLM, browse, research, draft, or complete batch tasks by itself.
+- `rdw validate-artifact` checks a content-and-evidence request and emits a
+  content-bound receipt. Passing means eligible for human review, never permission
+  to send, submit, publish, or represent the user.
+- `rdw task execute --fixture` can run the checked-in deterministic vertical-slice fixture through receipt validation and lifecycle completion.
+- `rdw batch execute --fixture-map` can run a bounded serial fixture batch with
+  immutable attempts, retry limits, event replay, pause/cancel controls, and
+  explicit unknown-attempt recovery.
+- `rdw diff-qa` compares packet or explicit draft-claim-ledger structures with
+  an approved, hash-pinned local baseline. Missing or malformed draft ledgers
+  are indeterminate and cannot pass.
+- The CLI does not call an LLM, browse, research, or draft real copy by itself;
+  fixture execution only proves deterministic artifact and lifecycle handling.
 - The agent executes the emitted prompts and updates run artifacts.
 
 Details: `docs/LIMITATIONS.md`
 
-## Pipeline (do not skip steps)
+## Lanes (do not skip gates)
+
+The planner maps `standard` and `deep` to the full lane. It maps `light` and
+`minimal` to the lightweight research-card lane. Both lanes keep grounding,
+QA, style-only humanization, artifact receipts where required, and mandatory
+human approval. The lightweight lane keeps its card run-local and never writes
+a reusable packet under `knowledge/`.
+The generated contract selects packet diff-QA for the full lane and explicit
+draft-claim-ledger diff-QA for the lightweight lane; the latter never infers
+claims from Markdown.
+
+### Full lane
 
 1. **Router** — `prompts/domain-router.md`
 2. **Research planner** — `prompts/research-planner.md` (skip only if fresh packet exists)
@@ -43,14 +72,38 @@ Details: `docs/LIMITATIONS.md`
 4. **Knowledge packet builder** — `prompts/knowledge-packet-builder.md`
 5. **Domain copywriter** — `prompts/domain-copywriter.md` → `outputs/drafts/`
 6. **Domain QA** — `prompts/domain-qa.md` → must pass before step 7
-7. **Humanizer/blader** — `prompts/humanizer-blader.md` → `outputs/final/`
+7. **Deterministic diff-QA** — `prompts/diff-qa.md` → only `status: pass` advances
+8. **Humanizer/blader** — `prompts/humanizer-blader.md` → `outputs/final/`
+9. **Artifact receipt** — for externally consumed work, run `rdw validate-artifact`
+   and keep human approval as the final boundary
 
-Orchestration: `prompts/pipeline-orchestrator.md`  
+### Lightweight lane
+
+1. **Router and scope check** — `prompts/domain-router.md`
+2. **Research card** — `prompts/lightweight-research-card.md`
+3. **Grounded draft** — `prompts/lightweight-copywriter.md`
+4. **Compact QA** — `prompts/lightweight-qa.md`; escalate to full when the card is thin
+5. **Deterministic diff-QA** — `prompts/diff-qa.md`; no Markdown claim extraction
+6. **Humanizer/blader** — `prompts/humanizer-blader.md`, style only
+7. **Artifact receipt** — for externally consumed work, run `rdw validate-artifact`
+   and stop at human review
+
+Orchestration: `prompts/pipeline-orchestrator.md` or
+`prompts/lightweight-orchestrator.md`, selected by the task contract.
 Batch: `prompts/batch-runner.md`
 
 ## Hard rule
 
 **Humanizer/blader never adds facts.** If QA fails or packet is thin, return to research/copywriter.
+
+## Completion
+
+Complete only when the final artifact is supported by the current evidence
+packet, domain QA and required diff-QA pass before style work, any required
+artifact receipt is content-bound and valid, and unsupported claims or stale
+evidence are removed or explicitly disclosed. Externally consumed work remains
+pending human approval; a valid diff-QA report or receipt is not permission to
+send, submit, upload, publish, or represent the user.
 
 ## Slash commands
 
@@ -71,6 +124,10 @@ Pass one sentence. Router infers the rest (`config/router-inference.yaml`):
 ```
 
 → domain `basketball`, entity `LIS leaderboard`, `ranking_explanation`, fantasy/analytics audience, depth `standard`. Agent shows the contract and proceeds.
+
+`/rdw draft a concise outreach email to the hiring manager` routes to the
+`career` pack and `outreach_email` artifact profile. Research the recipient and
+role, bind candidate proof to source evidence, then validate the final content.
 
 Overrides optional: `domain=`, `entity=`, `output-type=`, `audience=`, `depth=`, `packet-id=`.
 

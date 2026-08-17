@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Synchronize canonical repository content into packaged assets."""
+"""Synchronize the canonical repository content into packaged assets."""
 
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -95,16 +97,50 @@ def drift(package_root: Path = PACKAGE_ROOT) -> list[str]:
 
 
 def sync() -> None:
-    for pair in asset_pairs():
-        destination = _destination(pair, PACKAGE_ROOT)
-        if pair.source.is_dir():
-            if destination.exists():
-                shutil.rmtree(destination)
-            destination.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copytree(pair.source, destination)
-        else:
-            destination.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(pair.source, destination)
+    PACKAGE_ROOT.parent.mkdir(parents=True, exist_ok=True)
+    stage = Path(tempfile.mkdtemp(prefix=f".{PACKAGE_ROOT.name}.sync-", dir=PACKAGE_ROOT.parent))
+    previous = _temporary_sibling(f".{PACKAGE_ROOT.name}.previous-")
+    try:
+        shutil.copytree(PACKAGE_ROOT, stage, dirs_exist_ok=True)
+        for pair in asset_pairs():
+            destination = _destination(pair, stage)
+            if pair.source.is_dir():
+                _remove_path(destination)
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copytree(pair.source, destination)
+            else:
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(pair.source, destination)
+        differences = drift(stage)
+        if differences:
+            raise ValueError("staged package assets failed verification: " + "; ".join(differences))
+        os.replace(PACKAGE_ROOT, previous)
+        try:
+            os.replace(stage, PACKAGE_ROOT)
+        except BaseException:
+            if not PACKAGE_ROOT.exists():
+                os.replace(previous, PACKAGE_ROOT)
+            raise
+        _remove_path(previous)
+    finally:
+        _remove_path(stage)
+
+
+def _temporary_sibling(prefix: str) -> Path:
+    file_descriptor, name = tempfile.mkstemp(prefix=prefix, dir=PACKAGE_ROOT.parent)
+    os.close(file_descriptor)
+    path = Path(name)
+    path.unlink()
+    return path
+
+
+def _remove_path(path: Path) -> None:
+    if not path.exists() and not path.is_symlink():
+        return
+    if path.is_dir() and not path.is_symlink():
+        shutil.rmtree(path)
+    else:
+        path.unlink()
 
 
 def _parser() -> argparse.ArgumentParser:

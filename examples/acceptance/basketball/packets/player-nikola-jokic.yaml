@@ -1,0 +1,87 @@
+id: basketball-player-nikola-jokic-profile-2026-07-15
+domain: basketball
+entity_type: player
+entity_name: Nikola Jokić
+topic: Interpret a current official profile snapshot without extending it into an unsupported projection
+time_period: NBA.com current profile snapshot accessed 2026-07-15
+context: A second player-context fixture for role-aware interpretation and bounded comparison.
+role_or_usage_context: NBA.com lists Jokić as a Denver Nuggets center; the supplied profile is descriptive and does not establish a complete impact or projection model.
+
+key_facts:
+  - id: fact-jokic-001
+    text: NBA.com's current Nikola Jokić profile snapshot lists 27.7 points per game, 12.9 rebounds per game, and 10.7 assists per game.
+  - id: fact-jokic-002
+    text: NBA.com identifies Nikola Jokić as a Denver Nuggets center.
+
+relevant_metrics:
+  - name: points per game
+    value: 27.7
+    unit: points per game
+    denominator: games played
+    period: current NBA.com profile snapshot accessed 2026-07-15
+    sample: Current profile sample; exact season window is not expanded in this fixture.
+    what_it_captures: Current profile scoring volume.
+    what_it_misses: Efficiency, role difficulty, opponent quality, and lineup context.
+    fact_ids: [fact-jokic-001]
+  - name: rebounds per game
+    value: 12.9
+    unit: rebounds per game
+    denominator: games played
+    period: current NBA.com profile snapshot accessed 2026-07-15
+    sample: Current profile sample; exact season window is not expanded in this fixture.
+    what_it_captures: Current profile rebounding volume.
+    what_it_misses: Rebound chances, box-outs, and defensive scheme.
+    fact_ids: [fact-jokic-001]
+  - name: assists per game
+    value: 10.7
+    unit: assists per game
+    denominator: games played
+    period: current NBA.com profile snapshot accessed 2026-07-15
+    sample: Current profile sample; exact season window is not expanded in this fixture.
+    what_it_captures: Current profile assist volume.
+    what_it_misses: Potential assists, passing difficulty, turnovers, and lineup effects.
+    fact_ids: [fact-jokic-001]
+
+domain_terms:
+  - center
+  - assist volume
+  - sample size
+  - role context
+concepts_that_apply:
+  - role-context
+  - sample-size
+
+source_notes:
+  - source_type: url
+    source: https://www.nba.com/player/203999/nikola-jokic
+    accessed: 2026-07-15
+    note: Official NBA player profile used for the current snapshot, team, and position.
+    fact_ids: [fact-jokic-001, fact-jokic-002]
+
+interpretation_notes:
+  - The combination of center designation and assist volume supports a bounded discussion of playmaking responsibility.
+  - The profile alone does not support a future projection, injury claim, or complete team-value conclusion.
+open_questions:
+  - What is the exact season and game sample behind the current profile snapshot?
+  - How does the assist volume change with different lineups and defensive coverages?
+uncertainties:
+  - Exact sample window, usage, efficiency, tracking, and defensive metrics are not loaded here.
+  - Current-profile facts require freshness checks before reuse.
+confidence_level: medium
+last_updated: 2026-07-15T12:00:00Z
+used_in_outputs:
+  - basketball-acceptance-player-comparison
+  - basketball-acceptance-bounded-projection
+
+extensions:
+  player:
+    team: Denver Nuggets
+    season: current profile snapshot
+    role: center
+    archetype: unknown
+    usage:
+      usg_pct: unknown
+      on_ball_pct: unknown
+    age: unknown
+    physical_profile: unknown
+    minutes_stability: unknown
