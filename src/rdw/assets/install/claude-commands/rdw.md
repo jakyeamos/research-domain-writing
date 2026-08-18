@@ -54,7 +54,14 @@ Example: "improve the copy on my LIS leaderboard" → basketball, entity `LIS le
 
 RDW orchestrates local research and artifact work; it does not send, upload,
 submit, publish, or deploy anything externally. Human review remains required
-before any consequential use of the output.
+before any consequential use of the output. Do not invent legal, policy,
+compliance, escalation, or operational rules absent from the evidence packet.
+Preserve distinct retention windows and mark unresolved inheritance or scope
+questions as unknown.
+When the packet supplies retention facts but no action rule, the artifact may
+state only those distinct facts and the explicit unknown. Do not add instructions
+to escalate, contact an owner, suspend work, or apply a temporary handling rule
+unless the packet itself supports them.
 </inference>
 
 <process>
