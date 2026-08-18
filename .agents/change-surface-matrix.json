@@ -2,7 +2,7 @@
   "schema_version": "change-surface-matrix/v1",
   "subject": {"kind": "repository", "id": "research-domain-writing"},
   "owner": "repository-owner",
-  "last_reviewed": "2026-08-13",
+  "last_reviewed": "2026-08-18",
   "surfaces": [
     {
       "id": "matrix-maintenance",
