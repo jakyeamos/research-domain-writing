@@ -17,3 +17,7 @@ outputs/**/*.yml
 AIOS-backfill/
 
 .quality-runner/
+
+# Generated / cache / audit output
+.turbo/
+.firecrawl/
