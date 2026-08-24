@@ -1,0 +1,3 @@
+[quality_runner]
+default_profile = "default"
+required_capabilities = ["formatter", "lint", "typecheck", "tests", "build", "dead_code", "runtime_smoke", "pre_pr", "pre_cr"]
