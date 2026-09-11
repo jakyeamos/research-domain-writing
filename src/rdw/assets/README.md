@@ -272,6 +272,13 @@ explicit claim-ledger sidecar; RDW never infers a ledger from Markdown.
 
 See [docs/LIMITATIONS.md](docs/LIMITATIONS.md) for current boundaries.
 
+## DOI-Ready Research Metadata
+
+The repository includes citation and Zenodo metadata for a future archived
+release. See [RESEARCH_READY.md](RESEARCH_READY.md) and
+[docs/release-notes/doi-readiness.md](docs/release-notes/doi-readiness.md) for
+the artifact boundary, validation path, and remaining release gate.
+
 ## Validation
 
 `rdw validate-packet` checks:

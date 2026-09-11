@@ -25,6 +25,8 @@ FILES = (
     ("CHANGELOG.md", "CHANGELOG.md"),
     ("LICENSE", "LICENSE"),
     ("README.md", "README.md"),
+    ("RESEARCH_READY.md", "RESEARCH_READY.md"),
+    ("docs/release-notes/doi-readiness.md", "docs/release-notes/doi-readiness.md"),
     ("RELEASE.md", "RELEASE.md"),
     ("SKILL.md", "SKILL.md"),
     ("docs/FUTURE-AIOS-INTEGRATION.md", "docs/FUTURE-AIOS-INTEGRATION.md"),
