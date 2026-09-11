@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import dis
 import sys
 import trace
 from pathlib import Path
+from types import CodeType
 
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_PATH = ROOT / "build" / "pre-cr-python.lcov"
 COVERAGE_FILES = [
+    ROOT / "scripts" / "sync-package-assets.py",
     ROOT / "src" / "rdw" / "adapters" / "fixture.py",
     ROOT / "src" / "rdw" / "artifact_validation.py",
     ROOT / "src" / "rdw" / "cli.py",
@@ -32,13 +35,15 @@ COVERAGE_FILES = [
 ]
 
 
-def _looks_executable(source: str) -> bool:
-    stripped = source.strip()
-    if not stripped or stripped.startswith("#"):
-        return False
-    if stripped in {"{", "}", "(", ")", "[", "]"}:
-        return False
-    return not (stripped.startswith('"') and stripped.endswith(('",', '"')))
+def _executable_lines(source: str, filename: str) -> set[int]:
+    def code_lines(code: CodeType) -> set[int]:
+        lines = {line for _, line in dis.findlinestarts(code) if line is not None and line > 0}
+        for constant in code.co_consts:
+            if isinstance(constant, CodeType):
+                lines.update(code_lines(constant))
+        return lines
+
+    return code_lines(compile(source, filename, "exec"))
 
 
 def _write_lcov(counts: dict[tuple[str, int], int]) -> None:
@@ -46,12 +51,9 @@ def _write_lcov(counts: dict[tuple[str, int], int]) -> None:
     with OUTPUT_PATH.open("w", encoding="utf-8") as handle:
         for file_path in COVERAGE_FILES:
             relative_path = file_path.relative_to(ROOT).as_posix()
-            lines = file_path.read_text(encoding="utf-8").splitlines()
-            executable = [
-                line_number
-                for line_number, line in enumerate(lines, start=1)
-                if _looks_executable(line)
-            ]
+            executable = sorted(
+                _executable_lines(file_path.read_text(encoding="utf-8"), str(file_path))
+            )
             if not executable:
                 continue
             handle.write(f"SF:{relative_path}\n")

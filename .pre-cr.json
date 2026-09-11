@@ -16,7 +16,8 @@
   "threshold": 80,
   "surfaces": {
     "covered": [
-      "src/rdw/**"
+      "src/rdw/**",
+      "scripts/sync-package-assets.py"
     ],
     "ignored": [
       ".gitignore",
@@ -37,7 +38,10 @@
       "scripts/new-domain.sh",
       "scripts/run-pre-cr-python-tests.py",
       "tests/**",
-      "uv.lock"
+      "uv.lock",
+      "src/rdw/assets/README.md",
+      "src/rdw/assets/RESEARCH_READY.md",
+      "src/rdw/assets/docs/release-notes/doi-readiness.md"
     ],
     "unsupported": []
   },

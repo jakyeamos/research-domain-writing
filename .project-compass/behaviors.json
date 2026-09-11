@@ -1,0 +1,41 @@
+{
+  "schema": "compass-behavior-inventory/v1",
+  "behaviors": [
+    {
+      "id": "grounded-routing",
+      "title": "Route domain and audience to bounded evidence-first task contracts",
+      "spec_ref": "README.md",
+      "authority": "accepted"
+    },
+    {
+      "id": "packet-claim-validation",
+      "title": "Reject unsupported fact links and mature-domain acceptance gaps",
+      "spec_ref": "README.md",
+      "authority": "accepted"
+    },
+    {
+      "id": "revision-preservation",
+      "title": "Compare approved baseline hashes and source-bound claims without treating unknowns as passes",
+      "spec_ref": "README.md",
+      "authority": "accepted"
+    },
+    {
+      "id": "receipt-bound-execution",
+      "title": "Validate staged fixture artifacts before promotion and preserve incomplete attempts",
+      "spec_ref": "README.md",
+      "authority": "accepted"
+    },
+    {
+      "id": "recoverable-batch",
+      "title": "Keep serial leases, pause/cancel and unknown interrupted attempts explicit",
+      "spec_ref": "README.md",
+      "authority": "accepted"
+    },
+    {
+      "id": "managed-package-projections",
+      "title": "Keep source and wheel assets synchronized and installs explicit",
+      "spec_ref": "README.md",
+      "authority": "accepted"
+    }
+  ]
+}
